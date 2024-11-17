@@ -8,7 +8,7 @@ if (isset($_SESSION['user_id'])) {
     $user_id = '';
 }
 
-include 'add_cart.php';
+
 
 // Fetch products data from the database
 $select_products = $conn->prepare("SELECT * FROM `products`");

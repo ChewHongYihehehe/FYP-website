@@ -1,5 +1,5 @@
 <?php
-require 'db.php'; // Include database connection
+require 'connect.php'; // Include database connection
 
 $registration_successful = false; // Flag for checking if registration is successful
 $error_message = ""; // Variable to hold error messages
@@ -25,34 +25,41 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         // Prepare and bind
         $stmt = $conn->prepare("INSERT INTO users (username, email, phone, country, region, address, password) VALUES (?, ?, ?, ?, ?, ?, ?)");
         $hashed_password = password_hash($password, PASSWORD_DEFAULT);
-        
+
         if ($stmt) {
-            $stmt->bind_param("sssssss", $username, $email, $phone, $country, $region, $address, $hashed_password);
+            $stmt->bindParam(1, $username);
+            $stmt->bindParam(2, $email);
+            $stmt->bindParam(3, $phone);
+            $stmt->bindParam(4, $country);
+            $stmt->bindParam(5, $region);
+            $stmt->bindParam(6, $address);
+            $stmt->bindParam(7, $hashed_password);
 
             if ($stmt->execute()) {
                 $registration_successful = true; // Set success flag
             } else {
-                $error_message = "Error: " . $stmt->error;
+                $error_message = "Error: " . $stmt->errorInfo()[2];
             }
-            $stmt->close();
+            $stmt->closeCursor();
         } else {
-            $error_message = "Error preparing statement: " . $conn->error;
+            $error_message = "Error preparing statement: " . $conn->errorInfo()[2]; // Use errorInfo() for PDO
         }
     }
 }
 
-$conn->close();
 ?>
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="register.css">
+    <link rel="stylesheet" href="assets/css/register.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/ionicons/5.5.2/collection/components/icon/icon.min.css">
     <title>Register</title>
 </head>
+
 <body>
     <section>
         <div class="form-box">
@@ -178,4 +185,5 @@ $conn->close();
         </script>
     <?php endif; ?>
 </body>
+
 </html>

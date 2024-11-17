@@ -1,5 +1,5 @@
 <?php
-require 'db.php'; // Include database connection
+require 'connect.php'; // Include database connection
 
 session_start();
 
@@ -11,17 +11,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     // Prepare statement to prevent SQL injection
     $stmt = $conn->prepare("SELECT * FROM users WHERE email = ?");
-    $stmt->bind_param("s", $email); // Bind parameters
-    $stmt->execute();
-    $result = $stmt->get_result();
+    $stmt->execute([$email]); // Execute with the email parameter
+    $row = $stmt->fetch(PDO::FETCH_ASSOC); // Fetch the result
 
-    if ($result->num_rows > 0) {
-        $row = $result->fetch_assoc();
+    if ($row) {
         if (password_verify($password, $row['password'])) {
             // Regenerate session ID to prevent session fixation
             session_regenerate_id(true);
             $_SESSION['user_id'] = $row['id'];
-            header("Location: homepage.php"); // Redirect to homepage
+            header("Location: home.php"); // Redirect to homepage
             exit();
         } else {
             $error_message = "Invalid password.";
@@ -29,21 +27,21 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     } else {
         $error_message = "No user found with this email.";
     }
-    $stmt->close(); // Close the statement
+    // No need to close the connection explicitly
 }
-
-$conn->close();
 ?>
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="login.css">
+    <link rel="stylesheet" href="assets/css/login.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/ionicons/5.5.2/collection/components/icon/icon.min.css">
     <title>Login</title>
 </head>
+
 <body>
     <section>
         <div class="form-box">
@@ -77,4 +75,5 @@ $conn->close();
 
     <script src="https://unpkg.com/ionicons@5.5.2/dist/ionicons.js"></script>
 </body>
+
 </html>

@@ -21,7 +21,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             // Regenerate session ID to prevent session fixation
             session_regenerate_id(true);
             $_SESSION['user_id'] = $row['id'];
-            header("Location: homepage.php"); // Redirect to homepage
+            header("Location: home.php"); // Redirect to homepage
             exit();
         } else {
             $error_message = "Invalid password.";

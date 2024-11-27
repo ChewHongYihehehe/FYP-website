@@ -10,12 +10,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $phone = trim($_POST['phone']);
     $postcode = trim($_POST['postcode']); // Capture postcode input
     $region = trim($_POST['region']);
-    $address = trim($_POST['address']);
     $password = $_POST['password'];
     $confirm_password = $_POST['confirm_password'];
 
     // Validate input
-    if (empty($username) || empty($email) || empty($phone) || empty($postcode) || empty($region) || empty($address) || empty($password) || empty($confirm_password)) {
+    if (empty($username) || empty($email) || empty($phone) || empty($postcode) || empty($region) || empty($password) || empty($confirm_password)) {
         $error_message = "All fields are required.";
     } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
         $error_message = "Invalid email format.";
@@ -37,10 +36,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 $error_message = "An account with this email already exists.";
             } else {
                 // Insert new user into database
-                $stmt = $conn->prepare("INSERT INTO users (username, email, phone, postcode, region, address, password) VALUES (?, ?, ?, ?, ?, ?, ?)");
+                $stmt = $conn->prepare("INSERT INTO users (username, email, phone, postcode, region, password) VALUES (?, ?, ?, ?, ?, ?)");
                 if ($stmt) {
                     $hashed_password = password_hash($password, PASSWORD_DEFAULT); // Hash password
-                    $stmt->bind_param("sssssss", $username, $email, $phone, $postcode, $region, $address, $hashed_password);
+                    $stmt->bind_param("ssssss", $username, $email, $phone, $postcode, $region, $hashed_password);
 
                     if ($stmt->execute()) {
                         $registration_successful = true; // Set success flag
@@ -122,11 +121,6 @@ $conn->close();
                             <ion-icon name="location-outline"></ion-icon>
                         </div>
                         <div class="inputbox">
-                            <input type="text" name="address" required>
-                            <label>Address</label>
-                            <ion-icon name="home-outline"></ion-icon>
-                        </div>
-                        <div class="inputbox">
                             <input type="password" id="password" name="password" required>
                             <label>Password</label>
                             <ion-icon name="lock-closed-outline"></ion-icon>
@@ -167,7 +161,7 @@ $conn->close();
         function validatePasswords() {
             const password = document.getElementById("password").value;
             const confirmPassword = document.getElementById("confirm_password").value;
-            const strongPasswordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_])[A-Za-z\d\W_]{8,12}$/;
+            const strongPasswordRegex = /^(?=.*[a-z])(?=.*[a-z])(?=.*\d)(?=.*[\W_])[A-Za-z\d\W_]{8,12}$/;
 
             if (!strongPasswordRegex.test(password)) {
                 alert("Password must meet the required criteria.");

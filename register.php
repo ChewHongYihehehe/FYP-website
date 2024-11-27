@@ -36,7 +36,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 $error_message = "An account with this email already exists.";
             } else {
                 // Insert new user into database
-                $stmt = $conn->prepare("INSERT INTO users (username, email, phone, postcode, region, password) VALUES (?, ?, ?, ?, ?, ?)");
+                $stmt = $conn->prepare("INSERT INTO users (fullname, email, phone, postcode, region, password) VALUES (?, ?, ?, ?, ?, ?)");
                 if ($stmt) {
                     $hashed_password = password_hash($password, PASSWORD_DEFAULT); // Hash password
                     $stmt->bind_param("ssssss", $username, $email, $phone, $postcode, $region, $hashed_password);
@@ -77,8 +77,8 @@ $conn->close();
                 <div class="form-row">
                     <div class="form-column">
                         <div class="inputbox">
-                            <input type="text" name="username" required>
-                            <label>Username</label>
+                            <input type="text" name="fullname" required>
+                            <label>Full name</label>
                             <ion-icon name="person-outline"></ion-icon>
                         </div>
                         <div class="inputbox">

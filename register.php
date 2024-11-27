@@ -3,7 +3,7 @@ require 'connect.php'; // Include database connection
 
 $registration_successful = false; // Flag for checking if registration is successful
 $error_message = ""; // Variable to hold error messages
-
+、br
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $username = trim($_POST['username']);
     $email = trim($_POST['email']);

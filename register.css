@@ -19,7 +19,7 @@ section {
 .form-box {
     position: relative;
     width: 700px;
-    background: rgba(255, 255, 255, 0.2); /* Slightly opaque background */
+    background: rgba(0, 0, 0, 0.5); /* Transparent black for better contrast */
     border: 2px solid rgba(255, 255, 255, 0.5);
     border-radius: 20px;
     backdrop-filter: blur(15px);
@@ -34,6 +34,7 @@ h2 {
     color: #fff;
     text-align: center;
     margin-bottom: 20px;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7); /* Subtle shadow for visibility */
 }
 
 .form-row {
@@ -64,6 +65,7 @@ h2 {
     font-size: 1em;
     pointer-events: none;
     transition: 0.5s;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7);
 }
 
 input:focus ~ label,
@@ -74,17 +76,18 @@ input:valid ~ label {
 .inputbox input {
     width: 100%;
     height: 50px;
-    background: transparent;
+    background: rgba(255, 255, 255, 0.1); /* Slightly transparent background */
     border: none;
     outline: none;
     font-size: 1em;
     padding: 0 35px 0 5px;
-    color: #fff; /* Change input text color to white */
-    transition: background 0.3s; /* Transition for background on focus */
+    color: #fff;
+    transition: background 0.3s;
+    text-shadow: none;
 }
 
 .inputbox input:focus {
-    background: rgba(255, 255, 255, 0.1); /* Light background on focus */
+    background: rgba(255, 255, 255, 0.2); /* Slight highlight on focus */
 }
 
 input[type="submit"] {
@@ -98,7 +101,7 @@ input[type="submit"] {
     cursor: pointer;
     font-size: 1.1em;
     font-weight: 600;
-    transition: background 0.3s, transform 0.2s; /* Added transform transition */
+    transition: background 0.3s, transform 0.2s;
 }
 
 input[type="submit"]:hover {
@@ -106,7 +109,7 @@ input[type="submit"]:hover {
 }
 
 input[type="submit"]:focus {
-    outline: 2px solid #007BFF; /* Outline for accessibility */
+    outline: 2px solid #007BFF;
 }
 
 .login {
@@ -119,6 +122,7 @@ input[type="submit"]:focus {
 .login p {
     color: #fff;
     font-size: 1em;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7); /* Shadow for clarity */
 }
 
 .login p a {
@@ -133,18 +137,19 @@ input[type="submit"]:focus {
 
 /* Error message styles */
 .error-message {
-    color: #ff4d4d; /* Red color for error messages */
+    color: #ff4d4d;
     font-size: 0.9em;
     margin-top: 5px;
-    text-align: center; /* Center align the error messages */
-    font-weight: bold; /* Make error message bold */
-    background-color: rgba(255, 0, 0, 0.1); /* Add light background */
-    padding: 5px; /* Add padding for better visibility */
+    text-align: center;
+    font-weight: bold;
+    background-color: rgba(255, 0, 0, 0.1);
+    padding: 5px;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7);
 }
 
 /* Success message styles */
 .success-message {
-    color: #28a745; /* Green color for success messages */
+    color: #28a745;
     font-size: 1em;
     text-align: center;
     margin-top: 10px;
@@ -152,13 +157,13 @@ input[type="submit"]:focus {
 
 /* Password reminder styles */
 .password-reminder {
-    color: #fff; /* Set the text color to white */
+    color: #fff;
     font-size: 0.9em;
     margin-top: 5px;
     text-align: center;
-    font-weight: normal; /* Optional, to ensure it's not bold */
+    font-weight: normal;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7);
 }
-
 
 /* Responsive styles */
 @media (max-width: 768px) {
@@ -167,59 +172,45 @@ input[type="submit"]:focus {
     }
 }
 
-.inputbox {
-    position: relative;
-    margin: 15px 0;
-    width: 100%;
-    border-bottom: 2px solid #fff;
-}
-
 .inputbox ion-icon {
     position: absolute;
-    right: 10px; /* Position the icon to the right */
-    top: 15px;   /* Center the icon vertically */
+    right: 10px;
+    top: 15px;
     color: #fff;
     font-size: 1.2em;
 }
 
 /* Placeholder styles */
 input::placeholder {
-    color: rgba(255, 255, 255, 0.5); /* Light color for placeholder text */
+    color: rgba(255, 255, 255, 0.5);
 }
 
 .inputbox select {
     width: 100%;
     height: 50px;
-    background: transparent;
+    background: rgba(255, 255, 255, 0.1); /* Transparent background */
     border: none;
     border-bottom: 2px solid #fff;
     outline: none;
     font-size: 1em;
     color: #fff;
-    appearance: none; /* Hide default arrow */
+    appearance: none;
     padding: 0 35px 0 5px;
     cursor: pointer;
 }
 
 /* Adjust the icon position for the select element */
 .inputbox ion-icon[name="map-outline"] {
-    right: 10px; /* Align to the right as with other icons */
-    top: 15px; /* Vertically align with the text */
+    right: 10px;
+    top: 15px;
 }
 
 /* Optional: Add custom arrow styling */
 .inputbox select::-ms-expand {
-    display: none; /* Remove the default arrow in IE */
-}
-
-/* Style for select arrow in Webkit browsers */
-.inputbox select {
-    background-image: url('data:image/svg+xml;base64,...'); /* Replace with a base64 SVG arrow */
-    background-position: right 10px center;
-    background-repeat: no-repeat;
+    display: none;
 }
 
 option {
-    color: #000; /* Set text color to black or a visible color */
-    background-color: rgba(255, 255, 255, 0.8); /* Optional: set a background to improve readability */
+    color: #000;
+    background-color: rgba(255, 255, 255, 0.8);
 }

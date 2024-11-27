@@ -1,5 +1,5 @@
 <?php
-require 'connect.php'; // Include database connection
+require 'db.php'; // Include database connection
 
 $registration_successful = false; // Flag for checking if registration is successful
 $error_message = ""; // Variable to hold error messages
@@ -8,58 +8,68 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $username = trim($_POST['username']);
     $email = trim($_POST['email']);
     $phone = trim($_POST['phone']);
-    $country = trim($_POST['country']);
+    $postcode = trim($_POST['postcode']); // Capture postcode input
     $region = trim($_POST['region']);
     $address = trim($_POST['address']);
     $password = $_POST['password'];
     $confirm_password = $_POST['confirm_password'];
 
-    // Server-side validation as a backup
-    if ($password !== $confirm_password) {
-        $error_message = "Passwords do not match.";
+    // Validate input
+    if (empty($username) || empty($email) || empty($phone) || empty($postcode) || empty($region) || empty($address) || empty($password) || empty($confirm_password)) {
+        $error_message = "All fields are required.";
     } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
         $error_message = "Invalid email format.";
-    } elseif (!preg_match("/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[$&%])[A-Za-z\d$&%]{8,12}$/", $password)) {
-        $error_message = "Password must be 8-12 characters, with uppercase, lowercase, a number, and a special character ($, &, or %).";
+    } elseif (!preg_match("/^\d{5}$/", $postcode)) { // Check if postcode is exactly 5 digits
+        $error_message = "Invalid postcode. It must be a 5-digit number.";
+    } elseif (!preg_match("/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_])[A-Za-z\d\W_]{8,12}$/", $password)) {
+        $error_message = "Password must be 8-12 characters, with uppercase, lowercase, a number, and a special character.";
+    } elseif ($password !== $confirm_password) {
+        $error_message = "Passwords do not match.";
     } else {
-        // Prepare and bind
-        $stmt = $conn->prepare("INSERT INTO users (username, email, phone, country, region, address, password) VALUES (?, ?, ?, ?, ?, ?, ?)");
-        $hashed_password = password_hash($password, PASSWORD_DEFAULT);
-
+        // Check if email already exists
+        $check_email_query = "SELECT * FROM users WHERE email = ?";
+        $stmt = $conn->prepare($check_email_query);
         if ($stmt) {
-            $stmt->bindParam(1, $username);
-            $stmt->bindParam(2, $email);
-            $stmt->bindParam(3, $phone);
-            $stmt->bindParam(4, $country);
-            $stmt->bindParam(5, $region);
-            $stmt->bindParam(6, $address);
-            $stmt->bindParam(7, $hashed_password);
-
-            if ($stmt->execute()) {
-                $registration_successful = true; // Set success flag
+            $stmt->bind_param("s", $email);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            if ($result->num_rows > 0) {
+                $error_message = "An account with this email already exists.";
             } else {
-                $error_message = "Error: " . $stmt->errorInfo()[2];
+                // Insert new user into database
+                $stmt = $conn->prepare("INSERT INTO users (username, email, phone, postcode, region, address, password) VALUES (?, ?, ?, ?, ?, ?, ?)");
+                if ($stmt) {
+                    $hashed_password = password_hash($password, PASSWORD_DEFAULT); // Hash password
+                    $stmt->bind_param("sssssss", $username, $email, $phone, $postcode, $region, $address, $hashed_password);
+
+                    if ($stmt->execute()) {
+                        $registration_successful = true; // Set success flag
+                    } else {
+                        $error_message = "Error: " . $stmt->error;
+                    }
+                    $stmt->close();
+                } else {
+                    $error_message = "Error preparing statement: " . $conn->error;
+                }
             }
-            $stmt->closeCursor();
         } else {
-            $error_message = "Error preparing statement: " . $conn->errorInfo()[2]; // Use errorInfo() for PDO
+            $error_message = "Error checking email: " . $conn->error;
         }
     }
 }
 
+$conn->close();
 ?>
 
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="assets/css/register.css">
+    <link rel="stylesheet" href="register.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/ionicons/5.5.2/collection/components/icon/icon.min.css">
     <title>Register</title>
 </head>
-
 <body>
     <section>
         <div class="form-box">
@@ -83,13 +93,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                             <ion-icon name="call-outline"></ion-icon>
                         </div>
                         <div class="inputbox">
-                            <input type="text" name="country" required>
-                            <label>Country</label>
-                            <ion-icon name="globe-outline"></ion-icon>
-                        </div>
-                    </div>
-                    <div class="form-column">
-                        <div class="inputbox">
                             <select name="region" required>
                                 <option value="" disabled selected>Select Region</option>
                                 <option value="Johor">Johor</option>
@@ -111,6 +114,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                             </select>
                             <ion-icon name="map-outline"></ion-icon>
                         </div>
+                    </div>
+                    <div class="form-column">
+                        <div class="inputbox">
+                            <input type="text" name="postcode" required>
+                            <label>Postcode</label>
+                            <ion-icon name="location-outline"></ion-icon>
+                        </div>
                         <div class="inputbox">
                             <input type="text" name="address" required>
                             <label>Address</label>
@@ -122,9 +132,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                             <ion-icon name="lock-closed-outline"></ion-icon>
                         </div>
                         <small class="password-reminder">
-                            Password must be 8-12 characters, with uppercase, lowercase, a number, and special characters ($, &, or %).
+                            Password must be 8-12 characters, with uppercase, lowercase, a number, and a special character.
                         </small>
-
                         <div class="inputbox">
                             <input type="password" id="confirm_password" name="confirm_password" required oninput="checkPasswordMatch()">
                             <label>Confirm Password</label>
@@ -142,8 +151,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     </section>
 
     <script src="https://unpkg.com/ionicons@5.5.2/dist/ionicons.js"></script>
-
-    <!-- JavaScript for Password Validation -->
     <script>
         function checkPasswordMatch() {
             const password = document.getElementById("password").value;
@@ -153,37 +160,33 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             if (password !== confirmPassword) {
                 errorMessage.textContent = "Passwords do not match!";
             } else {
-                errorMessage.textContent = ""; // Clear the message if passwords match
+                errorMessage.textContent = "";
             }
         }
 
         function validatePasswords() {
             const password = document.getElementById("password").value;
             const confirmPassword = document.getElementById("confirm_password").value;
-
-            // Password criteria: 8-12 characters, uppercase, lowercase, number, and special character
-            const strongPasswordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[$&%])[A-Za-z\d$&%]{8,12}$/;
+            const strongPasswordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_])[A-Za-z\d\W_]{8,12}$/;
 
             if (!strongPasswordRegex.test(password)) {
-                alert("Please create a stronger password: 8-12 characters, uppercase, lowercase, a number, and a special character ($, &, or %).");
+                alert("Password must meet the required criteria.");
                 return false;
             }
 
             if (password !== confirmPassword) {
-                alert("Passwords do not match. Please correct them.");
+                alert("Passwords do not match.");
                 return false;
             }
             return true;
         }
     </script>
 
-    <!-- Success Notification Script -->
     <?php if ($registration_successful): ?>
         <script>
             alert("Registration successful! You can now log in.");
-            window.location.href = "login.php"; // Redirect to login page after alert
+            window.location.href = "login.php";
         </script>
     <?php endif; ?>
 </body>
-
 </html>

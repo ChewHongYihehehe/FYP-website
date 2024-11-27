@@ -1,5 +1,4 @@
 <?php
-
 include 'connect.php';
 
 session_start();
@@ -8,9 +7,7 @@ if (isset($_SESSION['user_id'])) {
 	$user_id = $_SESSION['user_id'];
 } else {
 	$user_id = '';
-};
-
-
+}
 
 $products_per_page = 12;
 
@@ -18,36 +15,31 @@ $products_per_page = 12;
 $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
 $offset = ($page - 1) * $products_per_page;
 
-
+// Capture price filter values explicitly
+$min_price = isset($_GET['min_price']) ? (float)$_GET['min_price'] : null;
+$max_price = isset($_GET['max_price']) ? (float)$_GET['max_price'] : null;
 
 // Fetch categories from the category table
 $sql = "SELECT name FROM categories";
 $result = $conn->query($sql);
 
-
-
-
-//For the filter price section
-$price_sql = "SELECT MIN(price) AS min_price, MAX(price) AS max_price FROM products";
+// Fetch products based on filters to get the actual min and max prices
+$price_sql = "SELECT MIN(price) AS min_price, MAX(price) AS max_price FROM products WHERE 1=1";
 $price_result = $conn->query($price_sql);
 $price_row = $price_result->fetch(PDO::FETCH_ASSOC);
 
-
-//For the color section
-// Fetch colors from the color table
+// For the color section
 $color_sql = "SELECT color_name FROM color";
 $color_result = $conn->query($color_sql);
 
-//For the brand sectiono
+// For the brand section
 $brand_sql = "SELECT name FROM brand";
 $brand_result = $conn->query($brand_sql);
 
-
-//For the product section
+// For the product section
 $category_filter = isset($_GET['category']) ? $_GET['category'] : '';
 $color_filter = isset($_GET['color']) ? $_GET['color'] : '';
 $brand_filter = isset($_GET['brand']) ? $_GET['brand'] : '';
-
 
 // Start the SQL query with a WHERE clause that's always true
 $product_sql = "SELECT products.* FROM products 
@@ -67,12 +59,14 @@ if ($brand_filter) {
 	$product_sql .= " AND brand = :brand";
 }
 
+// For the filter price section
+if ($min_price !== null && $max_price !== null) {
+	$product_sql .= " AND price BETWEEN :min_price AND :max_price";
+}
 
 // Prepare the statement
 $product_sql .= " LIMIT :limit OFFSET :offset";
 $product_stmt = $conn->prepare($product_sql);
-
-
 
 // Bind values only if they are set
 if ($category_filter) {
@@ -85,18 +79,48 @@ if ($brand_filter) {
 	$product_stmt->bindValue(':brand', $brand_filter);
 }
 
+// Bind price values if set
+if ($min_price !== null && $max_price !== null) {
+	$product_stmt->bindValue(':min_price', $min_price);
+	$product_stmt->bindValue(':max_price', $max_price);
+}
+
 $product_stmt->bindValue(':limit', $products_per_page, PDO::PARAM_INT);
 $product_stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
-
 
 $product_stmt->execute();
 $products = $product_stmt->fetchAll(PDO::FETCH_ASSOC);
 
-
-
 $total_products = $conn->query("SELECT COUNT(*) FROM products")->fetchColumn();
 $total_pages = ceil($total_products / $products_per_page);
 
+// Ensure the price range is displayed correctly
+$min_price_display = ($price_row['min_price'] !== null) ? number_format($price_row['min_price'], 2) : '0.00';
+$max_price_display = ($price_row['max_price'] !== null) ? number_format($price_row['max_price'], 2) : '0.00';
+
+$min_price = ($min_price !== null) ? $min_price : ($price_row['min_price'] !== null ? (float)$price_row['min_price'] : 0);
+$max_price = ($max_price !== null) ? $max_price : ($price_row['max_price'] !== null ? (float)$price_row['max_price'] : 0);
+
+// Modify your existing code to check for filter_applied
+$filter_applied = isset($_GET['filter_applied']) && $_GET['filter_applied'] == '1';
+
+// When checking price filter conditions
+if ($filter_applied && $min_price !== null && $max_price !== null) {
+	$product_sql .= " AND price BETWEEN :min_price AND :max_price";
+}
+
+
+$grouped_products = [];
+foreach ($products as $product) {
+	$product_name = htmlspecialchars($product['name']);
+	$product_color = htmlspecialchars($product['color']);
+
+	if (!isset($grouped_products[$product_name])) {
+		$grouped_products[$product_name] = [];
+	}
+
+	$grouped_products[$product_name][] = $product;
+}
 
 ?>
 
@@ -119,7 +143,7 @@ $total_pages = ceil($total_products / $products_per_page);
 	<link rel="stylesheet" type="text/css" href="assets/plugins/jquery-ui.css">
 	<link rel="stylesheet" type="text/css" href="assets/css/categories.css">
 	<link rel="stylesheet" type="text/css" href="assets/css/categories_respond.css">
-	<link rel="stylesheet" type="text/css" href="assets/css/style.css">
+
 </head>
 
 <body>
@@ -283,24 +307,49 @@ $total_pages = ceil($total_products / $products_per_page);
 				<div class="row">
 					<div class="col product_section clearfix">
 
-						<!-- Breadcrumbs -->
 
+						<!-- Breadcrumbs -->
 						<div class="breadcrumbs d-flex flex-row align-items-center">
 							<ul>
-								<li><a href="index.html">Home</a></li>
+								<li><a href="index.php">Home</a></li>
+								<li><a href="categories.php"><i class="fa fa-angle-right" aria-hidden="true"></i>Categories</a></li>
+
 								<?php if ($category_filter): ?>
-									<li><a href="categories.php"><i class="fa fa-angle-right" aria-hidden="true"></i>Categories</a></li>
 									<li class="active">
-										<a href="categories.php?category=<?php echo urlencode($category_filter); ?>">
+										<a href="?category=<?php echo urlencode($category_filter); ?>&color=<?php echo urlencode($color_filter); ?>&brand=<?php echo urlencode($brand_filter); ?>">
 											<i class="fa fa-angle-right" aria-hidden="true"></i><?php echo htmlspecialchars($category_filter); ?>
+											<i class="fa fa-times cancel-filter" data-filter="category" data-value="<?php echo htmlspecialchars($category_filter); ?>"></i>
 										</a>
 									</li>
-								<?php else: ?>
-									<li class="active"><a href="categories.php"><i class="fa fa-angle-right" aria-hidden="true"></i>Categories</a></li>
+								<?php endif; ?>
+
+								<?php if ($color_filter): ?>
+									<li class="active">
+										<a href="?color=<?php echo urlencode($color_filter); ?>&category=<?php echo urlencode($category_filter); ?>&brand=<?php echo urlencode($brand_filter); ?>">
+											<i class="fa fa-angle-right" aria-hidden="true"></i><?php echo htmlspecialchars($color_filter); ?>
+											<i class="fa fa-times cancel-filter" data-filter="color" data-value="<?php echo htmlspecialchars($color_filter); ?>"></i>
+										</a>
+									</li>
+								<?php endif; ?>
+
+								<?php if ($brand_filter): ?>
+									<li class="active">
+										<a href="?brand=<?php echo urlencode($brand_filter); ?>&category=<?php echo urlencode($category_filter); ?>&color=<?php echo urlencode($color_filter); ?>">
+											<i class="fa fa-angle-right" aria-hidden="true"></i><?php echo htmlspecialchars($brand_filter); ?>
+											<i class="fa fa-times cancel-filter" data-filter="brand" data-value="<?php echo htmlspecialchars($brand_filter); ?>"></i>
+										</a>
+									</li>
+								<?php endif; ?>
+
+								<?php if ($min_price !== null && $max_price !== null): ?>
+									<li class="active">
+										<a href="?min_price=<?php echo urlencode($min_price); ?>&max_price=<?php echo urlencode($max_price); ?>&category=<?php echo urlencode($category_filter); ?>&color=<?php echo urlencode($color_filter); ?>&brand=<?php echo urlencode($brand_filter); ?>&filter_applied=1">
+											<i class="fa fa-angle-right" aria-hidden="true"></i>Price: $<?php echo number_format($min_price, 2); ?> - $<?php echo number_format($max_price, 2); ?>
+										</a>
+									</li>
 								<?php endif; ?>
 							</ul>
 						</div>
-
 
 						<!-- Sidebar -->
 
@@ -311,7 +360,11 @@ $total_pages = ceil($total_products / $products_per_page);
 								</div>
 								<ul class="sidebar_categories">
 									<?php while ($row = $result->fetch(PDO::FETCH_ASSOC)): ?>
-										<li><a href="?category=<?php echo urlencode($row['name']); ?>"><?php echo htmlspecialchars($row['name']); ?></a></li>
+										<li class="<?= ($category_filter === $row['name']) ? 'active' : '' ?>">
+											<a href="?category=<?php echo urlencode($row['name']); ?>&color=<?php echo urlencode($color_filter); ?>&brand=<?php echo urlencode($brand_filter); ?>&min_price=<?php echo urlencode($min_price); ?>&max_price=<?php echo urlencode($max_price); ?>">
+												<?php echo htmlspecialchars($row['name']); ?>
+											</a>
+										</li>
 									<?php endwhile; ?>
 								</ul>
 							</div>
@@ -322,15 +375,25 @@ $total_pages = ceil($total_products / $products_per_page);
 								<div class="sidebar_title">
 									<h5>Filter by Price</h5>
 								</div>
-								<p>
-									<input type="text" id="amount" readonly
-										style="border:0; color:#f6931f; font-weight:bold;"
-										value="$<?php echo $price_row['min_price']; ?> - $<?php echo $price_row['max_price']; ?>">
-								</p>
-								<div id="slider-range" data-min="<?php echo $price_row['min_price']; ?>" data-max="<?php echo $price_row['max_price']; ?>"></div>
-								<div class="filter_button"><span>filter</span></div>
-							</div>
+								<form method="GET" action="">
+									<p>
+										<input type="text" id="amount" readonly
+											style="border:0; color:#f6931f; font-weight:bold;"
+											value="$<?php echo $min_price_display; ?> - $<?php echo $max_price_display; ?>">
+									</p>
+									<div id="slider-range" data-min="<?php echo $price_row['min_price']; ?>" data-max="<?php echo $price_row['max_price']; ?>"></div>
+									<input type="hidden" name="min_price" id="min_price" value="<?php echo $min_price; ?>">
+									<input type="hidden" name="max_price" id="max_price" value="<?php echo $max_price; ?>">
+									<input type="hidden" name="filter_applied" id="filter_applied" value="0"> <!-- New hidden field -->
 
+									<!-- Hidden fields for other filters -->
+									<input type="hidden" name="category" id="category" value="<?php echo htmlspecialchars($category_filter); ?>">
+									<input type="hidden" name="color" id="color" value="<?php echo htmlspecialchars($color_filter); ?>">
+									<input type="hidden" name="brand" id="brand" value="<?php echo htmlspecialchars($brand_filter); ?>">
+
+									<button type="button" class="filter_button" id="apply-filter"><span>Filter</span></button>
+								</form>
+							</div>
 
 							<!-- Brand -->
 							<div class="sidebar_section">
@@ -340,7 +403,7 @@ $total_pages = ceil($total_products / $products_per_page);
 								<ul class="sidebar_categories">
 									<?php while ($brand_row = $brand_result->fetch(PDO::FETCH_ASSOC)): ?>
 										<li>
-											<a href="?brand=<?php echo urlencode($brand_row['name']); ?>">
+											<a href="?brand=<?php echo urlencode($brand_row['name']); ?>&category=<?php echo urlencode($category_filter); ?>&color=<?php echo urlencode($color_filter); ?>&min_price=<?php echo urlencode($min_price); ?>&max_price=<?php echo urlencode($max_price); ?>">
 												<?php echo htmlspecialchars($brand_row['name']); ?>
 											</a>
 										</li>
@@ -357,7 +420,7 @@ $total_pages = ceil($total_products / $products_per_page);
 								<ul class="checkboxes">
 									<?php while ($color_row = $color_result->fetch(PDO::FETCH_ASSOC)): ?>
 										<li>
-											<a href="?color=<?php echo urlencode($color_row['color_name']); ?>">
+											<a href="?color=<?php echo urlencode($color_row['color_name']); ?>&category=<?php echo urlencode($category_filter); ?>&brand=<?php echo urlencode($brand_filter); ?>&min_price=<?php echo urlencode($min_price); ?>&max_price=<?php echo urlencode($max_price); ?>">
 												<i class="fa fa-square-o" aria-hidden="true"></i>
 												<span><?php echo htmlspecialchars($color_row['color_name']); ?></span>
 											</a>
@@ -437,18 +500,36 @@ $total_pages = ceil($total_products / $products_per_page);
 
 											<!-- Product Grid -->
 											<div class="product-grid">
-												<?php foreach ($products as $product): ?>
-													<div class="product-item <?= htmlspecialchars($product['category']) ?>">
+												<?php foreach ($grouped_products as $product_name => $product_variants): ?>
+													<div class="product-item">
 														<div class="product product_filter">
 															<div class="product_image">
-																<img src="<?= htmlspecialchars($product['image1_display']) ?>" alt="">
+																<a href="product.php?product_id=<?php echo htmlspecialchars($product_variants[0]['id']); ?>" class="main-product-link">
+																	<img src="<?= htmlspecialchars($product_variants[0]['image1_display']) ?>" alt="" class="main-product-image">
+																	<div class="image-overlay"></div> <!-- Overlay for animation -->
+																</a>
+															</div>
+															<div class="favorite">
+																<i class="far fa-heart"></i>
 															</div>
 															<div class="product_info">
-																<h6 class="product_name"><a href="single.html"><?= htmlspecialchars($product['name']) ?></a></h6>
-																<div class="product_price">$<?= htmlspecialchars($product['price']) ?></div>
+																<h6 class="product_name"><a href="product.php?product_id=<?php echo htmlspecialchars($product_variants[0]['id']); ?>"><?= $product_name ?></a></h6>
+																<div class="product_price">$<?= htmlspecialchars($product_variants[0]['price']) ?></div>
+
+																<!-- Color Variants -->
+																<?php if (count($product_variants) > 1): ?>
+																	<div class="color-variants">
+																		<?php foreach ($product_variants as $variant): ?>
+																			<span class="color-circle" style="background-color: <?= htmlspecialchars($variant['color']); ?>;"
+																				data-product-id="<?= htmlspecialchars($variant['id']); ?>"
+																				data-product-image="<?= htmlspecialchars($variant['image1_display']); ?>"
+																				data-product-price="<?= htmlspecialchars($variant['price']); ?>">
+																			</span>
+																		<?php endforeach; ?>
+																	</div>
+																<?php endif; ?>
 															</div>
 														</div>
-														<div class="red_button add_to_cart_button"><a href="#">add to cart</a></div>
 													</div>
 												<?php endforeach; ?>
 											</div>
@@ -612,6 +693,65 @@ $total_pages = ceil($total_products / $products_per_page);
 			<script src="assets/plugins/isotope.pkgd.min.js"></script>
 			<script src="assets/plugins/jquery-ui.js"></script>
 			<script src="assets/js/categories_custom.js"></script>
+
+			<script>
+				document.querySelectorAll('.cancel-filter').forEach(function(element) {
+					element.addEventListener('click', function(event) {
+						event.preventDefault();
+						const filterType = this.getAttribute('data-filter');
+
+						// Create a URL object to manipulate the current URL
+						const url = new URL(window.location.href);
+
+						// Remove the filter from the URL
+						if (filterType === 'price') {
+							url.searchParams.delete('min_price');
+							url.searchParams.delete('max_price');
+						} else {
+							// Handle other filters
+							url.searchParams.delete(filterType);
+						}
+
+						// Redirect to the updated URL
+						window.location.href = url.toString();
+					});
+				});
+			</script>
+
+			<script>
+				$(document).ready(function() {
+					$('#apply-filter').on('click', function() {
+						// Ensure filter_applied is set to 1
+						$("#filter_applied").val("1");
+
+						// Create a URL object to manipulate the current URL
+						const url = new URL(window.location.href);
+
+						// Append existing filters to the URL
+						url.searchParams.set('min_price', $('#min_price').val());
+						url.searchParams.set('max_price', $('#max_price').val());
+						url.searchParams.set('filter_applied', '1'); // Ensure filter_applied is set
+
+						// Append other filters
+						if ($("#category").val()) {
+							url.searchParams.set('category', $("#category").val());
+						}
+						if ($("#color").val()) {
+							url.searchParams.set('color', $("#color").val());
+						}
+						if ($("#brand").val()) {
+							url.searchParams.set('brand', $("#brand").val());
+						}
+
+						// Redirect to the updated URL
+						window.location.href = url.toString();
+					});
+				});
+			</script>
+
+
+
+
 </body>
 
 </html>

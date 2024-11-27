@@ -1,0 +1,20 @@
+.gradient-custom {
+    /* Add margin or padding to create space below the header */
+    padding-top: 150px; /* Adjust this value as needed */
+}
+
+@media (max-width: 768px) {
+    .gradient-custom {
+        padding-top: 70px; /* Adjust for smaller screens */
+    }
+}
+
+.btn-primary {
+    background-color: #FF6347; /* Change the background color */
+    border-color: #FF6347; /* Change the border color */
+}
+
+.btn-primary:hover {
+    background-color: #e5533d; /* Darken the color on hover */
+    border-color: #e5533d; /* Darken the border color on hover */
+}

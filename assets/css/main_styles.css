@@ -1070,7 +1070,7 @@ section
 }
 .product_name
 {
-	margin-top: 27px;
+	margin-top: 10px;
 }
 .product_name a
 {
@@ -1203,6 +1203,56 @@ section
 }
 
 /*********************************
+Color Variants
+*********************************/
+.color-variants {
+    display: flex;
+    gap: 5px;
+    margin-top: 10px;
+    position: absolute;
+    bottom: -25px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    justify-content: center;
+}
+
+.product-item {
+    position: relative;
+    padding-bottom: 30px; /* Add extra space for color variants */
+}
+
+.color-circle {
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    cursor: pointer;
+    border: 1px solid #ddd;
+    transition: all 0.3s ease;
+    margin: 0 3px;
+}
+
+.color-circle:hover {
+    transform: scale(1.2);
+}
+
+.color-circle.color-active {
+    border: 2px solid #000;
+    transform: scale(1.2);
+    box-shadow: 0 0 5px rgba(0,0,0,0.3);
+}
+
+/* Ensure proper positioning in owl carousel */
+.owl-item .product-item {
+    position: relative;
+}
+
+/* Image transition animation */
+.main-product-image {
+    transition: all 0.5s ease;
+}
+
+/*********************************
 6. Deal of the week
 *********************************/
 
@@ -1317,9 +1367,9 @@ section
 {
 	overflow: visible !important;
 }
-.product_slider_item .product-item
-{
-	height: 340px;
+.product_slider_item .product-item {
+    position: relative;
+    padding-bottom: 40px; /* Extra space for color circles */
 }
 .product_slider_item
 {
@@ -1328,6 +1378,38 @@ section
 .product_slider_item .product-item
 {
 	width: 100% !important;
+}
+
+/* New Arrivals Specific Styling */
+.product_slider_item .color-variants {
+    position: absolute;
+    bottom: -20px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 5px;
+    width: 100%;
+    justify-content: center;
+}
+
+.product_slider_item .color-circle {
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    cursor: pointer;
+    border: 1px solid #ddd;
+    transition: all 0.3s ease;
+    margin: 0 3px;
+}
+
+.product_slider_item .color-circle:hover {
+    transform: scale(1.2);
+}
+
+.product_slider_item .color-circle.color-active {
+    border: 2px solid #000;
+    transform: scale(1.2);
+    box-shadow: 0 0 5px rgba(0,0,0,0.3);
 }
 
 /*********************************

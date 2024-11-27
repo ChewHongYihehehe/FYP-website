@@ -8,34 +8,48 @@ if (isset($_SESSION['user_id'])) {
     $user_id = '';
 }
 
+//Get the product id from the url
+$product_id = isset($_GET['product_id']) ? (int)$_GET['product_id'] : 0;
 
+if ($product_id > 0) {
+    //Fetch product details based on the product ID
+    $stmt = $conn->prepare("SELECT * FROM products WHERE id = :id");
+    $stmt->bindParam(':id', $product_id);
+    $stmt->execute();
+    $product = $stmt->fetch(PDO::FETCH_ASSOC);
+} else {
+    //Handle the case where the product ID is not valid
+    echo "Product not found.";
+    exit;
+}
 
 // Fetch products data from the database
-$select_products = $conn->prepare("SELECT * FROM `products`");
+$select_products = $conn->prepare("SELECT * FROM `products` WHERE name = :name");
+$select_products->bindParam(':name', $product['name']);
 $select_products->execute();
 $all_products = $select_products->fetchAll(PDO::FETCH_ASSOC);
 
 // Group products by name
 $products = [];
-foreach ($all_products as $product) {
-    $products[$product['name']][] = [
-        'id' => $product['id'],
-        'category' => $product['category'],
-        'brand' => $product['brand'],
-        'name' => $product['name'], // Add name field
-        'color' => $product['color'],
-        'price' => $product['price'],
+foreach ($all_products as $prod) {
+    $products[$prod['name']][] = [
+        'id' => $prod['id'],
+        'category' => $prod['category'],
+        'brand' => $prod['brand'],
+        'name' => $prod['name'], // Add name field
+        'color' => $prod['color'],
+        'price' => $prod['price'],
         'images' => [
-            $product['image1_display'],
-            $product['image2_display'],
-            $product['image3_display'],
-            $product['image4_display']
+            $prod['image1_display'],
+            $prod['image2_display'],
+            $prod['image3_display'],
+            $prod['image4_display']
         ],
         'thumbnails' => [
-            $product['image1_thumb'],
-            $product['image2_thumb'],
-            $product['image3_thumb'],
-            $product['image4_thumb']
+            $prod['image1_thumb'],
+            $prod['image2_thumb'],
+            $prod['image3_thumb'],
+            $prod['image4_thumb']
         ]
     ];
 }
@@ -51,6 +65,7 @@ $products = array_values($products);
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>menu</title>
 
     <!-- font awesome cdn link  -->
@@ -71,10 +86,11 @@ $products = array_values($products);
 
         <main>
             <div>
-                <span class="categoryText">MENS</span>
+                <span class="categoryText"><?php echo htmlspecialchars($product['category']); ?></span>
                 <h1 class="title">
                     <span class="titleText">
-                        Red Nike Jordan Max Aura 3
+                        <span class="titleText"><?php echo htmlspecialchars($product['name']); ?></span>
+                        <span class="titleOverlay"></span>
                     </span>
                     <span class="titleOverlay"></span>
                 </h1>
@@ -82,15 +98,15 @@ $products = array_values($products);
                     Lorem ipsum dolor sit amet
                 </p>
                 <div class="thumbs">
-                    <img src="img/showcase/thumbs/shoe1-1/img1.jpg" class="thumb-active" />
-                    <img src="img/showcase/thumbs/shoe1-1/img2.jpg" />
-                    <img src="img/showcase/thumbs/shoe1-1/img3.jpg" />
-                    <img src="img/showcase/thumbs/shoe1-1/img4.jpg" />
+                    <img src="<?php echo htmlspecialchars($product['image1_thumb']); ?>" class="thumb-active" />
+                    <img src="<?php echo htmlspecialchars($product['image2_thumb']); ?>" />
+                    <img src="<?php echo htmlspecialchars($product['image3_thumb']); ?>" />
+                    <img src="<?php echo htmlspecialchars($product['image4_thumb']); ?>" />
                 </div>
             </div>
             <div class="showcase">
                 <div>
-                    <img src="img/showcase/shoe1-1/img1.png" />
+                    <img src="<?php echo htmlspecialchars($product['image1_display']); ?>" />
                     <div class="shadow"></div>
                 </div>
             </div>
@@ -140,7 +156,7 @@ $products = array_values($products);
                 </div>
                 <div class="pricing">
                     <h4>Price</h4>
-                    <h4 class="price">$150</h4>
+                    <h4 class="price">$<?php echo htmlspecialchars($product['price']); ?></h4>
                 </div>
                 <div class="colors">
                     <h4>Colors</h4>

@@ -434,3 +434,72 @@ jQuery(document).ready(function($)
     	}
     }
 });
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Handle color variant clicks for both product grid and carousel
+    function setupColorVariants(container) {
+        const colorCircles = container.querySelectorAll('.color-circle');
+        
+        colorCircles.forEach(circle => {
+            circle.addEventListener('click', function() {
+                // Find the parent product item
+                const productItem = this.closest('.product-item');
+                
+                // Remove active state from all circles in this product
+                const allCircles = productItem.querySelectorAll('.color-circle');
+                allCircles.forEach(c => c.classList.remove('color-active'));
+                
+                // Add active state to clicked circle
+                this.classList.add('color-active');
+                
+                // Get new product details
+                const productId = this.getAttribute('data-product-id');
+                const productImage = this.getAttribute('data-product-image');
+                const productPrice = this.getAttribute('data-product-price');
+                
+                // Select elements for animation
+                const mainImage = productItem.querySelector('.main-product-image');
+                const mainImageLink = productItem.querySelector('a[href^="product.php"]');
+                const priceElement = productItem.querySelector('.product_price');
+                
+                // Animate image change
+                function animateImageChange() {
+                    mainImage.style.opacity = 0;
+                    mainImage.style.transform = 'scale(0.9)';
+                    
+                    setTimeout(() => {
+                        // Change image source
+                        mainImage.src = productImage;
+                        
+                        // Update product link if exists
+                        if (mainImageLink) {
+                            mainImageLink.href = `product.php?product_id=${productId}`;
+                        }
+                        
+                        // Restore image
+                        mainImage.style.opacity = 1;
+                        mainImage.style.transform = 'scale(1)';
+                    }, 250);
+                }
+                
+                // Animate image change
+                animateImageChange();
+                
+                // Update price
+                priceElement.textContent = `$${productPrice}`;
+            });
+        });
+    }
+
+    // Setup color variants for product grid
+    const productGrid = document.querySelector('.product-grid');
+    if (productGrid) {
+        setupColorVariants(productGrid);
+    }
+
+    // Setup color variants for product slider
+    const productSlider = document.querySelector('.product_slider');
+    if (productSlider) {
+        setupColorVariants(productSlider);
+    }
+});

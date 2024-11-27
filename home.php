@@ -10,6 +10,39 @@ if (isset($_SESSION['user_id'])) {
 	$user_id = '';
 };
 
+function groupProductsByNameandColor($products)
+{
+	$groupedProducts = [];
+	foreach ($products as $product) {
+		//Use a unique key combining name and color
+		$key = $product['name'] . '_' . $product['color'];
+
+		if (!isset($groupedProducts[$product['name']])) {
+			$groupedProducts[$product['name']] = [];
+		}
+
+		$groupedProducts[$product['name']][] = $product;
+	}
+	return $groupedProducts;
+}
+
+//Modify the New Arrivals section query
+$brand_query = "SELECT * FROM products WHERE id >= 1 ORDER BY id ASC LIMIT 16";
+$stmt = $conn->prepare($brand_query);
+$stmt->execute();
+$brand_result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+$grouped_products = groupProductsByNameAndColor($brand_result);
+
+//Group products by name
+$grouped_products = [];
+$unique_products = [];
+foreach ($brand_result  as $product) {
+	if (!isset($grouped_products[$product['name']])) {
+		$grouped_products[$product['name']] = [];
+		$unique_products[] = $product;
+	}
+	$grouped_products[$product['name']][] = $product;
+}
 
 
 try {
@@ -18,12 +51,6 @@ try {
 	$stmt = $conn->prepare($categories_query);
 	$stmt->execute();
 	$categories_result = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-	// Fetch new arrivals
-	$new_arrivals_query = "SELECT * FROM products ORDER BY id DESC LIMIT 12";
-	$stmt = $conn->prepare($new_arrivals_query);
-	$stmt->execute();
-	$new_arrivals_result = $stmt->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
 	echo "Error: " . $e->getMessage();
 }
@@ -32,6 +59,23 @@ $brands_query = "SELECT * FROM brand"; // Fetch all brands
 $stmt = $conn->prepare($brands_query);
 $stmt->execute();
 $brands_result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+//New Arrivals Query
+$new_arrivals_query = "SELECT * FROM products ORDER BY id DESC LIMIT 12";
+$stmt = $conn->prepare($new_arrivals_query);
+$stmt->execute();
+$new_arrivals_result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+//Gorup new arrivals by name
+$new_arrivals_grouped = [];
+$unique_new_arrivals = [];
+foreach ($new_arrivals_result as $product) {
+	if (!isset($new_arrivals_grouped[$product['name']])) {
+		$new_arrivals_grouped[$product['name']] = [];
+		$unique_new_arrivals[] = $product;
+	}
+	$new_arrivals_grouped[$product['name']][] = $product;
+}
 ?>
 
 
@@ -283,33 +327,50 @@ $brands_result = $stmt->fetchAll(PDO::FETCH_ASSOC);
 					<div class="col">
 						<div class="product-grid" data-isotope='{ "itemSelector": ".product-item", "layoutMode": "fitRows" }'>
 
-							<?php
-							// Fetch new arrivals from the database
-							$new_arrivals_query = "SELECT * FROM products WHERE id >= 1 ORDER BY id ASC LIMIT 16"; // Fetch products starting from ID 1
-							$stmt = $conn->prepare($new_arrivals_query);
-							$stmt->execute();
-							$new_arrivals_result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+							<?php foreach ($grouped_products as $product_name => $product_variants):
 
-							foreach ($new_arrivals_result as $product):
-								// Create a class name for the product based on its brand
-								$brand_class = strtolower(str_replace(' ', '-', htmlspecialchars($product['brand']))); // Create a class name from the brand name
+								// Use the first variant as the default
+								$first_variant = $product_variants[0];
+								$brand_class = strtolower(str_replace(' ', '-', htmlspecialchars($first_variant['brand'])));
+
+
 							?>
 								<div class="product-item <?php echo $brand_class; ?>">
 									<div class="product product_filter">
 										<div class="product_image">
-											<img src="<?php echo htmlspecialchars($product['image1_display']); ?>" alt="">
+											<a href="product.php?product_id=<?php echo htmlspecialchars($first_variant['id']); ?>" class="main-product-link">
+												<img src="<?php echo htmlspecialchars($first_variant['image1_display']); ?>" alt="" class="main-product-image">
+											</a>
 										</div>
 										<div class="favorite">
 											<i class="far fa-heart"></i>
 										</div>
 										<div class="product_info">
-											<h6 class="product_name"><a href="single.php?product_id=<?php echo htmlspecialchars($product['id']); ?>"><?php echo htmlspecialchars($product['name']); ?></a></h6>
+											<h6 class="product_name">
+												<a href="product.php?product_id=<?php echo htmlspecialchars($product['id']); ?>">
+													<?php echo htmlspecialchars($product_name); ?>
+												</a>
+											</h6>
 											<div class="product_price">
-												$<?php echo htmlspecialchars($product['price']); ?>
+												$<?php echo htmlspecialchars($first_variant['price']); ?>
 											</div>
+
+											<!----Color Variants--->
+											<?php if (count($product_variants) > 1): ?>
+												<div class="color-variants">
+													<?php foreach ($product_variants as $index => $variant): ?>
+														<span
+															class="color-circle <?php echo $index === 0 ? 'color-active' : ''; ?>"
+															style="background-color: <?php echo htmlspecialchars($variant['color']); ?>;"
+															data-product-id="<?php echo htmlspecialchars($variant['id']); ?>"
+															data-product-image="<?php echo htmlspecialchars($variant['image1_display']); ?>"
+															data-product-price="<?php echo htmlspecialchars($variant['price']); ?>"></span>
+													<?php endforeach; ?>
+												</div>
+											<?php endif; ?>
 										</div>
 									</div>
-									<div class="red_button add_to_cart_button"><a href="#">add to cart</a></div>
+
 								</div>
 							<?php endforeach; ?>
 						</div>
@@ -333,31 +394,46 @@ $brands_result = $stmt->fetchAll(PDO::FETCH_ASSOC);
 						<div class="product_slider_container">
 							<div class="owl-carousel owl-theme product_slider">
 
-								<?php
-								// Fetch the best-selling products from the database
-								$best_sellers_query = "SELECT * FROM products ORDER BY id DESC LIMIT 10"; // Adjust the limit as needed
-								$stmt = $conn->prepare($best_sellers_query);
-								$stmt->execute();
-								$best_sellers_result = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-								foreach ($best_sellers_result as $product):
+								<?php foreach ($unique_new_arrivals as $product):
 									// Create a class name for the product based on its brand
-									$brand_class = strtolower(str_replace(' ', '-', htmlspecialchars($product['brand']))); // Create a class name from the brand name
+									$brand_class = strtolower(str_replace(' ', '-', htmlspecialchars($product['brand'])));
+
+									// Get all variants of this product
+									$product_variants = $new_arrivals_grouped[$product['name']];
+
+									$first_variant = $product_variants[0];
 								?>
 									<div class="owl-item product_slider_item">
 										<div class="product-item <?php echo $brand_class; ?>">
 											<div class="product">
 												<div class="product_image">
-													<img src="<?php echo htmlspecialchars($product['image1_display']); ?>" alt="">
+													<a href="product.php?product_id=<?php echo htmlspecialchars($first_variant['id']); ?>" class="main-product-link">
+														<img src="<?php echo htmlspecialchars($product['image1_display']); ?>" alt="" class="main-product-image">
+													</a>
 												</div>
 												<div class="favorite"></div>
 												<div class="product_info">
-													<h6 class="product_name"><a href="single.php?product_id=<?php echo htmlspecialchars($product['id']); ?>"><?php echo htmlspecialchars($product['name']); ?></a></h6>
+													<h6 class="product_name"><a href="product.php?product_id=<?php echo htmlspecialchars($product['id']); ?>">
+															<?php echo htmlspecialchars($product['name']); ?>
+														</a>
+													</h6>
 													<div class="product_price">
 														$<?php echo htmlspecialchars($product['price']); ?>
 													</div>
+													<!-- Color Variants -->
+													<?php if (count($product_variants) > 1): ?>
+														<div class="color-variants">
+															<?php foreach ($product_variants as $index => $variant): ?>
+																<span
+																	class="color-circle <?php echo $index === 0 ? 'color-active' : ''; ?>"
+																	style="background-color: <?php echo htmlspecialchars($variant['color']); ?>;"
+																	data-product-id="<?php echo htmlspecialchars($variant['id']); ?>"
+																	data-product-image="<?php echo htmlspecialchars($variant['image1_display']); ?>"
+																	data-product-price="<?php echo htmlspecialchars($variant['price']); ?>"></span>
+															<?php endforeach; ?>
+														</div>
+													<?php endif; ?>
 												</div>
-												<!-- Add the green bubble here -->
 												<div class="product_bubble product_bubble_left product_bubble_green d-flex flex-column align-items-center">
 													<span>new</span>
 												</div>

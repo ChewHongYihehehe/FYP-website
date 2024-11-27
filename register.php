@@ -1,27 +1,24 @@
 <?php
-require 'connect.php'; // Include database connection
+require 'connect.php'; // Include the database connection
 
-$registration_successful = false; // Flag for checking if registration is successful
+$registration_successful = false; // Flag to check if registration was successful
 $error_message = ""; // Variable to hold error messages
-、br
+
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $username = trim($_POST['username']);
+    // Retrieve and sanitize input
+    $username = trim($_POST['fullname']);
     $email = trim($_POST['email']);
     $phone = trim($_POST['phone']);
-    $postcode = trim($_POST['postcode']); // Capture postcode input
-    $region = trim($_POST['region']);
     $password = $_POST['password'];
     $confirm_password = $_POST['confirm_password'];
 
     // Validate input
-    if (empty($username) || empty($email) || empty($phone) || empty($postcode) || empty($region) || empty($password) || empty($confirm_password)) {
+    if (empty($username) || empty($email) || empty($phone) || empty($password) || empty($confirm_password)) {
         $error_message = "All fields are required.";
     } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
         $error_message = "Invalid email format.";
-    } elseif (!preg_match("/^\d{5}$/", $postcode)) { // Check if postcode is exactly 5 digits
-        $error_message = "Invalid postcode. It must be a 5-digit number.";
     } elseif (!preg_match("/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_])[A-Za-z\d\W_]{8,12}$/", $password)) {
-        $error_message = "Password must be 8-12 characters, with uppercase, lowercase, a number, and a special character.";
+        $error_message = "Password must be 8-12 characters, with at least one uppercase, one lowercase, one number, and one special character.";
     } elseif ($password !== $confirm_password) {
         $error_message = "Passwords do not match.";
     } else {
@@ -30,26 +27,25 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $stmt = $conn->prepare($check_email_query);
         $stmt->bindParam(':email', $email, PDO::PARAM_STR);
         $stmt->execute();
-        
+
         if ($stmt->rowCount() > 0) {
             $error_message = "An account with this email already exists.";
         } else {
-            // Insert new user into database
-            $stmt = $conn->prepare("INSERT INTO users (fullname, email, phone, postcode, region, password) VALUES (:fullname, :email, :phone, :postcode, :region, :password)");
-            
+            // Insert new user into the database
+            $insert_query = "INSERT INTO users (fullname, email, phone, password) VALUES (:fullname, :email, :phone, :password)";
+            $stmt = $conn->prepare($insert_query);
+
             if ($stmt) {
-                $hashed_password = password_hash($password, PASSWORD_DEFAULT); // Hash password
+                $hashed_password = password_hash($password, PASSWORD_DEFAULT); // Hash the password
                 $stmt->bindParam(':fullname', $username, PDO::PARAM_STR);
                 $stmt->bindParam(':email', $email, PDO::PARAM_STR);
                 $stmt->bindParam(':phone', $phone, PDO::PARAM_STR);
-                $stmt->bindParam(':postcode', $postcode, PDO::PARAM_STR);
-                $stmt->bindParam(':region', $region, PDO::PARAM_STR);
                 $stmt->bindParam(':password', $hashed_password, PDO::PARAM_STR);
 
                 if ($stmt->execute()) {
                     $registration_successful = true; // Set success flag
                 } else {
-                    $error_message = "Error: " . $stmt->errorInfo()[2]; // Get detailed error message
+                    $error_message = "Database error: " . $stmt->errorInfo()[2];
                 }
             } else {
                 $error_message = "Error preparing statement: " . $conn->errorInfo()[2];
@@ -57,7 +53,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
     }
 }
-
 ?>
 
 <!DOCTYPE html>
@@ -91,42 +86,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                             <label>Phone</label>
                             <ion-icon name="call-outline"></ion-icon>
                         </div>
-                        <div class="inputbox">
-                            <select name="region" required>
-                                <option value="" disabled selected>Select Region</option>
-                                <option value="Johor">Johor</option>
-                                <option value="Kedah">Kedah</option>
-                                <option value="Kelantan">Kelantan</option>
-                                <option value="Kuala Lumpur">Kuala Lumpur</option>
-                                <option value="Labuan">Labuan</option>
-                                <option value="Melaka">Melaka</option>
-                                <option value="Negeri Sembilan">Negeri Sembilan</option>
-                                <option value="Pahang">Pahang</option>
-                                <option value="Penang">Penang</option>
-                                <option value="Perak">Perak</option>
-                                <option value="Perlis">Perlis</option>
-                                <option value="Putrajaya">Putrajaya</option>
-                                <option value="Sabah">Sabah</option>
-                                <option value="Sarawak">Sarawak</option>
-                                <option value="Selangor">Selangor</option>
-                                <option value="Terengganu">Terengganu</option>
-                            </select>
-                            <ion-icon name="map-outline"></ion-icon>
-                        </div>
                     </div>
                     <div class="form-column">
-                        <div class="inputbox">
-                            <input type="text" name="postcode" required>
-                            <label>Postcode</label>
-                            <ion-icon name="location-outline"></ion-icon>
-                        </div>
                         <div class="inputbox">
                             <input type="password" id="password" name="password" required>
                             <label>Password</label>
                             <ion-icon name="lock-closed-outline"></ion-icon>
                         </div>
                         <small class="password-reminder">
-                            Password must be 8-12 characters, with uppercase, lowercase, a number, and a special character.
+                            Password must be 8-12 characters, with at least one uppercase, one lowercase, one number, and one special character.
                         </small>
                         <div class="inputbox">
                             <input type="password" id="confirm_password" name="confirm_password" required oninput="checkPasswordMatch()">
@@ -161,7 +129,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         function validatePasswords() {
             const password = document.getElementById("password").value;
             const confirmPassword = document.getElementById("confirm_password").value;
-            const strongPasswordRegex = /^(?=.*[a-z])(?=.*[a-z])(?=.*\d)(?=.*[\W_])[A-Za-z\d\W_]{8,12}$/;
+            const strongPasswordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_])[A-Za-z\d\W_]{8,12}$/;
 
             if (!strongPasswordRegex.test(password)) {
                 alert("Password must meet the required criteria.");

@@ -39,14 +39,20 @@ h2 {
 
 .form-row {
     display: flex;
-    flex-direction: column; /* Align all fields vertically */
+    justify-content: space-between;
     width: 100%;
+}
+
+.form-column {
+    width: 48%;
+    display: flex;
+    flex-direction: column;
 }
 
 .inputbox {
     position: relative;
     margin: 15px 0;
-    width: 100%; /* Ensure all fields take the same full width */
+    width: 100%;
     border-bottom: 2px solid #fff;
 }
 
@@ -67,9 +73,8 @@ input:valid ~ label {
     top: -5px;
 }
 
-.inputbox input,
-.inputbox select {
-    width: 100%; /* Ensure consistent length for all fields */
+.inputbox input {
+    width: 88%;
     height: 50px;
     background: rgba(255, 255, 255, 0.1); /* Slightly transparent background */
     border: none;
@@ -79,46 +84,14 @@ input:valid ~ label {
     color: #fff;
     transition: background 0.3s;
     text-shadow: none;
-    border-bottom: 2px solid #fff;
 }
 
-.inputbox input:focus,
-.inputbox select:focus {
+.inputbox input:focus {
     background: rgba(255, 255, 255, 0.2); /* Slight highlight on focus */
 }
 
-.inputbox ion-icon {
-    position: absolute;
-    right: 10px;
-    top: 15px;
-    color: #fff;
-    font-size: 1.2em;
-}
-
-/* Placeholder styles */
-input::placeholder {
-    color: rgba(255, 255, 255, 0.5);
-}
-
-/* Adjust the icon position for the select element */
-.inputbox ion-icon[name="map-outline"] {
-    right: 10px;
-    top: 15px;
-}
-
-/* Optional: Add custom arrow styling for select elements */
-.inputbox select::-ms-expand {
-    display: none;
-}
-
-option {
-    color: #000;
-    background-color: rgba(255, 255, 255, 0.8);
-}
-
-/* Submit button styling */
 input[type="submit"] {
-    width: 100%; /* Match width with input fields */
+    width: 100%;
     height: 50px;
     border-radius: 30px;
     background: #fff;
@@ -139,7 +112,6 @@ input[type="submit"]:focus {
     outline: 2px solid #007BFF;
 }
 
-/* Login section styles */
 .login {
     text-align: center;
     margin-top: 20px;
@@ -202,4 +174,47 @@ input[type="submit"]:focus {
     .form-column {
         width: 100%;
     }
+}
+
+.inputbox ion-icon {
+    position: absolute;
+    right: 10px;
+    top: 15px;
+    color: #fff;
+    font-size: 1.2em;
+}
+
+/* Placeholder styles */
+input::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.inputbox select {
+    width: 100%;
+    height: 50px;
+    background: rgba(255, 255, 255, 0.1); /* Transparent background */
+    border: none;
+    border-bottom: 2px solid #fff;
+    outline: none;
+    font-size: 1em;
+    color: #fff;
+    appearance: none;
+    padding: 0 35px 0 5px;
+    cursor: pointer;
+}
+
+/* Adjust the icon position for the select element */
+.inputbox ion-icon[name="map-outline"] {
+    right: 10px;
+    top: 15px;
+}
+
+/* Optional: Add custom arrow styling */
+.inputbox select::-ms-expand {
+    display: none;
+}
+
+option {
+    color: #000;
+    background-color: rgba(255, 255, 255, 0.8);
 }

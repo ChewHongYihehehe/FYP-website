@@ -1,5 +1,5 @@
 <?php
-require 'db.php'; // Database connection
+require 'connect.php'; // Database connection
 
 $error_message = "";
 $success_message = "";
@@ -9,12 +9,11 @@ if (isset($_GET['token'])) {
     $token = $_GET['token'];
 
     // Check if token exists and has not expired
-    $stmt = $conn->prepare("SELECT * FROM users WHERE reset_token = ? AND reset_token_expiry > NOW()");
-    $stmt->bind_param("s", $token);
+    $stmt = $conn->prepare("SELECT * FROM users WHERE reset_token = :reset_token AND reset_token_expiry > NOW()");
+    $stmt->bindParam(":reset_token", $token, PDO::PARAM_STR);
     $stmt->execute();
-    $result = $stmt->get_result();
 
-    if ($result->num_rows > 0) {
+    if ($stmt->rowCount() > 0) {
         if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $new_password = $_POST['new_password'];
             $confirm_password = $_POST['confirm_password'];
@@ -25,8 +24,9 @@ if (isset($_GET['token'])) {
                 $hashed_password = password_hash($new_password, PASSWORD_BCRYPT);
 
                 // Update password in the database and clear the reset token
-                $stmt = $conn->prepare("UPDATE users SET password = ?, reset_token = NULL, reset_token_expiry = NULL WHERE reset_token = ?");
-                $stmt->bind_param("ss", $hashed_password, $token);
+                $stmt = $conn->prepare("UPDATE users SET password = :password, reset_token = NULL, reset_token_expiry = NULL WHERE reset_token = :reset_token");
+                $stmt->bindParam(":password", $hashed_password, PDO::PARAM_STR);
+                $stmt->bindParam(":reset_token", $token, PDO::PARAM_STR);
                 $stmt->execute();
 
                 $success_message = "Password has been reset successfully. <a href='login.php'>Login here</a>.";
@@ -41,15 +41,17 @@ if (isset($_GET['token'])) {
     $error_message = "No token provided.";
 }
 
-$conn->close();
+// Close the connection (optional, PDO will close automatically when the script finishes)
+$conn = null;
 ?>
+
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="reset_password.css">
+    <link rel="stylesheet" href="assets/css/reset_password.css">
     <title>Reset Password</title>
 </head>
 <body>

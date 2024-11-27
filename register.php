@@ -1,5 +1,5 @@
 <?php
-require 'db.php'; // Include database connection
+require 'connect.php'; // Include database connection
 
 $registration_successful = false; // Flag for checking if registration is successful
 $error_message = ""; // Variable to hold error messages
@@ -26,38 +26,38 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $error_message = "Passwords do not match.";
     } else {
         // Check if email already exists
-        $check_email_query = "SELECT * FROM users WHERE email = ?";
+        $check_email_query = "SELECT * FROM users WHERE email = :email";
         $stmt = $conn->prepare($check_email_query);
-        if ($stmt) {
-            $stmt->bind_param("s", $email);
-            $stmt->execute();
-            $result = $stmt->get_result();
-            if ($result->num_rows > 0) {
-                $error_message = "An account with this email already exists.";
-            } else {
-                // Insert new user into database
-                $stmt = $conn->prepare("INSERT INTO users (fullname, email, phone, postcode, region, password) VALUES (?, ?, ?, ?, ?, ?)");
-                if ($stmt) {
-                    $hashed_password = password_hash($password, PASSWORD_DEFAULT); // Hash password
-                    $stmt->bind_param("ssssss", $username, $email, $phone, $postcode, $region, $hashed_password);
-
-                    if ($stmt->execute()) {
-                        $registration_successful = true; // Set success flag
-                    } else {
-                        $error_message = "Error: " . $stmt->error;
-                    }
-                    $stmt->close();
-                } else {
-                    $error_message = "Error preparing statement: " . $conn->error;
-                }
-            }
+        $stmt->bindParam(':email', $email, PDO::PARAM_STR);
+        $stmt->execute();
+        
+        if ($stmt->rowCount() > 0) {
+            $error_message = "An account with this email already exists.";
         } else {
-            $error_message = "Error checking email: " . $conn->error;
+            // Insert new user into database
+            $stmt = $conn->prepare("INSERT INTO users (fullname, email, phone, postcode, region, password) VALUES (:fullname, :email, :phone, :postcode, :region, :password)");
+            
+            if ($stmt) {
+                $hashed_password = password_hash($password, PASSWORD_DEFAULT); // Hash password
+                $stmt->bindParam(':fullname', $username, PDO::PARAM_STR);
+                $stmt->bindParam(':email', $email, PDO::PARAM_STR);
+                $stmt->bindParam(':phone', $phone, PDO::PARAM_STR);
+                $stmt->bindParam(':postcode', $postcode, PDO::PARAM_STR);
+                $stmt->bindParam(':region', $region, PDO::PARAM_STR);
+                $stmt->bindParam(':password', $hashed_password, PDO::PARAM_STR);
+
+                if ($stmt->execute()) {
+                    $registration_successful = true; // Set success flag
+                } else {
+                    $error_message = "Error: " . $stmt->errorInfo()[2]; // Get detailed error message
+                }
+            } else {
+                $error_message = "Error preparing statement: " . $conn->errorInfo()[2];
+            }
         }
     }
 }
 
-$conn->close();
 ?>
 
 <!DOCTYPE html>
@@ -65,7 +65,7 @@ $conn->close();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="register.css">
+    <link rel="stylesheet" href="assets/css/register.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/ionicons/5.5.2/collection/components/icon/icon.min.css">
     <title>Register</title>
 </head>

@@ -1,5 +1,5 @@
 <?php
-require 'db.php'; // Include database connection
+require 'connect.php'; // Include database connection
 
 session_start();
 
@@ -10,13 +10,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $password = $_POST['password'];
 
     // Prepare statement to prevent SQL injection
-    $stmt = $conn->prepare("SELECT * FROM users WHERE email = ?");
-    $stmt->bind_param("s", $email); // Bind parameters
+    $stmt = $conn->prepare("SELECT * FROM users WHERE email = :email");
+    $stmt->bindParam(":email", $email, PDO::PARAM_STR);
     $stmt->execute();
-    $result = $stmt->get_result();
 
-    if ($result->num_rows > 0) {
-        $row = $result->fetch_assoc();
+    if ($stmt->rowCount() > 0) {
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
         if (password_verify($password, $row['password'])) {
             // Regenerate session ID to prevent session fixation
             session_regenerate_id(true);
@@ -29,18 +28,22 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     } else {
         $error_message = "No user found with this email.";
     }
-    $stmt->close(); // Close the statement
+    
+    // Reset the statement object (optional, PDO will clean up automatically)
+    $stmt = null;
 }
 
-$conn->close();
+// Close the connection (optional, PDO will close the connection when the script finishes)
+$conn = null;
 ?>
+
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="login.css">
+    <link rel="stylesheet" href="assets/css/login.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/ionicons/5.5.2/collection/components/icon/icon.min.css">
     <title>Login</title>
 </head>

@@ -11,14 +11,14 @@ section {
     align-items: center;
     min-height: 100vh;
     width: 100%;
-    background: url("https://png.pngtree.com/thumb_back/fh260/background/20230527/pngtree-nike-running-shoes-on-black-background-with-colorful-splashes-image_2671040.jpg") no-repeat;
+    background: url("https://img.freepik.com/free-photo/outdoor-hiking-equipment_1387-643.jpg") no-repeat;
     background-position: center;
     background-size: cover;
 }
 
 .form-box {
     position: relative;
-    width: 700px;
+    width: 600px; /* Set width of the form box to 600px (wider) */
     background: transparent;
     border: 2px solid rgba(255, 255, 255, 0.5);
     border-radius: 20px;
@@ -38,20 +38,20 @@ h2 {
 
 .form-row {
     display: flex;
-    justify-content: space-between;
+    flex-direction: column; /* Stack the fields vertically */
     width: 100%;
 }
 
 .form-column {
-    width: 48%;
+    width: 100%; /* Ensure the form column takes full width */
     display: flex;
     flex-direction: column;
+    margin-bottom: 20px; /* Add more space between fields */
 }
 
 .inputbox {
     position: relative;
-    margin: 15px 0;
-    width: 100%;
+    width: 100%; /* Ensure input fields take full width of the form box */
     border-bottom: 2px solid #fff;
 }
 
@@ -72,19 +72,19 @@ input:valid ~ label {
 }
 
 .inputbox input {
-    padding-right: 40px; /* Add padding to avoid text overlap with icon */
-    width: 100%; /* Ensure the input takes full width */
-    height: 50px; /* Set a height for consistency */
-    background: transparent; /* Background to match the form */
-    border: none; /* No border for the input */
-    outline: none; /* No outline */
-    font-size: 1em; /* Set font size */
-    color: #fff; /* Change input text color to white */
+    padding-right: 40px; /* Add space for the icon */
+    width: 100%; /* Input takes full width */
+    height: 60px; /* Increase the height of the input fields */
+    background: transparent;
+    border: none;
+    outline: none;
+    font-size: 1.2em; /* Larger text size */
+    color: #fff;
 }
 
 input[type="submit"] {
     width: 100%;
-    height: 50px;
+    height: 60px; /* Taller button */
     border-radius: 30px;
     background: #fff;
     color: #000;
@@ -126,20 +126,22 @@ input[type="submit"]:hover {
 .error-message {
     color: #ff4d4d; /* Red color for error messages */
     font-size: 0.9em;
-    margin-top: 10px; /* More margin for better visibility */
+    margin-top: 10px;
     text-align: center; /* Center align the error messages */
 }
 
 @media (max-width: 768px) {
-    .form-row {
-        flex-direction: column;
+    .form-box {
+        width: 90%; /* Make form box take up more space on smaller screens */
+        padding: 20px;
     }
 }
 
+/* Styling for icons */
 .inputbox ion-icon {
     position: absolute;
-    right: 10px; /* Position the icon to the right */
-    top: 15px;   /* Center the icon vertically */
+    right: 10px;
+    top: 15px;
     color: #fff;
     font-size: 1.2em;
 }

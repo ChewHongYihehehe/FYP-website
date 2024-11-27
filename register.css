@@ -75,11 +75,11 @@ input:valid ~ label {
 
 .inputbox input {
     width: 100%;
-    height: 50px;
+    height: 40px; /* Reduced height */
     background: rgba(255, 255, 255, 0.1); /* Slightly transparent background */
     border: none;
     outline: none;
-    font-size: 1em;
+    font-size: 0.9em; /* Adjusted font size */
     padding: 0 35px 0 5px;
     color: #fff;
     transition: background 0.3s;
@@ -92,14 +92,14 @@ input:valid ~ label {
 
 input[type="submit"] {
     width: 100%;
-    height: 50px;
-    border-radius: 30px;
+    height: 40px; /* Reduced height */
+    border-radius: 20px; /* Smaller radius for a proportional look */
     background: #fff;
     color: #000;
     border: none;
     outline: none;
     cursor: pointer;
-    font-size: 1.1em;
+    font-size: 1em; /* Adjusted font size */
     font-weight: 600;
     transition: background 0.3s, transform 0.2s;
 }
@@ -179,7 +179,7 @@ input[type="submit"]:focus {
 .inputbox ion-icon {
     position: absolute;
     right: 10px;
-    top: 15px;
+    top: 10px; /* Adjusted position for shorter fields */
     color: #fff;
     font-size: 1.2em;
 }
@@ -191,12 +191,12 @@ input::placeholder {
 
 .inputbox select {
     width: 100%;
-    height: 50px;
+    height: 40px; /* Reduced height */
     background: rgba(255, 255, 255, 0.1); /* Transparent background */
     border: none;
     border-bottom: 2px solid #fff;
     outline: none;
-    font-size: 1em;
+    font-size: 0.9em; /* Adjusted font size */
     color: #fff;
     appearance: none;
     padding: 0 35px 0 5px;
@@ -206,7 +206,7 @@ input::placeholder {
 /* Adjust the icon position for the select element */
 .inputbox ion-icon[name="map-outline"] {
     right: 10px;
-    top: 15px;
+    top: 10px; /* Adjusted position for shorter fields */
 }
 
 /* Optional: Add custom arrow styling */

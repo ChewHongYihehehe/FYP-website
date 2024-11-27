@@ -151,9 +151,9 @@ foreach ($new_arrivals_result as $product) {
 											<i class="fa fa-angle-down"></i>
 										</a>
 										<ul class="account_selection">
-											<li><a href="#"><i class="fa fa-sign-in" aria-hidden="true"></i>Sign In</a>
+											<li><a href="login.php"><i class="fa fa-sign-in" aria-hidden="true"></i>Sign In</a>
 											</li>
-											<li><a href="#"><i class="fa fa-user-plus"
+											<li><a href="register.php"><i class="fa fa-user-plus"
 														aria-hidden="true"></i>Register</a></li>
 										</ul>
 									</li>

@@ -387,23 +387,94 @@ jQuery(document).ready(function($)
 
 	*/
 
-    function initPriceSlider()
-    {
-		$( "#slider-range" ).slider(
-		{
+	function initPriceSlider() {
+		var minPrice = parseFloat($("#slider-range").data("min")) || 0;
+		var maxPrice = parseFloat($("#slider-range").data("max")) || 1000;
+	
+		$("#slider-range").slider({
 			range: true,
-			min: 0,
-			max: 1000,
-			values: [ 0, 580 ],
-			slide: function( event, ui )
-			{
-				$( "#amount" ).val( "$" + ui.values[ 0 ] + " - $" + ui.values[ 1 ] );
+			min: minPrice,
+			max: maxPrice,
+			values: [
+				parseFloat($("#min_price").val()) || minPrice,
+				parseFloat($("#max_price").val()) || maxPrice
+			],
+			slide: function(event, ui) {
+				$("#amount").val("$" + ui.values[0] + " - $" + ui.values[1]);
+				$("#min_price").val(ui.values[0]);
+				$("#max_price").val(ui.values[1]);
+				
+				// Automatically set filter_applied to 1
+				$("#filter_applied").val("1");
 			}
 		});
-			
-		$( "#amount" ).val( "$" + $( "#slider-range" ).slider( "values", 0 ) + " - $" + $( "#slider-range" ).slider( "values", 1 ) );
-    }
-
+	
+		$("#amount").val("$" + $("#slider-range").slider("values", 0) + " - $" + $("#slider-range").slider("values", 1));
+	}
+	
+	$(document).ready(function() {
+		initPriceSlider();
+	
+		$('#apply-filter').on('click', function() {
+			// Ensure filter_applied is set to 1
+			$("#filter_applied").val("1");
+			$(this).closest('form').submit();
+		});
+	});
+	
+	function initIsotopeFiltering() {
+		var $grid = $('.product-grid').isotope({
+			itemSelector: '.product-item',
+			layoutMode: 'fitRows',
+			getSortData: {
+				price: function(itemElement) {
+					var priceEle = $(itemElement).find('.product_price').text().replace('$', '');
+					return parseFloat(priceEle);
+				},
+				name: '.product_name'
+			}
+		});
+	
+		// Filter items on button click
+		$('#apply-filter').on('click', function() {
+			var filters = [];
+	
+			// Collect filters for price
+			if ($('#min_price').val() && $('#max_price').val()) {
+				filters.push(function() {
+					var priceMin = parseFloat($('#min_price').val());
+					var priceMax = parseFloat($('#max_price').val());
+					var itemPrice = parseFloat($(this).find('.product_price').text().replace('$', ''));
+					return itemPrice >= priceMin && itemPrice <= priceMax;
+				});
+			}
+	
+			// Add other filters (category, color, brand) similarly
+			// Example for category
+			if ($('input[name="category"]:checked').length) {
+				filters.push(function() {
+					var selectedCategories = $('input[name="category"]:checked').map(function() {
+						return $(this).val();
+					}).get();
+					return selectedCategories.includes($(this).data('category'));
+				});
+			}
+	
+			// Apply filters
+			$grid.isotope({
+				filter: function() {
+					return filters.every(function(filter) {
+						return filter.call(this);
+					}, this);
+				},
+				animationOptions: {
+					duration: 750,
+					easing: 'linear',
+					queue: false
+				}
+			});
+		});
+	}
     /* 
 
 	8. Init Checkboxes
@@ -450,6 +521,73 @@ jQuery(document).ready(function($)
     	};
     }
 	
+});
 
+document.addEventListener('DOMContentLoaded', function() {
+    // Handle color variant clicks for both product grid and carousel
+    function setupColorVariants(container) {
+        const colorCircles = container.querySelectorAll('.color-circle');
+        
+        colorCircles.forEach(circle => {
+            circle.addEventListener('click', function() {
+                // Find the parent product item
+                const productItem = this.closest('.product-item');
+                
+                // Remove active state from all circles in this product
+                const allCircles = productItem.querySelectorAll('.color-circle');
+                allCircles.forEach(c => c.classList.remove('color-active'));
+                
+                // Add active state to clicked circle
+                this.classList.add('color-active');
+                
+                // Get new product details
+                const productId = this.getAttribute('data-product-id');
+                const productImage = this.getAttribute('data-product-image');
+                const productPrice = this.getAttribute('data-product-price');
+                
+                // Select elements for animation
+                const mainImage = productItem.querySelector('.main-product-image');
+                const mainImageLink = productItem.querySelector('a[href^="product.php"]');
+                const priceElement = productItem.querySelector('.product_price');
+                
+                // Animate image change
+                function animateImageChange() {
+                    mainImage.style.opacity = 0;
+                    mainImage.style.transform = 'scale(0.9)';
+                    
+                    setTimeout(() => {
+                        // Change image source
+                        mainImage.src = productImage;
+                        
+                        // Update product link if exists
+                        if (mainImageLink) {
+                            mainImageLink.href = `product.php?product_id=${productId}`;
+                        }
+                        
+                        // Restore image
+                        mainImage.style.opacity = 1;
+                        mainImage.style.transform = 'scale(1)';
+                    }, 250);
+                }
+                
+                // Animate image change
+                animateImageChange();
+                
+                // Update price
+                priceElement.textContent = `$${productPrice}`;
+            });
+        });
+    }
 
+    // Setup color variants for product grid
+    const productGrid = document.querySelector('.product-grid');
+    if (productGrid) {
+        setupColorVariants(productGrid);
+    }
+
+    // Setup color variants for product slider
+    const productSlider = document.querySelector('.product_slider');
+    if (productSlider) {
+        setupColorVariants(productSlider);
+    }
 });

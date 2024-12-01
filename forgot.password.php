@@ -1,5 +1,9 @@
 <?php
 require 'connect.php'; // Include database connection
+require 'vendor/autoload.php'; // Autoload PHPMailer
+
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
 
 $error_message = "";
 $success_message = "";
@@ -24,29 +28,44 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $stmt->bindParam(":email", $email, PDO::PARAM_STR);
         $stmt->execute();
 
-        // Send reset link to the user's email
+        // Send reset link to the user's email using PHPMailer
         $reset_link = "http://yourwebsite.com/reset_password.php?token=" . $token;
-        $subject = "Password Reset Request";
-        $message = "Click the following link to reset your password: " . $reset_link;
-        $headers = "From: no-reply@yourwebsite.com";
 
-        if (mail($email, $subject, $message, $headers)) {
+        $mail = new PHPMailer(true);
+
+        try {
+            // Server settings
+            $mail->isSMTP();
+            $mail->Host = 'smtp.example.com'; // Replace with your SMTP host
+            $mail->SMTPAuth = true;
+            $mail->Username = 'your_email@example.com'; // SMTP username
+            $mail->Password = 'your_password'; // SMTP password
+            $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+            $mail->Port = 587;
+
+            // Recipients
+            $mail->setFrom('no-reply@yourwebsite.com', 'Your Website');
+            $mail->addAddress($email);
+
+            // Content
+            $mail->isHTML(true);
+            $mail->Subject = 'Password Reset Request';
+            $mail->Body = "Click the following link to reset your password: <a href='$reset_link'>$reset_link</a>";
+
+            $mail->send();
             $success_message = "Password reset link has been sent to your email.";
-        } else {
-            $error_message = "Failed to send reset link. Please try again.";
+        } catch (Exception $e) {
+            $error_message = "Message could not be sent. Mailer Error: {$mail->ErrorInfo}";
         }
     } else {
         $error_message = "No user found with this email.";
     }
 
-    $stmt = null; // Close the statement (optional, PDO will clean up automatically)
+    $stmt = null; // Close the statement
 }
 
-// Close the connection (optional, PDO will also close the connection when the script finishes)
+// Close the connection
 $conn = null;
-?>
-
-$conn->close();
 ?>
 
 <!DOCTYPE html>

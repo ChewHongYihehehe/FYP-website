@@ -38,8 +38,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $mail->isSMTP();
             $mail->Host = 'smtp.example.com'; // Replace with your SMTP host
             $mail->SMTPAuth = true;
-            $mail->Username = 'your_email@example.com'; // SMTP username
-            $mail->Password = 'your_password'; // SMTP password
+            $mail->Username = 'huangjiaze81@gmail.com'; // SMTP username
+            $mail->Password = 'xmufbeayghzypjf'; // SMTP password
             $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
             $mail->Port = 587;
 

@@ -29,34 +29,35 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $stmt->execute();
 
         // Send reset link to the user's email using PHPMailer
-        $reset_link = "http://yourwebsite.com/reset_password.php?token=" . $token;
+        $reset_link = "http://FYP-website/reset_password.php?token=" . $token;
 
         $mail = new PHPMailer(true);
 
         try {
             // Server settings
             $mail->isSMTP();
-            $mail->Host = 'smtp.example.com'; // Replace with your SMTP host
+            $mail->Host = 'smtp.gmail.com';
             $mail->SMTPAuth = true;
-            $mail->Username = 'huangjiaze81@gmail.com'; // SMTP username
-            $mail->Password = 'xmufbeayghzypjf'; // SMTP password
+            $mail->Username = 'huangjiaze81@gmail.com'; // Replace with your email
+            $mail->Password = 'ylnk kmlo vgbn karc';    // Replace with your app password
             $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
             $mail->Port = 587;
-
+        
             // Recipients
-            $mail->setFrom('no-reply@yourwebsite.com', 'Your Website');
+            $mail->setFrom('huangjiaze81@gmail.com', 'STEP SHOES SHOP');
             $mail->addAddress($email);
-
+        
             // Content
             $mail->isHTML(true);
             $mail->Subject = 'Password Reset Request';
             $mail->Body = "Click the following link to reset your password: <a href='$reset_link'>$reset_link</a>";
-
+        
             $mail->send();
             $success_message = "Password reset link has been sent to your email.";
         } catch (Exception $e) {
             $error_message = "Message could not be sent. Mailer Error: {$mail->ErrorInfo}";
         }
+        
     } else {
         $error_message = "No user found with this email.";
     }
@@ -80,7 +81,7 @@ $conn = null;
     <section>
         <div class="form-box">
             <h2>Forgot Password</h2>
-            <form action="forgot_password.php" method="post">
+            <form action="forgot.password.php" method="post">
                 <div class="form-row">
                     <div class="form-column">
                         <div class="inputbox">

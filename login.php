@@ -20,7 +20,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             // Regenerate session ID to prevent session fixation
             session_regenerate_id(true);
             $_SESSION['user_id'] = $row['id'];
-            header("Location: home.php"); // Redirect to homepage
+            $_SESSION['user_email'] = $row['email']; // Optional for user tracking
+            header("Location: home.php"); // Redirect to the homepage
             exit();
         } else {
             $error_message = "Invalid password.";
@@ -33,10 +34,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $stmt = null;
 }
 
-// Close the connection (optional, PDO will close the connection when the script finishes)
+// Close the connection (optional, PDO will close automatically when the script finishes)
 $conn = null;
 ?>
-
 
 <!DOCTYPE html>
 <html lang="en">
@@ -44,7 +44,6 @@ $conn = null;
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="assets/css/login.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/ionicons/5.5.2/collection/components/icon/icon.min.css">
     <title>Login</title>
 </head>
 <body>
@@ -52,28 +51,20 @@ $conn = null;
         <div class="form-box">
             <h2>Login</h2>
             <form action="login.php" method="post">
-                <!-- Email field at the top -->
                 <div class="form-column">
                     <div class="inputbox">
                         <input type="email" name="email" required autofocus>
                         <label>Email</label>
-                        <ion-icon name="mail-outline"></ion-icon>
                     </div>
                 </div>
-
-                <!-- Password field below email field -->
                 <div class="form-column">
                     <div class="inputbox">
                         <input type="password" name="password" required>
                         <label>Password</label>
-                        <ion-icon name="lock-closed-outline"></ion-icon>
                     </div>
                 </div>
-
-                <!-- Error message and submit button -->
                 <span class="error-message"><?php echo $error_message; ?></span>
                 <input type="submit" value="Login">
-                
                 <div class="login">
                     <p>Don't have an account? <a href="register.php">Register here</a>.</p>
                     <p><a href="forgot.password.php">Forgot Password? Click here</a></p>
@@ -81,7 +72,5 @@ $conn = null;
             </form>
         </div>
     </section>
-
-    <script src="https://unpkg.com/ionicons@5.5.2/dist/ionicons.js"></script>
 </body>
 </html>

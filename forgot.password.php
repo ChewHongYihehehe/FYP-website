@@ -38,13 +38,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $mail->isSMTP();
             $mail->Host = 'smtp.gmail.com';
             $mail->SMTPAuth = true;
-            $mail->Username = 'huangjiaze81@gmail.com'; // Replace with your email
-            $mail->Password = 'ylnk kmlo vgbn karc';    // Replace with your app password
+            $mail->Username = 'your_email@gmail.com'; // Replace with your email
+            $mail->Password = 'your_email_password';    // Replace with your app password
             $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
             $mail->Port = 587;
         
             // Recipients
-            $mail->setFrom('huangjiaze81@gmail.com', 'STEP SHOES SHOP');
+            $mail->setFrom('your_email@gmail.com', 'Step Shoes Shop');
             $mail->addAddress($email);
         
             // Content
@@ -75,6 +75,8 @@ $conn = null;
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="assets/css/forgot.password.css">
+    <script type="module" src="https://cdn.jsdelivr.net/npm/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://cdn.jsdelivr.net/npm/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
     <title>Forgot Password</title>
 </head>
 <body>
@@ -87,6 +89,7 @@ $conn = null;
                         <div class="inputbox">
                             <input type="email" name="email" required>
                             <label>Email</label>
+                            <ion-icon name="mail-outline"></ion-icon>
                         </div>
                     </div>
                 </div>

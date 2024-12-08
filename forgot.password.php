@@ -74,7 +74,6 @@ $conn = null;
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="assets/css/forgot.password.css">
     <title>Forgot Password</title>
 </head>
@@ -88,7 +87,6 @@ $conn = null;
                         <div class="inputbox">
                             <input type="email" name="email" required>
                             <label>Email</label>
-                            <i class="fas fa-envelope"></i>
                         </div>
                     </div>
                 </div>

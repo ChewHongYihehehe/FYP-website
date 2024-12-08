@@ -57,6 +57,7 @@ $conn = null;
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="assets/css/reset_password.css">
     <title>Reset Password</title>
 </head>
@@ -69,12 +70,14 @@ $conn = null;
                     <div class="inputbox">
                         <input type="password" name="new_password" required>
                         <label>New Password</label>
+                        <i class="fas fa-lock"></i>
                     </div>
                 </div>
                 <div class="form-column">
                     <div class="inputbox">
                         <input type="password" name="confirm_password" required>
                         <label>Confirm Password</label>
+                        <i class="fas fa-lock"></i>
                     </div>
                 </div>
                 <span class="error-message"><?php echo $error_message; ?></span>

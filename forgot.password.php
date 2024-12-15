@@ -38,13 +38,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $mail->isSMTP();
             $mail->Host = 'smtp.gmail.com';
             $mail->SMTPAuth = true;
-            $mail->Username = 'your_email@gmail.com'; // Replace with your email
-            $mail->Password = 'your_email_password';    // Replace with your app password
+            $mail->Username = 'huangjiaze81@gmail.com'; // Replace with your email
+            $mail->Password = 'lssd cuhb sflj bgzw';    // Replace with your app password
             $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
             $mail->Port = 587;
         
             // Recipients
-            $mail->setFrom('your_email@gmail.com', 'Step Shoes Shop');
+            $mail->setFrom('huangjiaze81@gmail.com', 'Step Shoes Shop');
             $mail->addAddress($email);
         
             // Content

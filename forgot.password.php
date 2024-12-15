@@ -1,6 +1,6 @@
 <?php
 require 'connect.php'; // Include database connection
-require 'vendor/autoload.php'; // Autoload PHPMailer
+
 
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;

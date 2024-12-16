@@ -1,6 +1,8 @@
 <?php
 require 'connect.php'; // Include database connection
+require 'vendor/autoload.php'; // Autoload PHPMailer
 
+date_default_timezone_set('Asia/Kuala_Lumpur');
 
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
@@ -39,7 +41,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $mail->Host = 'smtp.gmail.com';
             $mail->SMTPAuth = true;
             $mail->Username = 'huangjiaze81@gmail.com'; // Replace with your email
-            $mail->Password = 'lssd cuhb sflj bgzw';    // Replace with your app password
+            $mail->Password = 'twgzwsmviynumozq';    // Replace with your app password
             $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
             $mail->Port = 587;
         

@@ -503,3 +503,237 @@ document.addEventListener('DOMContentLoaded', function() {
         setupColorVariants(productSlider);
     }
 });
+
+
+document.addEventListener('DOMContentLoaded', function() {
+    function setupAddToCart() {
+        const quickAddButtons = document.querySelectorAll('.quick-add-button');
+
+        quickAddButtons.forEach(button => {
+            const productItem = button.closest('.product-item');
+            const quickAddLink = button.querySelector('a');
+            const plusIcon = quickAddLink.querySelector('.quick-add-icon');
+            let sizesContainer = null;
+            let isQuickAddActive = false;
+
+            const productId = productItem.getAttribute('data-product-id');
+            const availableSizesJSON = productItem.getAttribute('data-available-sizes');
+            const availableSizes = JSON.parse(availableSizesJSON || '[]');
+
+            // Check if the product has color variants
+            const colorCircles = productItem.querySelectorAll('.color-circle');
+            const hasColorVariants = colorCircles.length > 0;
+
+            // Track the active color variant
+            let activeColorCircle = hasColorVariants 
+                ? productItem.querySelector('.color-circle.color-active') 
+                : null;
+
+            // If color variants exist, add event listeners
+            if (hasColorVariants) {
+                colorCircles.forEach(circle => {
+                    circle.addEventListener('click', function() {
+                        // Remove active class from all circles
+                        colorCircles.forEach(c => c.classList.remove('color-active'));
+                        // Add active class to the clicked circle
+                        circle.classList.add('color-active');
+                        // Update the active color circle
+                        activeColorCircle = circle;
+                    });
+                });
+            }
+
+            // Function to close sizes container
+            function closeSizesContainer() {
+                if (sizesContainer) {
+                    productItem.removeChild(sizesContainer);
+                    sizesContainer = null;
+                }
+                plusIcon.classList.remove('rotated');
+                isQuickAddActive = false;
+            }
+
+            // Close sizes container when clicking outside
+            document.addEventListener('click', function(event) {
+                if (isQuickAddActive && 
+                    !productItem.contains(event.target) && 
+                    !button.contains(event.target)) {
+                    closeSizesContainer();
+                }
+            });
+
+            button.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation(); // Prevent event from bubbling
+
+                // If container is already open, close it
+                if (isQuickAddActive) {
+                    closeSizesContainer();
+                    return;
+                }
+
+                // Rotate the plus icon to minus
+                plusIcon.classList.add('rotated');
+                isQuickAddActive = true;
+
+                let sizesToShow = [];
+
+                // Determine sizes to show based on product type
+                if (hasColorVariants && activeColorCircle) {
+                    // Get sizes for the active color variant
+                    const activeAvailableSizesJSON = activeColorCircle.getAttribute('data-available-sizes');
+                    sizesToShow = JSON.parse(activeAvailableSizesJSON || '[]');
+                } else {
+                    // If no color variants or no active color, use the main product sizes
+                    sizesToShow = availableSizes;
+                }
+
+                // Check if there are available sizes
+                if (!sizesToShow || sizesToShow.length === 0) {
+                    alert('No sizes available for this product');
+                    plusIcon.classList.remove('rotated');
+                    isQuickAddActive = false;
+                    return;
+                }
+
+                // Create sizes container
+                sizesContainer = document.createElement('div');
+                sizesContainer.classList.add('sizes-container');
+                productItem.appendChild(sizesContainer);
+
+                // Create size buttons
+                sizesToShow.forEach(size => {
+                    const sizeButton = document.createElement('button');
+                    sizeButton.textContent = size;
+                    sizeButton.classList.add('size-button');
+
+                    sizeButton.addEventListener('click', function(e) {
+                        e.stopPropagation(); // Prevent event from bubbling
+                        
+                        // Add to cart logic
+                        addToCart(productId, size);
+                        
+                        // Remove sizes container
+                        closeSizesContainer();
+                    });
+
+                    sizesContainer.appendChild(sizeButton);
+                });
+            });
+        });
+    }
+
+    // Function to add product to cart
+    function addToCart(productId, size) {
+		let color = 'Unknown';
+		
+		const activeColorCircle = document.querySelector(`.color-circle[data-product-id="${productId}"].color-active`);
+		
+		if (activeColorCircle) {
+			color = activeColorCircle.getAttribute('data-color') || 
+					activeColorCircle.style.backgroundColor || 'Unknown';
+		}
+	
+		fetch('add_to_cart_process.php', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/x-www-form-urlencoded',
+			},
+			body: `product_id=${productId}&size=${size}&color=${encodeURIComponent(color)}`
+		})
+		.then(response => response.json())
+		.then(data => {
+			if (data.success) {
+				// Update cart count
+				const cartCountElement = document.querySelector('.cart-count');
+				if (cartCountElement && data.cart_count !== undefined) {
+					cartCountElement.textContent = data.cart_count;
+					
+					// Optional: Add animation
+					cartCountElement.classList.add('cart-count-updated');
+					setTimeout(() => {
+						cartCountElement.classList.remove('cart-count-updated');
+					}, 300);
+				}
+				
+				// Optional: Show notification
+				const notification = document.createElement('div');
+				notification.classList.add('cart-notification');
+				notification.textContent = 'Added to cart!';
+				document.body.appendChild(notification);
+				
+				setTimeout(() => {
+					notification.remove();
+				},  2000);
+			}
+		})
+		.catch(error => console.error('Error:', error));
+	}
+
+
+    // Initial setup
+    setupAddToCart();
+
+
+});
+// Wishlist Toggle Handler
+document.querySelectorAll('.favorite').forEach(favoriteIcon => {
+    favoriteIcon.addEventListener('click', function(e) {
+        e.preventDefault();
+        
+        // Find the product item
+        const productItem = this.closest('.product-item');
+        const productId = productItem.getAttribute('data-product-id');
+        
+        // Get color from active color circle
+        let activeColorCircle = productItem.querySelector('.color-circle.color-active');
+        
+        // Fallback to first color circle if no active one
+        if (!activeColorCircle) {
+            activeColorCircle = productItem.querySelector('.color-circle');
+            if (activeColorCircle) {
+                activeColorCircle.classList.add('color-active');
+            }
+        }
+
+        // Get the color name from the active color circle
+        const color = activeColorCircle ? activeColorCircle.style.backgroundColor : 'Unknown';
+
+        // Determine action based on current state
+        const heartIcon = this.querySelector('i');
+        const isCurrentlyFavorited = heartIcon.classList.contains('fas');
+        const action = isCurrentlyFavorited ? 'remove' : 'add';
+
+        // AJAX Request to Toggle Wishlist
+        fetch('add_to_wishlist.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: `product_id=${productId}&color=${encodeURIComponent(color)}&action=${action}`
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Toggle heart icon
+                if (action === 'add') {
+                    heartIcon.classList.remove('far');
+                    heartIcon.classList.add('fas');
+                    heartIcon.style.color = '#fe4c50';
+                    showToast('Added to wishlist', 'success');
+                } else {
+                    heartIcon.classList.remove('fas');
+                    heartIcon.classList.add('far');
+                    heartIcon.style.color = '#b9b4c7';
+                    showToast('Removed from wishlist', 'success');
+                }
+            } else {
+                showToast(data.message, 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Wishlist Toggle Error:', error);
+            showToast('Failed to update wishlist', 'error');
+        });
+    });
+});

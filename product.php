@@ -8,54 +8,87 @@ if (isset($_SESSION['user_id'])) {
     $user_id = '';
 }
 
-//Get the product id from the url
+// Get the product id from the url
 $product_id = isset($_GET['product_id']) ? (int)$_GET['product_id'] : 0;
 
 if ($product_id > 0) {
-    //Fetch product details based on the product ID
-    $stmt = $conn->prepare("SELECT * FROM products WHERE id = :id");
+    // Fetch product details with variants
+    $stmt = $conn->prepare("
+        SELECT p.*, 
+               pv.color, 
+               pv.size, 
+               pv.price, 
+               pv.image1_display, 
+               pv.image2_display, 
+               pv.image3_display, 
+               pv.image4_display,
+               pv.image1_thumb,
+               pv.image2_thumb,
+               pv.image3_thumb,
+               pv.image4_thumb
+        FROM products p
+        JOIN product_variants pv ON p.id = pv.product_id
+        WHERE p.id = :id
+    ");
     $stmt->bindParam(':id', $product_id);
     $stmt->execute();
     $product = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if (!$product) {
+        echo "Product not found.";
+        exit;
+    }
 } else {
-    //Handle the case where the product ID is not valid
-    echo "Product not found.";
+    echo "Invalid product ID.";
     exit;
 }
 
-// Fetch products data from the database
-$select_products = $conn->prepare("SELECT * FROM `products` WHERE name = :name");
-$select_products->bindParam(':name', $product['name']);
-$select_products->execute();
-$all_products = $select_products->fetchAll(PDO::FETCH_ASSOC);
+// Fetch all variants for this product name
+$select_variants = $conn->prepare("
+    SELECT p.*, 
+           pv.color, 
+           pv.size, 
+           pv.price, 
+           pv.image1_display, 
+           pv.image2_display, 
+           pv.image3_display, 
+           pv.image4_display,
+           pv.image1_thumb,
+           pv.image2_thumb,
+           pv.image3_thumb,
+           pv.image4_thumb
+    FROM products p
+    JOIN product_variants pv ON p.id = pv.product_id
+    WHERE p.name = :name
+");
+$select_variants->bindParam(':name', $product['name']);
+$select_variants->execute();
+$all_variants = $select_variants->fetchAll(PDO::FETCH_ASSOC);
 
-// Group products by name
-$products = [];
-foreach ($all_products as $prod) {
-    $products[$prod['name']][] = [
-        'id' => $prod['id'],
-        'category' => $prod['category'],
-        'brand' => $prod['brand'],
-        'name' => $prod['name'], // Add name field
-        'color' => $prod['color'],
-        'price' => $prod['price'],
-        'images' => [
-            $prod['image1_display'],
-            $prod['image2_display'],
-            $prod['image3_display'],
-            $prod['image4_display']
-        ],
-        'thumbnails' => [
-            $prod['image1_thumb'],
-            $prod['image2_thumb'],
-            $prod['image3_thumb'],
-            $prod['image4_thumb']
-        ]
-    ];
+// Group variants
+$grouped_variants = [];
+$unique_colors = [];
+$unique_sizes = [];
+
+foreach ($all_variants as $variant) {
+    $key = $variant['name'] . '_' . $variant['color'];
+
+    if (!isset($grouped_variants[$key])) {
+        $grouped_variants[$key] = $variant;
+    }
+
+    // Collect unique colors and sizes
+    if (!in_array($variant['color'], $unique_colors)) {
+        $unique_colors[] = $variant['color'];
+    }
+
+    if (!in_array($variant['size'], $unique_sizes)) {
+        $unique_sizes[] = $variant['size'];
+    }
 }
 
-// Flatten the array for easier access
-$products = array_values($products);
+// Sort sizes
+sort($unique_sizes);
 ?>
 
 <!DOCTYPE html>
@@ -98,76 +131,58 @@ $products = array_values($products);
                     Lorem ipsum dolor sit amet
                 </p>
                 <div class="thumbs">
-                    <img src="<?php echo htmlspecialchars($product['image1_thumb']); ?>" class="thumb-active" />
-                    <img src="<?php echo htmlspecialchars($product['image2_thumb']); ?>" />
-                    <img src="<?php echo htmlspecialchars($product['image3_thumb']); ?>" />
-                    <img src="<?php echo htmlspecialchars($product['image4_thumb']); ?>" />
+                    <?php
+                    $thumbs = [
+                        $product['image1_thumb'] ?? '',
+                        $product['image2_thumb'] ?? '',
+                        $product['image3_thumb'] ?? '',
+                        $product['image4_thumb'] ?? ''
+                    ];
+                    foreach ($thumbs as $index => $thumb):
+                        if (!empty($thumb)):
+                    ?>
+                            <img src="<?php echo htmlspecialchars($thumb); ?>"
+                                class="<?php echo $index === 0 ? 'thumb-active' : ''; ?>" />
+                    <?php
+                        endif;
+                    endforeach;
+                    ?>
                 </div>
             </div>
             <div class="showcase">
                 <div>
-                    <img src="<?php echo htmlspecialchars($product['image1_display']); ?>" />
+                    <img src="<?php echo htmlspecialchars($product['image1_display'] ?? ''); ?>"
+                        id="main-image"
+                        data-default-image="<?php echo htmlspecialchars($product['image1_display'] ?? ''); ?>" />
                     <div class="shadow"></div>
                 </div>
             </div>
             <div class="options">
                 <h4>Size</h4>
                 <ul class="sizes">
-                    <li class="size-active">37</li>
-                    <li>38</li>
-                    <li>39</li>
-                    <li>40</li>
-                    <li>41</li>
+                    <?php foreach ($unique_sizes as $index => $size): ?>
+                        <li class="<?php echo $index === 0 ? 'size-active' : ''; ?>"><?php echo htmlspecialchars($size); ?></li>
+                    <?php endforeach; ?>
                 </ul>
-                <div class="revies">
-                    <h4>Reviews</h4>
-                    <ul class="stars">
-                        <li>
-                            <span class="material-icons-outlined">
-                                star
-                            </span>
-                        </li>
-                        <li>
-                            <span class="material-icons-outlined">
-                                star
-                            </span>
-                        </li>
-                        <li>
-                            <span class="material-icons-outlined">
-                                star
-                            </span>
-                        </li>
-                        <li>
-                            <span class="material-icons-outlined">
-                                star
-                            </span>
-                        </li>
-                        <li>
-                            <span class="material-icons-outlined">
-                                star
-                            </span>
-                        </li>
-                        <li>
-                            <span class="material-icons-outlined">
-                                star_outline
-                            </span>
-                        </li>
-                    </ul>
-                </div>
-                <div class="pricing">
-                    <h4>Price</h4>
-                    <h4 class="price">$<?php echo htmlspecialchars($product['price']); ?></h4>
-                </div>
+
                 <div class="colors">
                     <h4>Colors</h4>
                     <ul>
-                        <li class="color color-active"></li>
-                        <li class="color"></li>
+                        <?php foreach ($unique_colors as $index => $color): ?>
+                            <li class="color <?php echo $index === 0 ? 'color-active' : ''; ?>"
+                                style="background-color: <?php echo htmlspecialchars($color); ?>"
+                                data-color="<?php echo htmlspecialchars($color); ?>">
+                            </li>
+                        <?php endforeach; ?>
                     </ul>
+                </div>
+
+                <div class="pricing">
+                    <h4>Price</h4>
+                    <h4 class="price">$<?php echo number_format($product['price'], 2); ?></h4>
                 </div>
             </div>
         </main>
-
         <section class="bar-bottom">
             <div>
                 <a href="#">
@@ -207,16 +222,21 @@ $products = array_values($products);
         </section>
     </div>
 
-
     <script>
-        const products = <?php echo json_encode($products); ?>;
+        const products = <?php
+                            // Group variants by color
+                            $grouped_variants = [];
+                            foreach ($all_variants as $variant) {
+                                $key = $variant['color'];
+                                $grouped_variants[$key][] = $variant;
+                            }
+                            echo json_encode(array_values($grouped_variants));
+                            ?>;
     </script>
 
+
     <!-- custom js file link  -->
-    <script src="assets/js/product.js"></script>
-
-
-
+    <script src="assets/js/products.js"></script>
 </body>
 
 </html>

@@ -57,6 +57,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -64,6 +65,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/ionicons/5.5.2/collection/components/icon/icon.min.css">
     <title>Register</title>
 </head>
+
 <body>
     <section>
         <div class="form-box">
@@ -151,4 +153,5 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         </script>
     <?php endif; ?>
 </body>
+
 </html>

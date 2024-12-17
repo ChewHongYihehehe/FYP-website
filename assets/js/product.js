@@ -49,23 +49,29 @@ function resetStars(rating) {
 function loadProductData(shoeIndex) {
     const productGroup = products[shoeIndex];
     const product = productGroup[0];  // Get the first product (default color option)
-    const thumbs = product.thumbnails || [];
 
+    // Update product details
     title.innerText = product.name;
     categoryText.innerText = product.category || "Category not available";
-    desc.innerText = product.description || "Description not available";
-    price.innerText = "$" + product.price;
-    shoeNum.innerText = "0" + (shoeIndex + 1);
-    shoeTotal.innerText = "0" + products.length;
-    resetStars(product.rating);
+    desc.innerText = "Lorem ipsum dolor sit amet"; // Default description as in PHP
+    price.innerText = "$" + Number(product.price).toFixed(2);
+    
+    // Update shoe number and total
+    shoeNum.innerText = "0" + (shoeIndex + 1).toString();
+    shoeTotal.innerText = "0" + products.length.toString();
 
     // Set the main image
-    img.src = product.images[0] || 'default-image.png';
-
-    // Set initial color effect based on the first color
-    applyColorEffect(product.color);
+    img.src = product.image1_display || 'default-image.png';
+    img.setAttribute('data-default-image', product.image1_display || 'default-image.png');
 
     // Set thumbnails
+    const thumbs = [
+        product.image1_thumb,
+        product.image2_thumb,
+        product.image3_thumb,
+        product.image4_thumb
+    ];
+
     for (let i = 0; i < thumb.length; i++) {
         if (thumbs[i]) {
             thumb[i].src = thumbs[i];
@@ -78,47 +84,85 @@ function loadProductData(shoeIndex) {
     // Reset active thumbnail to the first one
     resetActive(thumb, "thumb", 0);
 
-    // Assign color buttons if available
+    // Recreate color buttons based on unique colors in the product group
     const colorContainer = document.querySelector(".colors ul");
     colorContainer.innerHTML = "";
 
-    // Create color buttons based on available colors
-    for (let i = 0; i < productGroup.length; i++) {
-        const colorBtn = document.createElement("li");
-        colorBtn.classList.add("color");
-        colorBtn.style.background = productGroup[i].color;
-        colorBtn.setAttribute("data-index", i);
+    // Collect unique colors
+    const uniqueColors = [...new Set(productGroup.map(p => p.color))];
 
-        colorContainer.appendChild(colorBtn);
+    uniqueColors.forEach((color, index) => {
+        const colorButton = document.createElement("li");
+        colorButton.classList.add("color");
+        colorButton.style.backgroundColor = color;
+        colorButton.setAttribute('data-color', color);
+        
+        if (index === 0) {
+            colorButton.classList.add('color-active');
+        }
 
-        // Add click event listener for each color button
-        colorBtn.addEventListener("click", () => {
-            colorType = i + 1;
-            const selectedColor = productGroup[i].color;
+        colorContainer.appendChild(colorButton);
 
-            img.src = productGroup[i].images[0] || 'default-image.png';
+        colorButton.addEventListener("click", () => {
+            // Find the product variant with this color
+            const selectedVariant = productGroup.find(p => p.color === color);
+            
+            if (selectedVariant) {
+                // Update images
+                img.src = selectedVariant.image1_display || 'default-image.png';
+                
+                // Update thumbnails
+                const thumbs = [
+                    selectedVariant.image1_thumb,
+                    selectedVariant.image2_thumb,
+                    selectedVariant.image3_thumb,
+                    selectedVariant.image4_thumb
+                ];
 
-            // Apply color effect when color button is clicked
-            applyColorEffect(selectedColor);
-
-            resetActive(colorContainer.children, "color", i);
-            animate(img, 550, "jump 500ms ease-in-out");
-            animate(shadow, 550, "shadow 500ms ease-in-out");
-            animate(titleOverlay, 850, "title 800ms ease");
-
-            // Update thumbnails for the selected color
-            const selectedColorThumbnails = productGroup[i].thumbnails || [];
-            for (let j = 0; j < thumb.length; j++) {
-                if (selectedColorThumbnails[j]) {
-                    thumb[j].src = selectedColorThumbnails[j];
-                    thumb[j].style.display = 'block';
-                } else {
-                    thumb[j].style.display = 'none';
+                for (let i = 0; i < thumb.length; i++) {
+                    if (thumbs[i]) {
+                        thumb[i].src = thumbs[i];
+                        thumb[i].style.display = 'block';
+                    } else {
+                        thumb[i].style.display = 'none';
+                    }
                 }
+
+                // Reset active thumbnail to the first one
+                resetActive(thumb, "thumb", 0);
+
+                // Update color selection
+                resetActive(colorContainer.children, "color", index);
+
+                // Animate changes
+                animate(img, 550, "jump 500ms ease-in-out");
+                animate(shadow, 550, "shadow 500ms ease-in-out");
+                animate(titleOverlay, 850, "title 800ms ease");
+
+                // Update price
+                price.innerText = "$" + Number(selectedVariant.price).toFixed(2);
             }
-            resetActive(thumb, "thumb", 0);
         });
-    }
+    });
+
+    // Update sizes
+    const sizesContainer = document.querySelector(".sizes");
+    sizesContainer.innerHTML = "";
+
+    // Collect unique sizes
+    const uniqueSizes = [...new Set(productGroup.map(p => p.size))];
+    uniqueSizes.sort((a, b) => a - b);
+
+    uniqueSizes.forEach((size, index) => {
+        const sizeElement = document.createElement("li");
+        sizeElement.innerText = size;
+        
+        if (index === 0) {
+            sizeElement.classList.add('size-active');
+        }
+
+        sizesContainer.appendChild(sizeElement);
+    });
 }
 
 // Function to apply color effect to shadow and title overlay

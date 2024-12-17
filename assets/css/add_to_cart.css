@@ -9,12 +9,51 @@
     }
 }
 
-.btn-primary {
-    background-color: #FF6347; /* Change the background color */
-    border-color: #FF6347; /* Change the border color */
+/* Change the color of the trash bin button only */
+.btn.btn-primary {
+    background-color: #FF6347; /* Change background color */
+    border-color: #6a11cb; /* Change border color if applicable */
 }
 
-.btn-primary:hover {
-    background-color: #e5533d; /* Darken the color on hover */
-    border-color: #e5533d; /* Darken the border color on hover */
+
+/* Adjust the size of the plus and minus icons */
+.btn .fas {
+    font-size: 0.8em; /* Adjust this value to make the icons smaller */
+}
+
+/* Optionally, you can also adjust the button size to match */
+.btn {
+    padding: 0.25rem 0.5rem; /* Adjust button padding if necessary */
+}
+
+/* Ensure the flex container aligns items vertically */
+.d-flex {
+    display: flex;
+}
+
+/* Flex column to stack buttons and input vertically */
+.flex-column {
+    flex-direction: column;
+}
+
+/* Adjust the input field */
+.form-outline {
+    width: 100%; /* Ensure the input takes full width */
+}
+
+/* Adjust the input field */
+.form-control {
+    height: 38px; /* Set a height that matches the button height */
+    padding: 0.375rem 0.75rem; /* Adjust padding as needed */
+}
+
+/* Adjust label position */
+.form-label {
+    margin-top: 5px; /* Add some space above the label */
+    font-size: 0.9em; /* Adjust font size if needed */
+}
+
+/* Optional: Adjust the button height to match the input */
+.btn {
+    height: 38px; /* Set a height that matches the input field */
 }

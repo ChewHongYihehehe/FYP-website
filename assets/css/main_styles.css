@@ -614,7 +614,7 @@ section
 	background: #eceff6;
 	border-radius: 50%;
 }
-.checkout_items
+.cart-count
 {
 	display: -webkit-box;
 	display: -moz-box;
@@ -874,23 +874,77 @@ section
 }
 .red_button:hover
 {
-	background: #FE7C7F !important;
+	background: #FE7C7F;
 }
-.red_button a
-{
-	display: block;
-	color: #FFFFFF;
-	text-transform: uppercase;
-	font-size: 14px;
-	font-weight: 500;
-	text-align: center;
-	line-height: 40px;
-	width: 100%;
+
+.red_button.add_to_cart_button {
+    display: flex;
+    justify-content: center; /* Center the content horizontally */
+    align-items: center; /* Center the content vertically */
+    width: 100%; /* Full width of the container */
+    text-align: center;
 }
-.shop_now_button
-{
-	width: 140px;
-	margin-top: 32px;
+
+.red_button.add_to_cart_button a {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px; /* Space between text and icon */
+	color: white;
+}
+
+.quick-add-icon {
+    transition: transform 0.3s ease;
+}
+
+.quick-add-icon.rotated {
+    transform: rotate(45deg);
+}
+
+.sizes-container {
+    display: flex;
+    gap: 10px;
+    width: 100%;
+    flex-wrap: wrap;
+	background-color: #fe4c50;
+	padding:15px;
+	border-radius:3px;
+	position:absolute;
+	left:0;
+	right:0;
+	z-index:10;
+	box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+	animation: slideDown 0.3s ease;
+}
+
+.size-button {
+    background-color: white;
+    border: 1px solid #ddd;
+    padding: 8px 15px;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin: 5px;
+    color: #fe4c50;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+
+.size-button:hover {
+    background-color: #f0f0f0;
+    color: #fe4c50;
+	transform: scale(1.05);
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 /*********************************
@@ -1165,6 +1219,7 @@ section
 	width: 100%;
 	visibility: hidden;
 	opacity: 0;
+	color: #fe4c50;
 	-webkit-transition: all 0.3s ease;
 	-moz-transition: all 0.3s ease;
 	-ms-transition: all 0.3s ease;
@@ -1229,7 +1284,8 @@ Color Variants
     cursor: pointer;
     border: 1px solid #ddd;
     transition: all 0.3s ease;
-    margin: 0 3px;
+    margin:0 3px;
+	margin-bottom: 10px;
 }
 
 .color-circle:hover {
@@ -1759,4 +1815,30 @@ Color Variants
 .footer_social ul li a:hover
 {
 	color: #fe4c50;
+}
+
+.toast {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 15px;
+    background-color: #333;
+    color: white;
+    border-radius: 5px;
+    z-index: 1000;
+    opacity: 0;
+    animation: toast-animation 0.3s forwards;
+}
+
+.toast-success {
+    background-color: #4CAF50;
+}
+
+.toast-error {
+    background-color: #f44336;
+}
+
+@keyframes toast-animation {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
 }

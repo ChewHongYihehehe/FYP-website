@@ -24,7 +24,10 @@ $sql = "SELECT name FROM categories";
 $result = $conn->query($sql);
 
 // Fetch products based on filters to get the actual min and max prices
-$price_sql = "SELECT MIN(price) AS min_price, MAX(price) AS max_price FROM products WHERE 1=1";
+$price_sql = "SELECT MIN(pv.price) AS min_price, MAX(pv.price) AS max_price 
+              FROM products p 
+              JOIN product_variants pv ON p.id = pv.product_id 
+              WHERE 1=1"; // Add your filters here if needed
 $price_result = $conn->query($price_sql);
 $price_row = $price_result->fetch(PDO::FETCH_ASSOC);
 
@@ -41,9 +44,11 @@ $category_filter = isset($_GET['category']) ? $_GET['category'] : '';
 $color_filter = isset($_GET['color']) ? $_GET['color'] : '';
 $brand_filter = isset($_GET['brand']) ? $_GET['brand'] : '';
 
-// Start the SQL query with a WHERE clause that's always true
-$product_sql = "SELECT products.* FROM products 
-                JOIN color ON products.color = color.color_name
+// Modify your product query to ensure you get multiple variants
+$product_sql = "SELECT DISTINCT p.*, pv.product_id, pv.color, pv.size, pv.price, pv.image1_display 
+                FROM products p 
+                JOIN product_variants pv ON p.id = pv.product_id 
+                LEFT JOIN color c ON pv.color = c.color_name
                 WHERE 1=1";
 
 // Append conditions based on available filters
@@ -52,7 +57,7 @@ if ($category_filter) {
 }
 
 if ($color_filter) {
-	$product_sql .= " AND color.color_name = :color";
+	$product_sql .= " AND color_name = :color";
 }
 
 if ($brand_filter) {
@@ -61,10 +66,13 @@ if ($brand_filter) {
 
 // For the filter price section
 if ($min_price !== null && $max_price !== null) {
-	$product_sql .= " AND price BETWEEN :min_price AND :max_price";
+	$product_sql .= " AND pv.price BETWEEN :min_price AND :max_price";
 }
 
-// Prepare the statement
+// Group and order to get multiple variants
+$product_sql .= " GROUP BY p.name, pv.color";
+
+// Add pagination
 $product_sql .= " LIMIT :limit OFFSET :offset";
 $product_stmt = $conn->prepare($product_sql);
 
@@ -109,17 +117,51 @@ if ($filter_applied && $min_price !== null && $max_price !== null) {
 	$product_sql .= " AND price BETWEEN :min_price AND :max_price";
 }
 
+// Group products
+$grouped_products = groupProductsByNameAndColor($products);
 
-$grouped_products = [];
-foreach ($products as $product) {
-	$product_name = htmlspecialchars($product['name']);
-	$product_color = htmlspecialchars($product['color']);
+function groupProductsByNameAndColor($products)
+{
+	$groupedProducts = [];
+	$processedProductNames = [];
+	$processedProductIds = [];
 
-	if (!isset($grouped_products[$product_name])) {
-		$grouped_products[$product_name] = [];
+	foreach ($products as $product) {
+		// Check if this product name or ID has already been processed
+		if (
+			in_array($product['name'], $processedProductNames) ||
+			in_array($product['id'], $processedProductIds)
+		) {
+			continue;
+		}
+
+		// Create a unique key for this product
+		$key = $product['name'] . '_' . $product['color'];
+
+		// Find all unique color variants for this product
+		$colorVariants = [];
+		$seenColors = [];
+
+		foreach ($products as $variant) {
+			// Check if this variant matches the current product and hasn't been seen before
+			if ($variant['name'] === $product['name'] && !in_array($variant['color'], $seenColors)) {
+				$colorVariants[] = $variant;
+				$seenColors[] = $variant['color'];
+			}
+		}
+
+		// Group the product
+		$groupedProducts[$key] = [
+			'main_product' => $product,
+			'color_variants' => $colorVariants
+		];
+
+		// Mark this product ID as processed
+		$processedProductNames[] = $product['name'];
+		$processedProductIds[] = $product['id'];
 	}
 
-	$grouped_products[$product_name][] = $product;
+	return $groupedProducts;
 }
 
 ?>
@@ -499,37 +541,54 @@ foreach ($products as $product) {
 											</div>
 
 											<!-- Product Grid -->
-											<div class="product-grid">
-												<?php foreach ($grouped_products as $product_name => $product_variants): ?>
-													<div class="product-item">
+											<!-- Product Grid -->
+											<div class="product-grid" data-isotope='{ "itemSelector": ".product-item", "layoutMode": "fitRows" }'>
+												<?php foreach ($grouped_products as $product_key => $product_data):
+													// Ensure main_product and color_variants exist
+													$first_variant = $product_data['main_product'] ?? null;
+													$color_variants = $product_data['color_variants'] ?? [];
+
+													// Skip if no product data
+													if (!$first_variant) continue;
+
+													$brand_class = strtolower(str_replace(' ', '-', htmlspecialchars($first_variant['brand'] ?? '')));
+												?>
+													<div class="product-item <?php echo $brand_class; ?>">
 														<div class="product product_filter">
 															<div class="product_image">
-																<a href="product.php?product_id=<?php echo htmlspecialchars($product_variants[0]['id']); ?>" class="main-product-link">
-																	<img src="<?= htmlspecialchars($product_variants[0]['image1_display']) ?>" alt="" class="main-product-image">
-																	<div class="image-overlay"></div> <!-- Overlay for animation -->
+																<a href="product.php?product_id=<?php echo htmlspecialchars($first_variant['id'] ?? ''); ?>" class="main-product-link">
+																	<img src="<?php echo htmlspecialchars($first_variant['image1_display'] ?? ''); ?>" alt="" class="main-product-image">
 																</a>
 															</div>
 															<div class="favorite">
 																<i class="far fa-heart"></i>
 															</div>
 															<div class="product_info">
-																<h6 class="product_name"><a href="product.php?product_id=<?php echo htmlspecialchars($product_variants[0]['id']); ?>"><?= $product_name ?></a></h6>
-																<div class="product_price">$<?= htmlspecialchars($product_variants[0]['price']) ?></div>
+																<h6 class="product_name">
+																	<a href="product.php?product_id=<?php echo htmlspecialchars($first_variant['id'] ?? ''); ?>">
+																		<?php echo htmlspecialchars($first_variant['name'] ?? 'Unknown Product'); ?>
+																	</a>
+																</h6>
+																<div class="product_price">
+																	$<?php echo htmlspecialchars($first_variant['price'] ?? '0.00'); ?>
+																</div>
 
 																<!-- Color Variants -->
-																<?php if (count($product_variants) > 1): ?>
+																<?php if (!empty($color_variants) && count($color_variants) > 1): ?>
 																	<div class="color-variants">
-																		<?php foreach ($product_variants as $variant): ?>
-																			<span class="color-circle" style="background-color: <?= htmlspecialchars($variant['color']); ?>;"
-																				data-product-id="<?= htmlspecialchars($variant['id']); ?>"
-																				data-product-image="<?= htmlspecialchars($variant['image1_display']); ?>"
-																				data-product-price="<?= htmlspecialchars($variant['price']); ?>">
-																			</span>
+																		<?php foreach ($color_variants as $index => $variant): ?>
+																			<span
+																				class="color-circle <?php echo $index === 0 ? 'color-active' : ''; ?>"
+																				style="background-color: <?php echo htmlspecialchars($variant['color'] ?? ''); ?>;"
+																				data-product-id="<?php echo htmlspecialchars($variant['product_id'] ?? ''); ?>"
+																				data-product-image="<?php echo htmlspecialchars($variant['image1_display'] ?? ''); ?>"
+																				data-product-price="<?php echo htmlspecialchars($variant['price'] ?? ''); ?>"></span>
 																		<?php endforeach; ?>
 																	</div>
 																<?php endif; ?>
 															</div>
 														</div>
+														<div class="red_button add_to_cart_button"><a href="#">Quick Add</a></div>
 													</div>
 												<?php endforeach; ?>
 											</div>

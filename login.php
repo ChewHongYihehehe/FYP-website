@@ -28,7 +28,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     } else {
         $error_message = "No user found with this email.";
     }
-    
+
     // Reset the statement object (optional, PDO will clean up automatically)
     $stmt = null;
 }
@@ -40,6 +40,7 @@ $conn = null;
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -47,6 +48,7 @@ $conn = null;
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/ionicons/5.5.2/collection/components/icon/icon.min.css">
     <title>Login</title>
 </head>
+
 <body>
     <section>
         <div class="form-box">
@@ -73,7 +75,7 @@ $conn = null;
                 <!-- Error message and submit button -->
                 <span class="error-message"><?php echo $error_message; ?></span>
                 <input type="submit" value="Login">
-                
+
                 <div class="login">
                     <p>Don't have an account? <a href="register.php">Register here</a>.</p>
                     <p><a href="forgot.password.php">Forgot Password? Click here</a></p>
@@ -84,4 +86,5 @@ $conn = null;
 
     <script src="https://unpkg.com/ionicons@5.5.2/dist/ionicons.js"></script>
 </body>
+
 </html>

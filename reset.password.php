@@ -1,35 +1,42 @@
 <?php
-require 'connect.php'; // Database connection
+require 'connect.php'; // Include database connection
 
 $error_message = "";
 $success_message = "";
 
-// Check if token is in the URL
+// Check if token is provided in the URL
 if (isset($_GET['token'])) {
     $token = $_GET['token'];
 
-    // Check if token exists and has not expired
-    $stmt = $conn->prepare("SELECT * FROM users WHERE reset_token = :reset_token AND reset_token_expiry > NOW()");
+    // Check if the token exists and has not expired
+    $stmt = $conn->prepare("SELECT email FROM users WHERE reset_token = :reset_token AND reset_token_expiry > NOW()");
     $stmt->bindParam(":reset_token", $token, PDO::PARAM_STR);
     $stmt->execute();
 
     if ($stmt->rowCount() > 0) {
+        // Token is valid
+        $user = $stmt->fetch(PDO::FETCH_ASSOC);
+        $email = $user['email'];
+
         if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $new_password = $_POST['new_password'];
             $confirm_password = $_POST['confirm_password'];
 
             // Check if passwords match
             if ($new_password === $confirm_password) {
-                // Hash new password
+                // Hash the new password
                 $hashed_password = password_hash($new_password, PASSWORD_BCRYPT);
 
-                // Update password in the database and clear the reset token
-                $stmt = $conn->prepare("UPDATE users SET password = :password, reset_token = NULL, reset_token_expiry = NULL WHERE reset_token = :reset_token");
-                $stmt->bindParam(":password", $hashed_password, PDO::PARAM_STR);
-                $stmt->bindParam(":reset_token", $token, PDO::PARAM_STR);
-                $stmt->execute();
+                // Update the password and clear the reset token
+                $update_stmt = $conn->prepare("UPDATE users SET password = :password, reset_token = NULL, reset_token_expiry = NULL WHERE email = :email");
+                $update_stmt->bindParam(":password", $hashed_password, PDO::PARAM_STR);
+                $update_stmt->bindParam(":email", $email, PDO::PARAM_STR);
 
-                $success_message = "Password has been reset successfully. <a href='login.php'>Login here</a>.";
+                if ($update_stmt->execute()) {
+                    $success_message = "Password has been reset successfully. <a href='login.php'>Login here</a>.";
+                } else {
+                    $error_message = "Failed to update the password. Please try again.";
+                }
             } else {
                 $error_message = "Passwords do not match.";
             }
@@ -41,16 +48,16 @@ if (isset($_GET['token'])) {
     $error_message = "No token provided.";
 }
 
-// Close the connection (optional, PDO will close automatically when the script finishes)
+// Close the connection
 $conn = null;
 ?>
-
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="assets/css/reset_password.css">
     <title>Reset Password</title>
 </head>
@@ -59,18 +66,18 @@ $conn = null;
         <div class="form-box">
             <h2>Reset Password</h2>
             <form action="" method="post">
-                <div class="form-row">
-                    <div class="form-column">
-                        <div class="inputbox">
-                            <input type="password" name="new_password" required>
-                            <label>New Password</label>
-                        </div>
+                <div class="form-column">
+                    <div class="inputbox">
+                        <input type="password" name="new_password" required>
+                        <label>New Password</label>
+                        <i class="fas fa-lock"></i>
                     </div>
-                    <div class="form-column">
-                        <div class="inputbox">
-                            <input type="password" name="confirm_password" required>
-                            <label>Confirm Password</label>
-                        </div>
+                </div>
+                <div class="form-column">
+                    <div class="inputbox">
+                        <input type="password" name="confirm_password" required>
+                        <label>Confirm Password</label>
+                        <i class="fas fa-lock"></i>
                     </div>
                 </div>
                 <span class="error-message"><?php echo $error_message; ?></span>

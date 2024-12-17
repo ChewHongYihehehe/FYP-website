@@ -1,5 +1,11 @@
 <?php
 require 'connect.php'; // Include database connection
+require 'vendor/autoload.php'; // Autoload PHPMailer
+
+date_default_timezone_set('Asia/Kuala_Lumpur');
+
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
 
 $error_message = "";
 $success_message = "";
@@ -24,29 +30,45 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $stmt->bindParam(":email", $email, PDO::PARAM_STR);
         $stmt->execute();
 
-        // Send reset link to the user's email
-        $reset_link = "http://yourwebsite.com/reset_password.php?token=" . $token;
-        $subject = "Password Reset Request";
-        $message = "Click the following link to reset your password: " . $reset_link;
-        $headers = "From: no-reply@yourwebsite.com";
+        // Send reset link to the user's email using PHPMailer
+        $reset_link = "http://localhost/FYP-website/reset.password.php?token=" . $token;
 
-        if (mail($email, $subject, $message, $headers)) {
+        $mail = new PHPMailer(true);
+
+        try {
+            // Server settings
+            $mail->isSMTP();
+            $mail->Host = 'smtp.gmail.com';
+            $mail->SMTPAuth = true;
+            $mail->Username = 'huangjiaze81@gmail.com'; // Replace with your email
+            $mail->Password = 'eqygfyfgaoywwvqj';    // Replace with your app password
+            $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+            $mail->Port = 587;
+        
+            // Recipients
+            $mail->setFrom('huangjiaze81@gmail.com', 'Step Shoes Shop');
+            $mail->addAddress($email);
+        
+            // Content
+            $mail->isHTML(true);
+            $mail->Subject = 'Password Reset Request';
+            $mail->Body = "Click the following link to reset your password: <a href='$reset_link'>$reset_link</a>";
+        
+            $mail->send();
             $success_message = "Password reset link has been sent to your email.";
-        } else {
-            $error_message = "Failed to send reset link. Please try again.";
+        } catch (Exception $e) {
+            $error_message = "Message could not be sent. Mailer Error: {$mail->ErrorInfo}";
         }
+        
     } else {
         $error_message = "No user found with this email.";
     }
 
-    $stmt = null; // Close the statement (optional, PDO will clean up automatically)
+    $stmt = null; // Close the statement
 }
 
-// Close the connection (optional, PDO will also close the connection when the script finishes)
+// Close the connection
 $conn = null;
-?>
-
-$conn->close();
 ?>
 
 <!DOCTYPE html>
@@ -55,18 +77,21 @@ $conn->close();
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="assets/css/forgot.password.css">
+    <script type="module" src="https://cdn.jsdelivr.net/npm/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://cdn.jsdelivr.net/npm/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
     <title>Forgot Password</title>
 </head>
 <body>
     <section>
         <div class="form-box">
             <h2>Forgot Password</h2>
-            <form action="forgot_password.php" method="post">
+            <form action="forgot.password.php" method="post">
                 <div class="form-row">
                     <div class="form-column">
                         <div class="inputbox">
                             <input type="email" name="email" required>
                             <label>Email</label>
+                            <ion-icon name="mail-outline"></ion-icon>
                         </div>
                     </div>
                 </div>
@@ -81,3 +106,6 @@ $conn->close();
     </section>
 </body>
 </html>
+
+
+

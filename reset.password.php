@@ -33,7 +33,12 @@ if (isset($_GET['token'])) {
                 $update_stmt->bindParam(":email", $email, PDO::PARAM_STR);
 
                 if ($update_stmt->execute()) {
-                    $success_message = "Password has been reset successfully. <a href='login.php'>Login here</a>.";
+                    // Redirect with notification
+                    echo "<script>
+                        alert('Your password has been reset successfully. You will now be redirected to the login page.');
+                        window.location.href = 'login.php';
+                    </script>";
+                    exit;
                 } else {
                     $error_message = "Failed to update the password. Please try again.";
                 }
@@ -68,20 +73,19 @@ $conn = null;
             <form action="" method="post">
                 <div class="form-column">
                     <div class="inputbox">
-                        <input type="password" name="new_password" required>
+                        <input type="password" name="new_password" placeholder=" " required>
                         <label>New Password</label>
                         <i class="fas fa-lock"></i>
                     </div>
                 </div>
                 <div class="form-column">
                     <div class="inputbox">
-                        <input type="password" name="confirm_password" required>
+                        <input type="password" name="confirm_password" placeholder=" " required>
                         <label>Confirm Password</label>
                         <i class="fas fa-lock"></i>
                     </div>
                 </div>
                 <span class="error-message"><?php echo $error_message; ?></span>
-                <span class="success-message"><?php echo $success_message; ?></span>
                 <input type="submit" value="Reset Password">
             </form>
         </div>

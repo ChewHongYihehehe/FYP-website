@@ -116,6 +116,8 @@ function getAvailableSizes($conn, $productId)
 }
 // Fetch all available sizes
 $availableSizes = getAvailableSizes($conn, $productId);
+
+
 ?>
 
 <div class="fs_menu_overlay"></div>
@@ -259,7 +261,7 @@ $availableSizes = getAvailableSizes($conn, $productId);
 									</a>
 								</div>
 								<div class="favorite">
-									<i class="far fa-heart"></i>
+									<i class="far fa-heart" data-product-id="<?php echo htmlspecialchars($first_variant['id']); ?>"></i>
 								</div>
 								<div class="product_info">
 									<h6 class="product_name">

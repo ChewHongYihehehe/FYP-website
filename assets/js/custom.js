@@ -453,7 +453,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 this.classList.add('color-active');
                 
                 // Get new product details
-                const productId = this.getAttribute('data-product-id');
+                const productId = productItem.getAttribute('data-product-id');
                 const productImage = this.getAttribute('data-product-image');
                 const productPrice = this.getAttribute('data-product-price');
                 
@@ -461,7 +461,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 const mainImage = productItem.querySelector('.main-product-image');
                 const mainImageLink = productItem.querySelector('a[href^="product.php"]');
                 const priceElement = productItem.querySelector('.product_price');
-                
+                const favoriteIcon = productItem.querySelector('.favorite i');
+
                 // Animate image change
                 function animateImageChange() {
                     mainImage.style.opacity = 0;
@@ -487,6 +488,21 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 // Update price
                 priceElement.textContent = `$${productPrice}`;
+
+                // Check if this color variant is favorited
+                const color = this.style.backgroundColor; // Get the color of the selected variant
+                const isFavorited = localStorage.getItem(`favorite_${productId}_${color}`) ? true : false;
+
+                // Update favorite icon based on the current color variant
+                if (isFavorited) {
+                    favoriteIcon.classList.add('fas');
+                    favoriteIcon.classList.remove('far');
+                    favoriteIcon.style.color = '#fe4c50'; // Filled heart
+                } else {
+                    favoriteIcon.classList.remove('fas');
+                    favoriteIcon.classList.add('far');
+                    favoriteIcon.style.color = '#b9b4c7'; // Empty heart
+                }
             });
         });
     }
@@ -632,6 +648,10 @@ document.addEventListener('DOMContentLoaded', function() {
 		if (activeColorCircle) {
 			color = activeColorCircle.getAttribute('data-color') || 
 					activeColorCircle.style.backgroundColor || 'Unknown';
+		}else{
+			const firstVariantQuery = `SELECT color FROM product_variants
+									   WHERE product_id = ?
+									   LIMTI 1`;
 		}
 	
 		fetch('add_to_cart_process.php', {
@@ -676,64 +696,56 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
 });
-// Wishlist Toggle Handler
-document.querySelectorAll('.favorite').forEach(favoriteIcon => {
-    favoriteIcon.addEventListener('click', function(e) {
-        e.preventDefault();
-        
-        // Find the product item
-        const productItem = this.closest('.product-item');
-        const productId = productItem.getAttribute('data-product-id');
-        
-        // Get color from active color circle
-        let activeColorCircle = productItem.querySelector('.color-circle.color-active');
-        
-        // Fallback to first color circle if no active one
-        if (!activeColorCircle) {
-            activeColorCircle = productItem.querySelector('.color-circle');
-            if (activeColorCircle) {
-                activeColorCircle.classList.add('color-active');
-            }
-        }
+document.addEventListener('DOMContentLoaded', function() {
+    // Handle favorite icon clicks
+    document.querySelectorAll('.favorite').forEach(favoriteIcon => {
+        favoriteIcon.addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            // Find the product item
+            const productItem = this.closest('.product-item');
+            const productId = productItem.getAttribute('data-product-id');
+            
+            // Get the color from the active color circle
+            let activeColorCircle = productItem.querySelector('.color-circle.color-active');
+            const color = activeColorCircle ? activeColorCircle.style.backgroundColor : 'Unknown';
 
-        // Get the color name from the active color circle
-        const color = activeColorCircle ? activeColorCircle.style.backgroundColor : 'Unknown';
+            // Determine action based on current state
+            const heartIcon = this.querySelector('i');
+            const isCurrentlyFavorited = heartIcon.classList.contains('fas');
+            const action = isCurrentlyFavorited ? 'remove' : 'add';
 
-        // Determine action based on current state
-        const heartIcon = this.querySelector('i');
-        const isCurrentlyFavorited = heartIcon.classList.contains('fas');
-        const action = isCurrentlyFavorited ? 'remove' : 'add';
-
-        // AJAX Request to Toggle Wishlist
-        fetch('add_to_wishlist.php', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
-            body: `product_id=${productId}&color=${encodeURIComponent(color)}&action=${action}`
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                // Toggle heart icon
-                if (action === 'add') {
-                    heartIcon.classList.remove('far');
-                    heartIcon.classList.add('fas');
-                    heartIcon.style.color = '#fe4c50';
-                    showToast('Added to wishlist', 'success');
+            // AJAX Request to Toggle Wishlist
+            fetch('add_to_wishlist.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `product_id=${productId}&color=${encodeURIComponent(color)}&action=${action}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Toggle heart icon for the active color variant
+                    if (action === 'add') {
+                        heartIcon.classList.remove('far');
+                        heartIcon.classList.add('fas');
+                        heartIcon.style.color = '#fe4c50'; // Change color to indicate it's favorited
+                        localStorage.setItem(`favorite_${productId}_${color}`, true); // Store in local storage
+                    } else {
+                        heartIcon.classList.remove('fas');
+                        heartIcon.classList.add('far');
+                        heartIcon.style.color = '#b9b4c7'; // Reset color to indicate it's not favorited
+                        localStorage.removeItem(`favorite_${productId}_${color}`); // Remove from local storage
+                    }
                 } else {
-                    heartIcon.classList.remove('fas');
-                    heartIcon.classList.add('far');
-                    heartIcon.style.color = '#b9b4c7';
-                    showToast('Removed from wishlist', 'success');
+                    showToast(data.message, 'error');
                 }
-            } else {
-                showToast(data.message, 'error');
-            }
-        })
-        .catch(error => {
-            console.error('Wishlist Toggle Error:', error);
-            showToast('Failed to update wishlist', 'error');
+            })
+            .catch(error => {
+                console.error('Wishlist Toggle Error:', error);
+                showToast('Failed to update wishlist', 'error');
+            });
         });
     });
 });

@@ -1,0 +1,186 @@
+/*dashboard function will move to the new page */
+
+<!DOCTYPE html>
+<html lang = "en">
+<head>
+    <meta charset="UTF-8">
+    <meta name = "viewport" content="width=device-width, initial-scale=1.0">
+    <title>ALL SHOES ONLINE SHOP ADMIN PANEL</title>
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <link rel="stylesheet" href="asadminpanel.css">
+</head>
+<body>
+    <section id = "sidebar"> 
+        <a href = "#" class = "brand">
+            <i class='bx bx-smile'></i>
+            <span class="text">Admin Dashboard</span>
+        </a>
+        <ul class = "side-menu top">
+            <li class = "active">
+                <a href="#">
+                    <i class = "bx bxs-shopping-bag-alt"></i>
+                    <span class="text">My Store</span>
+                </a>
+            </li>
+            <li>
+                <a href="admin_product.html">
+                    <i class='bx bxs-data'></i>
+                    <span class = "text">Product</span>
+                </a>
+            </li>
+            <li>
+                <a href="admin_order.html">
+                    <i class = "bx bxs-doughnut-chart"></i>
+                    <span class="text">Order</span>
+                </a>
+            </li>
+            <li>
+                <a href="admin_totalsale.html">
+                    <i class='bx bx-dollar'></i>
+                    <span class="text">Total Sale</span>
+                </a>
+            </li>
+            <li>
+                <a href="admin_payment.html">
+                    <i class = "bx bxs-wallet"></i>
+                    <span class="text">Payment</span>
+                </a>
+            </li>
+            <li>
+                <a href="admin_message.html">
+                    <i class = "bx bxs-message-dots"></i>
+                    <span class="text">Message</span>
+                </a>
+            </li>
+            <li>
+                <a href="admin_user.html">
+                    <i class = "bx bxs-user"></i>
+                    <span class="text">User</span>
+                </a>
+            </li>
+            <li>
+                <a href="admin_a.html">
+                    <i class='bx bxs-group'></i>
+                    <span class="text">Admin</span>
+                </a>
+            </li>
+            <li>
+                <a href="admin_profile">
+                    <i class='bx bx-user-circle'></i>
+                    <span class="text">My Profile</span>
+                </a>
+            </li>
+            <li>
+                <a href="#" class="logout">
+                    <i class='bx bx-log-out'></i>
+                    <span class="text">Log Out</span>
+                </a>
+            </li>
+        </ul>
+    </section>
+
+
+    <section id="content">
+        <nav>
+            <i class='bx bx-menu-alt-left'></i>
+            <a href="#" class="nav-link">Categories</a>
+            <form action="#">
+                <div class="form-input">
+                    <input type="search" placeholder="Search...">
+                    <button type="submit" class="search.btn">
+                        <i class='bx bx-search' ></i>
+                    </button>
+                </div>
+            </form>
+
+        </nav>
+
+        <store>
+            <div class = "head-title">
+                <div class="left">
+                    <h1>MY STORE</h1>
+                    <u1 class = "store2">
+                    </u1>
+                </div>
+            </div>
+
+            <u1 class = "box-info">
+                <li>
+                    <a href="admin_order.html">
+                        <i class = "bx bxs-doughnut-chart"></i>
+                        <span class = "totalorder">
+                            <p>Total Order</p>
+                        </span>
+                    </a>
+                </li>
+                <li>
+                    <a href="admin_product.html">
+                        <i class='bx bxs-data'></i>
+                        <span class = "productcategory">
+                            <p>Product Category</p>
+                        </span>
+                    </a>
+                </li>
+                <li>
+                    <a href="admin_product.html">
+                        <i class='bx bxs-data'></i>
+                        <span class = "productstock">
+                            <p>Product Stock</p>
+                        </span>
+                    </a>
+                </li>
+                <li>
+                    <a href="admin_order.html">
+                        <i class = "bx bxs-doughnut-chart"></i>
+                        <span class = "totalorder">
+                            <p>Total Order</p>
+                        </span>
+                    </a>
+                </li>
+                <li>
+                    <a href="admin_totalsale.html">
+                        <i class='bx bxs-dollar-circle' ></i>
+                        <span class = "totalsales">
+                            <p>Total Sales</p>
+                        </span>
+                    </a>
+                </li>
+                <li>
+                    <a href="admin_message.html">
+                        <i class = "bx bxs-message-dots"></i>
+                        <span class = "totalmessage">
+                            <p>All Message</p>
+                        </span>
+                    </a>
+                </li>
+                <li>
+                    <a href="admin_user.html">
+                        <i class = "bx bxs-user"></i>
+                    <span class = "totaluser">
+                        <p>User</p>
+                    </span>
+                    </a>
+                </li>
+                <li>
+                    <a href="admin_a.html">
+                        <i class='bx bxs-group'></i>
+                        <span class = "alladmin">
+                            <p>Admin</p>
+                        </span>
+                    </a>
+                </li>
+                <li>
+                    <a href="admin_profile">
+                        <i class='bx bx-user-circle'></i>
+                        <span class = "admin_profile">
+                            <p>My Profile</p>
+                        </span> 
+                    </a>
+                </li>
+            </u1>
+        </store>
+    </section>
+
+    <script src="asadminpanel.js"></script>
+</body>
+</html>

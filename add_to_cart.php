@@ -10,15 +10,23 @@ if (!isset($_SESSION['user_id'])) {
 
 $user_id = $_SESSION['user_id'];
 
-$cart_query = "SELECT c.*, p.id AS product_id, 
-               (SELECT image1_display 
-                FROM product_variants pv 
-                WHERE pv.product_id = p.id 
-                  AND pv.size = c.size 
-                  AND (pv.color = c.color OR c.color = 'Unknown')) AS image1_display
-               FROM cart c
-               JOIN products p ON c.pid = p.id
-               WHERE c.user_id = ?";
+$cart_query = "SELECT 
+    c.id AS cart_id, 
+    c.user_id, 
+    c.pid, 
+    c.name, 
+    c.price, 
+    c.quantity, 
+    c.size, 
+    c.color,
+    pv.image1_display,
+    pv.color AS variant_color
+FROM cart c
+JOIN products p ON c.pid = p.id
+LEFT JOIN product_variants pv ON c.pid = pv.product_id 
+    AND c.size = pv.size 
+    AND (c.color = pv.color OR c.color = 'Unknown')
+WHERE c.user_id = ?";
 $stmt = $conn->prepare($cart_query);
 $stmt->execute([$user_id]);
 $cart_items = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -26,6 +34,7 @@ $cart_items = $stmt->fetchAll(PDO::FETCH_ASSOC);
 // Calculate total
 $total_price = 0;
 $total_items = count($cart_items);
+
 
 include 'header.php';
 ?>
@@ -39,12 +48,18 @@ include 'header.php';
             <div class="col-md-8">
                 <div class="card mb-4">
                     <div class="card-header py-3">
-                        <h5 class="mb-0" id="cart-items-count">Cart - <?php echo $total_items; ?> items</h5>
+                        <h5 class="mb-0" id="cart-items-count"> My Cart</h5>
                     </div>
                     <div class="card-body" id="cart-items-container">
                         <?php foreach ($cart_items as $item):
                             $item_total = $item['price'] * $item['quantity'];
                             $total_price += $item_total;
+                            $item['display_color'] = !empty($item['color']) && $item['color'] !== 'Unknown'
+                                ? $item['color']
+                                : (!empty($item['variant_color'])
+                                    ? $item['variant_color']
+                                    : 'Unknown');
+
                         ?>
 
 
@@ -65,12 +80,12 @@ include 'header.php';
                                 <div class="col-lg-5 col-md-6 mb-4 mb-lg-0">
                                     <!-- Data -->
                                     <p><strong><?php echo htmlspecialchars($item['name']); ?></strong></p>
-                                    <p>Color: <?php echo htmlspecialchars($item['color']); ?></p>
+                                    <p>Color: <?php echo htmlspecialchars($item['display_color']); ?></p>
                                     <p>Size: <?php echo htmlspecialchars($item['size']); ?></p>
 
 
                                     <button type="button" class="btn btn-primary btn-sm me-1 mb-2 remove-item"
-                                        data-cart-id="<?php echo $item['id']; ?>"
+                                        data-cart-id="<?php echo $item['cart_id']; ?>"
                                         title="Remove item">
                                         <i class="fas fa-trash"></i>
                                     </button>
@@ -84,8 +99,8 @@ include 'header.php';
                                 <div class="col-lg-4 col-md-6 mb-4 mb-lg-0">
                                     <!-- Quantity -->
                                     <div class="d-flex mb-4" style="max-width: 300px">
-                                        <button data-mdb-button-init data-mdb-ripple-init class="btn btn-primary px-3 me-2"
-                                            data-cart-id="<?php echo $item['id']; ?>">
+                                        <button class="btn btn-primary px-3 me-2 decrease-quantity"
+                                            data-cart-id="<?php echo $item['cart_id']; ?>">
                                             <i class="fas fa-minus"></i>
                                         </button>
 
@@ -94,13 +109,13 @@ include 'header.php';
                                                 class="form-control quantity-input"
                                                 min="1"
                                                 value="<?php echo $item['quantity']; ?>"
-                                                data-cart-id="<?php echo $item['id']; ?>"
+                                                data-cart-id="<?php echo $item['cart_id']; ?>"
                                                 data-price="<?php echo $item['price']; ?>" />
                                             <label class="form-label">Quantity</label>
                                         </div>
 
                                         <button class="btn btn-primary px-3 ms-2 increase-quantity"
-                                            data-cart-id="<?php echo $item['id']; ?>">
+                                            data-cart-id="<?php echo $item['cart_id']; ?>">
                                             <i class="fas fa-plus"></i>
                                         </button>
                                     </div>
@@ -115,7 +130,6 @@ include 'header.php';
                             </div>
                             <!-- Single item -->
 
-                            <hr class="my-4" />
                         <?php endforeach; ?>
                     </div>
                 </div>

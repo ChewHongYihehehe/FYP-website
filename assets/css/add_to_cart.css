@@ -1,59 +1,64 @@
 .gradient-custom {
-    /* Add margin or padding to create space below the header */
-    padding-top: 150px; /* Adjust this value as needed */
+
+    padding-top: 150px; 
 }
 
+/* Responsive adjustments */
 @media (max-width: 768px) {
-    .gradient-custom {
-        padding-top: 70px; /* Adjust for smaller screens */
+    .card-body .row {
+        margin-bottom: 15px;
     }
 }
 
-/* Change the color of the trash bin button only */
 .btn.btn-primary {
-    background-color: #FF6347; /* Change background color */
-    border-color: #6a11cb; /* Change border color if applicable */
+    background-color: #FF6347; 
+    border-color: #6a11cb; 
 }
 
-
-/* Adjust the size of the plus and minus icons */
 .btn .fas {
-    font-size: 0.8em; /* Adjust this value to make the icons smaller */
+    font-size: 0.8em; 
 }
 
-/* Optionally, you can also adjust the button size to match */
 .btn {
-    padding: 0.25rem 0.5rem; /* Adjust button padding if necessary */
+    padding: 0.25rem 0.5rem; 
 }
 
-/* Ensure the flex container aligns items vertically */
+
 .d-flex {
     display: flex;
 }
 
-/* Flex column to stack buttons and input vertically */
 .flex-column {
     flex-direction: column;
 }
 
-/* Adjust the input field */
+
 .form-outline {
-    width: 100%; /* Ensure the input takes full width */
+    width: 100%; 
 }
 
-/* Adjust the input field */
+
 .form-control {
-    height: 38px; /* Set a height that matches the button height */
-    padding: 0.375rem 0.75rem; /* Adjust padding as needed */
+    height: 38px; 
+    padding: 0.375rem 0.75rem; 
 }
 
-/* Adjust label position */
 .form-label {
-    margin-top: 5px; /* Add some space above the label */
-    font-size: 0.9em; /* Adjust font size if needed */
+    margin-top: 5px; 
+    font-size: 0.9em; 
 }
 
-/* Optional: Adjust the button height to match the input */
+
 .btn {
-    height: 38px; /* Set a height that matches the input field */
+    height: 38px; 
 }
+
+
+
+.card-body .row {
+    margin-bottom: 20px; 
+    padding-bottom: 20px; 
+    border-bottom: 1px solid #e0e0e0; 
+}
+
+

@@ -184,7 +184,7 @@ function getAvailableSizes($conn, $productId)
                                                             </a>
                                                         </div>
                                                         <div class="cancel">
-                                                            <i class="fas fa-trash cancel-icon" data-product-id="<?php echo htmlspecialchars($product_details['product_id']); ?>"></i>
+                                                            <i class="fas fa-trash cancel-icon" data-product-id="<?php echo htmlspecialchars($product_details['product_id']); ?>" data-color="<?php echo htmlspecialchars($product_details['color']); ?>"></i>
                                                         </div>
                                                         <div class="product_info">
                                                             <h6 class="product_name">

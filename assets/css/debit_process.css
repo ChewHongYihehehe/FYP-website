@@ -1,0 +1,111 @@
+/* General Styles */
+body {
+    font-family: 'Poppins', sans-serif;
+    background-color: #f9f9f9;
+    color: #333;
+    margin: 0;
+    padding: 20px;
+}
+
+/* Container for the payment confirmation */
+.container {
+    max-width: 600px;
+    margin: 0 auto;
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Headings */
+h2 {
+    font-size: 24px;
+    margin-bottom: 10px;
+    color: #1e1e27;
+}
+
+h3 {
+    font-size: 20px;
+    margin-top: 20px;
+    margin-bottom: 10px;
+    color: #fe4c50; /* Brand color */
+}
+
+/* Paragraphs */
+p {
+    font-size: 16px;
+    line-height: 1.5;
+}
+
+/* Form Styles */
+form {
+    margin-top: 20px;
+}
+
+label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 600;
+}
+
+input[type="text"] {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 16px;
+}
+
+input[type="text"]:focus {
+    border-color: #fe4c50; /* Focus color */
+    outline: none;
+}
+
+/* Button Styles */
+.proceed-btn {
+    background-color: #007bff; /* Primary color */
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    cursor: pointer;
+    border-radius: 5px;
+    font-size: 16px;
+    transition: background-color 0.3s ease;
+}
+
+.proceed-btn:hover {
+    background-color: #0056b3; /* Darker shade on hover */
+}
+
+/* Order Summary Styles */
+.order-summary {
+    margin-top: 20px;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+}
+
+.order-summary p {
+    margin: 5px 0;
+}
+
+/* Responsive Styles */
+@media (max-width: 600px) {
+    .container {
+        padding: 15px;
+    }
+
+    h2, h3 {
+        font-size: 20px;
+    }
+
+    input[type="text"] {
+        font-size: 14px;
+    }
+
+    .proceed-btn {
+        font-size: 14px;
+    }
+}

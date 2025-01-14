@@ -163,9 +163,9 @@ include 'header.php';
                             </li>
                         </ul>
 
-                        <button type="button" data-mdb-button-init data-mdb-ripple-init class="btn btn-primary btn-lg btn-block">
+                        <a href="checkout.php" data-mdb-button-init data-mdb-ripple-init class="btn btn-primary btn-lg btn-block">
                             Go to checkout
-                        </button>
+                        </a>
                     </div>
                 </div>
             </div>

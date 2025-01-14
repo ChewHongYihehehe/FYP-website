@@ -42,7 +42,6 @@ if (isset($_SESSION['user_id'])) {
     <link rel="stylesheet" type="text/css" href="assets/css/owl.theme.default.css">
     <link rel="stylesheet" type="text/css" href="assets/css/main_styles.css">
     <link rel="stylesheet" type="text/css" href="assets/css/responsive.css">
-    <link rel="stylesheet" type="text/css" href="assets/css/header.css">
     <link rel="stylesheet" type="text/css" href="assets/css/wishlist.css">
 </head>
 
@@ -131,7 +130,8 @@ if (isset($_SESSION['user_id'])) {
                                 </ul>
                                 <ul class="navbar_user">
                                     <li><a href="#"><i class="fa fa-search" aria-hidden="true"></i></a></li>
-                                    <li><a href="#"><i class="fa fa-user" aria-hidden="true"></i></a></li>
+                                    <li><a href="wishlist.php"><i class="fas fa-heart" aria-hidden="true"></i></a></li>
+                                    <li><a href="profiles.php"><i class="fa fa-user" aria-hidden="true"></i></a></li>
                                     <li class="checkout">
                                         <a href="add_to_cart.php" id="cart-icon">
                                             <i class="fa fa-shopping-cart" aria-hidden="true"></i>

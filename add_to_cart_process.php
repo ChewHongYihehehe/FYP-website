@@ -129,43 +129,35 @@ if (!$variant) {
 
 
 // Check if product is already in cart
-$check_cart_query = "SELECT * FROM cart WHERE user_id = :user_id 
-                     AND pid = :pid 
-                     AND size = :size 
-                     AND color = :color";
+$check_cart_query = "SELECT * FROM cart WHERE user_id = :user_id AND pid = :pid AND size = :size AND color = :color";
 $stmt = $conn->prepare($check_cart_query);
 $stmt->bindParam(':user_id', $user_id, PDO::PARAM_INT);
 $stmt->bindParam(':pid', $product_id, PDO::PARAM_INT);
-$stmt->bindParam(':size', $final_size, PDO::PARAM_STR);
-$stmt->bindParam(':color', $final_color, PDO::PARAM_STR);
+$stmt->bindParam(':size', $size, PDO::PARAM_STR);
+$stmt->bindParam(':color', $color, PDO::PARAM_STR);
 $stmt->execute();
 $existing_cart_item = $stmt->fetch(PDO::FETCH_ASSOC);
 
 if ($existing_cart_item) {
     // Update quantity if product already in cart
-    $update_query = "UPDATE cart 
-                         SET quantity = quantity + 1, 
-                             price = :price 
-                         WHERE id = :cart_id";
+    $update_query = "UPDATE cart SET quantity = quantity + 1 WHERE id = :cart_id";
     $stmt = $conn->prepare($update_query);
-    $stmt->bindParam(':price', $variant['price'], PDO::PARAM_STR);
     $stmt->bindParam(':cart_id', $existing_cart_item['id'], PDO::PARAM_INT);
     $stmt->execute();
 } else {
-    // Insert new item into cart using variant details
+    // Insert new item into cart
     $insert_query = "INSERT INTO cart (user_id, pid, name, price, quantity, size, color, image) 
-    VALUES (:user_id, :pid, :name, :price, 1, :size, :color, :image)";
+                     VALUES (:user_id, :pid, :name, :price, 1, :size, :color, :image)";
     $stmt = $conn->prepare($insert_query);
     $stmt->bindParam(':user_id', $user_id, PDO::PARAM_INT);
     $stmt->bindParam(':pid', $product_id, PDO::PARAM_INT);
-    $stmt->bindParam(':name', $variant['product_name'], PDO::PARAM_STR);
-    $stmt->bindParam(':price', $variant['price'], PDO::PARAM_STR);
-    $stmt->bindParam(':size', $variant['size'], PDO::PARAM_STR); // Use the size from the variant
-    $stmt->bindParam(':color', $variant['color'], PDO::PARAM_STR); // Use the color from the variant
-    $stmt->bindParam(':image', $variant['image1_display'], PDO::PARAM_STR); // Use the image from the variant
+    $stmt->bindParam(':name', $variant['product_name'], PDO::PARAM_STR); // Ensure you have the product name
+    $stmt->bindParam(':price', $variant['price'], PDO::PARAM_STR); // Ensure you have the product price
+    $stmt->bindParam(':size', $size, PDO::PARAM_STR); // Use the size from the request
+    $stmt->bindParam(':color', $color, PDO::PARAM_STR); // Use the color from the request
+    $stmt->bindParam(':image', $variant['image1_display'], PDO::PARAM_STR); // Ensure you have the product image
     $stmt->execute();
 }
-
 
 // Get updated cart count and total price
 $cart_count = getCartCount($conn, $user_id);
@@ -187,7 +179,8 @@ if (isset($_POST['cart_id']) && isset($_POST['quantity'])) {
         $stmt->execute();
 
         // Get updated total price
-        $total_price_query = "SELECT COALESCE(SUM(price * quantity), 0) as total FROM cart WHERE user_id = ?";
+        $total_price_query = "SELECT COALESCE(SUM(price * quantity), 0) as total FROM cart WHERE user_id ```php
+= ?";
         $stmt = $conn->prepare($total_price_query);
         $stmt->execute([$user_id]);
         $total_price = $stmt->fetch(PDO::FETCH_ASSOC)['total'];

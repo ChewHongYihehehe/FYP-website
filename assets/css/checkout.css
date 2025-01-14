@@ -40,11 +40,43 @@ body{
     text-align: center;
     display: inline-block;
 }
-#payment{
+#payment-form{
     margin:0;
     color: blue;
+    display:none;
+
 }
-.icons{
+.payment-methods {
+    margin-bottom: 20px;
+    margin-top:20px;
+}
+.onlineBankMethod, .debitCardMethod {
+    display: flex;
+    align-items: center;
+    padding: 15px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: border-color 0.3s, background-color 0.3s;
+    margin-bottom: 20px;
+}
+.onlineBankMethod:hover, .debitCardMethod:hover {
+    border-color: #FE7C7F; /* Change border color on hover */
+}
+.bankMethod:hover {
+    border-color: #FE7C7F; /* Change border color on hover */
+}
+.bankMethod {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: border-color 0.3s;
+    margin-top:10px;
+}
+.icons,.icons_{
     margin-left: auto;
 }
 form span{
@@ -122,15 +154,7 @@ input[type=checkbox]{
     width: unset;
     margin-bottom: unset;
 }
-#cvv{
-    background-image: linear-gradient(to left, rgba(255, 255, 255, 0.575) , rgba(255, 255, 255, 0.541)), url("https://img.icons8.com/material-outlined/24/000000/help.png");
-    background-repeat: no-repeat;
-    background-position-x: 95%;
-    background-position-y: center;
-} 
-#cvv:hover{
 
-}
 
 .account-details{
     padding:10px;
@@ -154,9 +178,28 @@ input[type=checkbox]{
     padding:10px;
 }
 
-.shipping-address{
-    display:flex;
-    flex-direction: column;
+.shipping-address {
+    display: flex;
+    flex-direction: column; 
+    margin-bottom: 10px; 
+}
+
+.shipping-address div {
+    display: flex; 
+    align-items: center; 
+}
+
+.address-radio{
+    width: 20px; 
+    height: 20px; 
+    margin-right: 10px; 
+    cursor: pointer; 
+    margin-top:25px;
+}
+
+.shipping-address label {
+    margin-left: 10px; 
+    color: #666; 
 }
 
 .shipping-address span{
@@ -187,4 +230,123 @@ input[type=checkbox]{
     color: red;
     font-size: 0.8rem;
     margin-bottom:8px;
+}
+
+h4 {
+    margin-bottom: 15px;
+    color: #333; /* Darker text for headings */
+}
+
+.left, .right {
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+.left {
+    border: 1px solid #ddd; /* Light border for separation */
+}
+
+
+label {
+    display: flex;
+    align-items: center;
+    padding: 15px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: border-color 0.3s, background-color 0.3s; /* Add transition for background color */
+}
+
+label:hover {
+    border-color: #FE7C7F; /* Change border color on hover */
+}
+
+.check {
+    display: none; /* Hide check icon by default */
+}
+
+.check i {
+    color: #6064b6; /* Color for the check icon */
+}
+
+.btn {
+    background-color: #fe4c50; /* Button color */
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.btn:hover {
+    background-color: #e03e45; /* Darker shade on hover */
+}
+
+.row {
+    margin: 0; /* Reset margin for rows */
+}
+
+.item {
+    padding: 10px 0;
+    border-bottom: 1px solid #ddd; /* Separator for items */
+}
+
+.item:last-child {
+    border-bottom: none; /* Remove border for last item */
+}
+
+#bank-selection{
+    margin-top:20px;
+    display:none;
+}
+.bank-options {
+    display: flex;
+    align-items: center; /* Align items vertically in the center */
+    margin-top: 10px; /* Space above bank method */
+}
+
+.bank-radio {
+    width: 20px; 
+    height: 20px; 
+    margin-right: 10px; 
+    cursor: pointer; 
+    margin-top:25px;
+}
+
+
+
+
+.bank-radio + .bankMethod::before {
+    background-color: #FE7C7F; /* Inner circle color when checked */
+    border-color: #FE7C7F; /* Change border color when checked */
+}
+
+
+.bankMethod{
+    display:flex;
+    align-items:center;
+    padding:10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    cursor:pointer;
+    transition: border-color 0.3s;
+    flex-grow:1;
+}
+
+.bankMethod:hover {
+    border-color: #FE7C7F; /* Change border color on hover */
+}
+
+.bank-radio:checked + .bankMethod {
+    border-color: #FE7C7F; /* Change border color when radio is checked */
+}
+
+#showOtherAddresses {
+    cursor: pointer; /* Change cursor to pointer */
+    color:white; 
+    padding: 5px;
+    border: 1px solid transparent; /* Optional border */
+    transition: background-color 0.3s; /* Smooth transition */
 }

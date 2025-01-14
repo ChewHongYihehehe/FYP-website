@@ -1,0 +1,150 @@
+/* styles.css */
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: #f9f9f9;
+}
+
+.order-page {
+  display: flex;
+  min-height: 100vh;
+}
+
+.sidebar {
+  background-color: #fff;
+  padding: 20px;
+  width: 20%;
+  border-right: 1px solid #ddd;
+}
+
+.sidebar h2 {
+  font-size: 18px;
+  margin-bottom: 20px;
+}
+
+.filter button {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  background: #f9f9f9;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.order-dates {
+  list-style: none;
+  padding: 0;
+  margin: 20px 0;
+}
+
+.order-dates li {
+  padding: 10px 0;
+  color: #555;
+}
+
+.order-dates li.active {
+  font-weight: bold;
+  color: #000;
+  position: relative;
+}
+
+.order-dates li.active::before {
+  content: '';
+  position: absolute;
+  left: -10px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 5px;
+  height: 5px;
+  background-color: #000;
+  border-radius: 50%;
+}
+
+.my-account {
+  display: block;
+  text-decoration: none;
+  color: #000;
+  margin-top: 20px;
+}
+
+.order-details {
+  flex: 1;
+  padding: 20px;
+}
+
+.order-details header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #ddd;
+  padding-bottom: 10px;
+  margin-bottom: 20px;
+}
+
+.order-details h2 {
+  font-size: 18px;
+}
+
+.order-info span {
+  margin-right: 20px;
+  font-size: 14px;
+}
+
+.order-info .status-fulfilled {
+  color: green;
+}
+
+.products h3 {
+  font-size: 16px;
+  margin-bottom: 20px;
+}
+
+.product-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.product {
+  background: #fff;
+  border: 1px solid #ddd;
+  padding: 10px;
+  text-align: center;
+  width: 22%;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.product img {
+  width: 100%;
+  height: auto;
+  margin-bottom: 10px;
+}
+
+.product .price {
+  font-weight: bold;
+  color: #000;
+}
+
+.reorder-btn {
+  background: #000;
+  color: #fff;
+  padding: 10px;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.completed-order{
+    background-color: #e6f2e6;
+    color:  #2c542c;
+}
+
+.completed-order td {
+    color: #2c542c !important;
+}
+
+.completed-order .fas.fa-check-circle {
+    color: green;
+    margin-left: 5px;
+}

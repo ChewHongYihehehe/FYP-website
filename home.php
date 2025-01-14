@@ -118,6 +118,8 @@ function getAvailableSizes($conn, $productId)
 $availableSizes = getAvailableSizes($conn, $productId);
 
 
+
+
 ?>
 
 <div class="fs_menu_overlay"></div>
@@ -253,7 +255,7 @@ $availableSizes = getAvailableSizes($conn, $productId);
 						$brand_class = strtolower(str_replace(' ', '-', htmlspecialchars($first_variant['brand'] ?? '')));
 						$availableSizesForProduct = json_encode(getAvailableSizes($conn, $first_variant['id'])); // Get available sizes for the main product
 					?>
-						<div class="product-item <?php echo $brand_class; ?>" data-product-id="<?php echo htmlspecialchars($first_variant['id'] ?? ''); ?>" data-available-sizes='<?php echo $availableSizesForProduct; ?>'>
+						<div class="product-item <?php echo $brand_class; ?>" data-product-id="<?php echo htmlspecialchars($first_variant['id'] ?? ''); ?>" data-color="<?php echo htmlspecialchars($first_variant['color']); ?>" data-available-sizes='<?php echo $availableSizesForProduct; ?>'>
 							<div class="product product_filter">
 								<div class="product_image">
 									<a href="product.php?product_id=<?php echo htmlspecialchars($first_variant['id'] ?? ''); ?>" class="main-product-link">
@@ -261,7 +263,7 @@ $availableSizes = getAvailableSizes($conn, $productId);
 									</a>
 								</div>
 								<div class="favorite">
-									<i class="far fa-heart" data-product-id="<?php echo htmlspecialchars($first_variant['id']); ?>"></i>
+									<i class="far fa-heart" data-product-id="<?php echo htmlspecialchars($first_variant['id']); ?>" data-color="<?php echo htmlspecialchars($first_variant['color']); ?>"></i>
 								</div>
 								<div class="product_info">
 									<h6 class="product_name">
@@ -270,7 +272,7 @@ $availableSizes = getAvailableSizes($conn, $productId);
 										</a>
 									</h6>
 									<div class="product_price">
-										$<?php echo htmlspecialchars($first_variant['price'] ?? '0.00'); ?>
+										RM<?php echo htmlspecialchars($first_variant['price'] ?? '0.00'); ?>
 									</div>
 
 									<!-- Color Variants -->
@@ -315,7 +317,7 @@ $availableSizes = getAvailableSizes($conn, $productId);
 				</div>
 			</div>
 		</div>
-		<div class="row">
+		<div class="row">q`
 			<div class="col">
 				<div class="product_slider_container">
 					<div class="owl-carousel owl-theme product_slider">
@@ -323,16 +325,21 @@ $availableSizes = getAvailableSizes($conn, $productId);
 							$first_variant = $product_data['main_product'];
 							$color_variants = $product_data['color_variants'];
 							$brand_class = strtolower(str_replace(' ', '-', htmlspecialchars($first_variant['brand'])));
+							$availableSizesForProduct = json_encode(getAvailableSizes($conn, $first_variant['id']));
 						?>
 							<div class="owl-item product_slider_item">
-								<div class="product-item <?php echo $brand_class; ?>" data-product-id="<?php echo htmlspecialchars($first_variant['id'] ?? ''); ?>">
+								<div class="product-item <?php echo $brand_class; ?>"
+									data-product-id="<?php echo htmlspecialchars($first_variant['id'] ?? ''); ?>"
+									data-available-sizes='<?php echo $availableSizesForProduct; ?>'>
 									<div class="product">
 										<div class="product_image">
 											<a href="product.php?product_id=<?php echo htmlspecialchars($first_variant['id']); ?>" class="main-product-link">
 												<img src="<?php echo htmlspecialchars($first_variant['image1_display']); ?>" alt="" class="main-product-image">
 											</a>
 										</div>
-										<div class="favorite"></div>
+										<div class="favorite">
+											<i class="far fa-heart" data-product-id="<?php echo htmlspecialchars($first_variant['id']); ?>"></i>
+										</div>
 										<div class="product_info">
 											<h6 class="product_name">
 												<a href="product.php?product_id=<?php echo htmlspecialchars($first_variant['id']); ?>">
@@ -340,7 +347,7 @@ $availableSizes = getAvailableSizes($conn, $productId);
 												</a>
 											</h6>
 											<div class="product_price">
-												$<?php echo htmlspecialchars($first_variant['price']); ?>
+												RM<?php echo htmlspecialchars($first_variant['price']); ?>
 											</div>
 
 											<!-- Color Variants -->
@@ -352,7 +359,12 @@ $availableSizes = getAvailableSizes($conn, $productId);
 															style="background-color: <?php echo htmlspecialchars($variant['color']); ?>;"
 															data-product-id="<?php echo htmlspecialchars($variant['product_id']); ?>"
 															data-product-image="<?php echo htmlspecialchars($variant['image1_display']); ?>"
-															data-product-price="<?php echo htmlspecialchars($variant['price']); ?>"></span>
+															data-product-price="<?php echo htmlspecialchars($variant['price']); ?>"
+															data-available-sizes='<?php
+																					$variantSizes = getAvailableSizes($conn, $variant['product_id']);
+																					echo json_encode($variantSizes);
+																					?>'>
+														</span>
 													<?php endforeach; ?>
 												</div>
 											<?php endif; ?>
@@ -361,7 +373,9 @@ $availableSizes = getAvailableSizes($conn, $productId);
 											<span>new</span>
 										</div>
 									</div>
-									<div class="red_button add_to_cart_button"><a href="#">Quick Add</a></div>
+									<div class="red_button add_to_cart_button quick-add-button">
+										<a href="#">Quick Add <i class="fa fa-plus quick-add-icon"></i></a>
+									</div>
 								</div>
 							</div>
 						<?php endforeach; ?>
@@ -369,7 +383,7 @@ $availableSizes = getAvailableSizes($conn, $productId);
 
 					<!-- Slider Navigation -->
 					<div class="product_slider_nav_left product_slider_nav d-flex align-items-center justify-content-center flex-column">
-						<i class="fa fa-chevron-left" aria-hidden="true"></i>
+						<i class="fa fs-chevron-left" aria-hidden="true"></i>
 					</div>
 					<div class="product_slider_nav_right product_slider_nav d-flex align-items-center justify-content-center flex-column">
 						<i class="fa fa-chevron-right" aria-hidden="true"></i>

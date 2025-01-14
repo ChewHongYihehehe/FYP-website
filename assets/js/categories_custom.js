@@ -7,7 +7,6 @@
 1. Vars and Inits
 2. Set Header
 3. Init Menu
-4. Init Favorite
 5. Init Fix Product Border
 6. Init Isotope Filtering
 7. Init Price Slider
@@ -45,12 +44,11 @@ jQuery(document).ready(function($)
 	});
 
 	$(document).on('scroll', function()
-	{
+	{        
 		setHeader();
 	});
 
 	initMenu();
-	initFavorite();
 	initFixProductBorder();
 	initIsotopeFiltering();
 	initPriceSlider();
@@ -175,43 +173,7 @@ jQuery(document).ready(function($)
 		menuActive = false;
 	}
 
-	/* 
 
-	4. Init Favorite
-
-	*/
-
-    function initFavorite()
-    {
-    	if($('.favorite').length)
-    	{
-    		var favs = $('.favorite');
-
-    		favs.each(function()
-    		{
-    			var fav = $(this);
-    			var active = false;
-    			if(fav.hasClass('active'))
-    			{
-    				active = true;
-    			}
-
-    			fav.on('click', function()
-    			{
-    				if(active)
-    				{
-    					fav.removeClass('active');
-    					active = false;
-    				}
-    				else
-    				{
-    					fav.addClass('active');
-    					active = true;
-    				}
-    			});
-    		});
-    	}
-    }
 
     /* 
 
@@ -318,21 +280,20 @@ jQuery(document).ready(function($)
     	if($('.product-grid').length)
     	{
     		$('.product-grid').isotope({
-    			itemSelector: '.product-item',
-	            getSortData: {
-	            	price: function(itemElement)
-	            	{
-	            		var priceEle = $(itemElement).find('.product_price').text().replace( '$', '' );
-	            		return parseFloat(priceEle);
-	            	},
-	            	name: '.product_name'
-	            },
-	            animationOptions: {
-	                duration: 750,
-	                easing: 'linear',
-	                queue: false
-	            }
-	        });
+				itemSelector: '.product-item',
+				getSortData: {
+					price: function(itemElement) {
+						var priceEle = $(itemElement).find('.product_price').text().replace('RM', '').trim();
+						return parseFloat(priceEle);
+					},
+					name: '.product_name'
+				},
+				animationOptions: {
+					duration: 750,
+					easing: 'linear',
+					queue: false
+				}
+			});
 
     		// Short based on the value from the sorting_type dropdown
 	        sortTypes.each(function()

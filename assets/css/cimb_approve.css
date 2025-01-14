@@ -1,0 +1,154 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f9f9f9;
+}
+
+.container {
+    max-width: 900px;
+    margin: 30px auto;
+    padding: 20px;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+}
+
+.header .logo-container{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+}
+
+.header .logo-container img{
+    height:50px;
+    margin-left:300px;
+}
+
+.header .logo-container img.fpx-logo{
+    margin-top:10px;
+    height:60px;
+}
+
+.header .logo-container img.cimb-logo{
+    height:60px;
+}
+
+
+.header img {
+    height: 50px;
+}
+
+.title-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.title {
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.transaction-title {
+    font-size: 16px;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+
+.section {
+    padding: 10px 0;
+    border-bottom: 1px solid #ddd;
+}
+
+.section:last-child {
+    border-bottom: none;
+}
+
+.section-title {
+    font-size: 16px;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.details {
+    font-size: 14px;
+    line-height: 1.8;
+    color: #333;
+}
+
+.details strong {
+    font-weight: bold;
+}
+
+.transaction-amount {
+    text-align: right;
+    font-size: 14px;
+    line-height: 1.8;
+    color: #333;
+}
+
+.transaction-details {
+    margin-top:10px;
+}
+
+.transaction-details p{
+    margin:0;
+    font-size:14px;
+    line-height:1.8;
+    color: #333;
+}
+
+.amount {
+    font-size: 16px;
+    font-weight: bold;
+}
+
+.actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 20px;
+}
+
+.actions button {
+    padding: 10px 20px;
+    font-size: 14px;
+    font-weight: bold;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.cancel-btn {
+    background-color: #fff;
+    color: #e74c3c;
+    border: 1px solid #e74c3c;
+}
+
+.cancel-btn:hover {
+    background-color: #e74c3c;
+    color: #fff;
+}
+
+.proceed-btn {
+    background-color: #e74c3c;
+    color: #fff;
+}
+
+.proceed-btn:hover {
+    background-color: #c0392b;
+}

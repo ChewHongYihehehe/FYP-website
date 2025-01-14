@@ -1,5 +1,6 @@
 <?php
 include 'connect.php';
+
 session_start();
 
 if (isset($_SESSION['user_id'])) {
@@ -89,6 +90,83 @@ foreach ($all_variants as $variant) {
 
 // Sort sizes
 sort($unique_sizes);
+
+// Fetch recommended products from the same category, excluding the current product
+$recommended_query = "SELECT DISTINCT p.id, p.name, p.category, p.brand, pv.product_id, pv.color, pv.size, pv.price, pv.image1_display 
+                      FROM products p 
+                      JOIN product_variants pv ON p.id = pv.product_id 
+                      WHERE p.category = :category 
+                      AND p.id != :current_product_id 
+                      ORDER BY RAND() 
+                      LIMIT 10"; // Adjust the limit as needed
+
+$stmt = $conn->prepare($recommended_query);
+$stmt->bindParam(':category', $product['category']);
+$stmt->bindParam(':current_product_id', $product_id);
+$stmt->execute();
+$recommended_products = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+// Group recommended products
+$recommended_grouped = groupProductsByNameAndColor($recommended_products);
+
+include 'header.php';
+function groupProductsByNameAndColor($products)
+{
+    $groupedProducts = [];
+    $processedProductNames = [];
+    $processedProductIds = [];
+
+    foreach ($products as $product) {
+        if (in_array($product['name'], $processedProductNames) || in_array($product['id'], $processedProductIds)) {
+            continue;
+        }
+
+        $key = $product['name'] . '_' . $product['color'];
+        $colorVariants = [];
+        $seenColors = [];
+
+        foreach ($products as $variant) {
+            if ($variant['name'] === $product['name'] && !in_array($variant['color'], $seenColors)) {
+                $colorVariants[] = $variant;
+                $seenColors[] = $variant['color'];
+            }
+        }
+
+        $groupedProducts[$key] = [
+            'main_product' => $product,
+            'color_variants' => $colorVariants
+        ];
+
+        $processedProductNames[] = $product['name'];
+        $processedProductIds[] = $product['id'];
+
+        if (count($groupedProducts) >= 16) {
+            break;
+        }
+    }
+
+    return $groupedProducts;
+}
+
+function getAvailableSizes($conn, $productId)
+{
+    try {
+        $sizes_query = "SELECT DISTINCT size FROM product_variants WHERE product_id = ? AND stock > 0";
+        $stmt = $conn->prepare($sizes_query);
+        $stmt->execute([$productId]);
+        $sizes = $stmt->fetchAll(PDO::FETCH_COLUMN);
+
+        return $sizes;
+    } catch (PDOException $e) {
+        error_log("Error fetching sizes: " . $e->getMessage());
+        return [];
+    }
+}
+// Fetch all available sizes
+$availableSizes = getAvailableSizes($conn, $product_id);
+
+
+
 ?>
 
 <!DOCTYPE html>
@@ -112,10 +190,19 @@ sort($unique_sizes);
 </head>
 
 
-<body>
+<body class="product">
 
 
-    <div class="container">
+    <div class="product-container">
+
+
+        <div class="breadcrumbs d-flex flex-row align-items-center">
+            <ul>
+                <li><a href="home.php">Home</a></li>
+                <li><a href="product.php"><i class="fa fa-angle-right" aria-hidden="true"></i>Product</a></li>
+            </ul>
+        </div>
+
 
         <main>
             <div>
@@ -127,9 +214,6 @@ sort($unique_sizes);
                     </span>
                     <span class="titleOverlay"></span>
                 </h1>
-                <p class="description">
-                    Lorem ipsum dolor sit amet
-                </p>
                 <div class="thumbs">
                     <?php
                     $thumbs = [
@@ -158,10 +242,10 @@ sort($unique_sizes);
                 </div>
             </div>
             <div class="options">
-                <h4>Size</h4>
+                <h4>Size(UK)</h4>
                 <ul class="sizes">
                     <?php foreach ($unique_sizes as $index => $size): ?>
-                        <li class="<?php echo $index === 0 ? 'size-active' : ''; ?>"><?php echo htmlspecialchars($size); ?></li>
+                        <li class="<?php echo $index === 0 ? 'size-active' : ''; ?>" data-size="<?php echo htmlspecialchars($size); ?>"><?php echo htmlspecialchars($size); ?></li>
                     <?php endforeach; ?>
                 </ul>
 
@@ -178,49 +262,111 @@ sort($unique_sizes);
                 </div>
 
                 <div class="pricing">
-                    <h4>Price</h4>
-                    <h4 class="price">$<?php echo number_format($product['price'], 2); ?></h4>
+                    <h4>Price: </h4>
+                    <h4 class="price"> RM<?php echo number_format($product['price'], 2); ?></h4>
                 </div>
             </div>
         </main>
         <section class="bar-bottom">
-            <div>
-                <a href="#">
-                    <span class="material-icons-outlined">
-                        play_arrow
-                    </span>
-                    <span>Play Video</span>
-                </a>
-            </div>
-            <div class="controls">
-                <div class="arrows">
-                    <span class="material-icons-outlined 
-                    arr-left">
-                        arrow_right_alt
-                    </span>
-                    <span class="material-icons-outlined
-                            arr-right">
-                        arrow_right_alt
-                    </span>
-                </div>
-                <div>
-                    <small class="shoe-num">01</small>
-                    <div class="pagination">
-                        <span class="pag pag-active"></span>
-                        <span class="pag"></span>
-                        <span class="pag"></span>
-                    </div>
-                    <small class="shoe-total">03</small>
-                </div>
-            </div>
             <div class="cart">
-                <button>Add To Cart</button>
-                <span class="material-icons-outlined">
-                    favorite_border
-                </span>
+                <button id="add-to-cart-button"
+                    data-product-id="<?php echo htmlspecialchars($product['id']); ?>"
+                    data-size=""
+                    data-color="">Add To Cart</button>
+                <div class="favorite-product">
+                    <i class="<?php echo $is_favorited ? 'fas' : 'far'; ?> fa-heart" data-product-id="<?php echo htmlspecialchars($product['id']); ?>"></i>
+                </div>
+
             </div>
         </section>
     </div>
+
+    <!-- Recommended Products Section -->
+    <div class="recommended_products">
+        <div class="container">
+            <div class="row">
+                <div class="col text-center">
+                    <div class="section_title new_arrivals_title">
+                        <h2>Recommended for You</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <div class="product_slider_container">
+                        <div class="owl-carousel owl-theme product_slider">
+                            <?php foreach ($recommended_grouped as $product_name => $product_data):
+                                $first_variant = $product_data['main_product'];
+                                $color_variants = $product_data['color_variants'];
+                                $brand_class = strtolower(str_replace(' ', '-', htmlspecialchars($first_variant['brand'])));
+                                $availableSizesForProduct = json_encode(getAvailableSizes($conn, $first_variant['id']));
+                            ?>
+                                <div class="owl-item product_slider_item">
+                                    <div class="product-item <?php echo $brand_class; ?>"
+                                        data-product-id="<?php echo htmlspecialchars($first_variant['id'] ?? ''); ?>"
+                                        data-available-sizes='<?php echo $availableSizesForProduct; ?>'>
+                                        <div class="product product_filter">
+                                            <div class="product_image">
+                                                <a href="product.php?product_id=<?php echo htmlspecialchars($first_variant['id']); ?>" class="main-product-link">
+                                                    <img src="<?php echo htmlspecialchars($first_variant['image1_display']); ?>" alt="" class="main-product-image">
+                                                </a>
+                                            </div>
+                                            <div class="favorite">
+                                                <i class="far fa-heart" data-product-id="<?php echo htmlspecialchars($first_variant['id']); ?>"></i>
+                                            </div>
+                                            <div class="product_info">
+                                                <h6 class="product_name">
+                                                    <a href="product.php?product_id=<?php echo htmlspecialchars($first_variant['id']); ?>">
+                                                        <?php echo htmlspecialchars($first_variant['name']); ?>
+                                                    </a>
+                                                </h6>
+                                                <div class="product_price">
+                                                    RM<?php echo htmlspecialchars($first_variant['price']); ?>
+                                                </div>
+
+                                                <!-- Color Variants -->
+                                                <?php if (count($color_variants) > 1): ?>
+                                                    <div class="color-variants">
+                                                        <?php foreach ($color_variants as $index => $variant): ?>
+                                                            <span
+                                                                class="color-circle <?php echo $index === 0 ? 'color-active' : ''; ?>"
+                                                                style="background-color: <?php echo htmlspecialchars($variant['color']); ?>;"
+                                                                data-product-id="<?php echo htmlspecialchars($variant['product_id']); ?>"
+                                                                data-product-image="<?php echo htmlspecialchars($variant['image1_display']); ?>"
+                                                                data-product-price="<?php echo htmlspecialchars($variant['price']); ?>"
+                                                                data-available-sizes='<?php
+                                                                                        $variantSizes = getAvailableSizes($conn, $variant['product_id']);
+                                                                                        echo json_encode($variantSizes);
+                                                                                        ?>'>
+                                                            </span>
+                                                        <?php endforeach; ?>
+                                                    </div>
+                                                <?php endif; ?>
+                                            </div>
+                                        </div>
+                                        <div class="red_button add_to_cart_button quick-add-button">
+                                            <a href="#">Quick Add <i class="fa fa-plus quick-add-icon"></i></a>
+                                        </div>
+                                    </div>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+
+                        <!-- Slider Navigation -->
+                        <div class="product_slider_nav_left product_slider_nav d-flex align-items-center justify-content-center flex-column">
+                            <i class="fa fa-chevron-left" aria-hidden="true"></i>
+                        </div>
+                        <div class="product_slider_nav_right product_slider_nav d-flex align-items-center justify-content-center flex-column">
+                            <i class="fa fa-chevron-right" aria-hidden="true"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
 
     <script>
         const products = <?php
@@ -237,6 +383,9 @@ sort($unique_sizes);
 
     <!-- custom js file link  -->
     <script src="assets/js/products.js"></script>
+    <script src="assets/js/jquery-3.2.1.min.js"></script>
+    <script src="assets/js/owl.carousel.js"></script>
+    <script src="assets/js/custom.js"></script>
 </body>
 
 </html>

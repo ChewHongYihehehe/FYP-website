@@ -1,136 +1,136 @@
 <?php
-
 include 'connect.php';
 
 session_start();
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $action = $_POST['action'];
+//Fetch categories
+$categories = [];
 
-    // Add Product
-    if ($action === 'add') {
-        $name = $_POST['name'];
-        $category = $_POST['category'];
-        $brand = $_POST['brand'];
-        $size = $_POST['size'];
-        $color = $_POST['color'];
-        $stock = $_POST['stock'];
-        $price = $_POST['price'];
+$stmt = $conn->prepare("SELECT * FROM categories");
+$stmt->execute();
+$categories = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-        $stmt = $pdo->prepare("INSERT INTO products (name, categories, brand) VALUES (?, ?, ?)");
-        $stmt->execute([$name, $category, $brand]);
-        $product_id = $pdo->lastInsertId();
+$brands = [];
+$stmt = $conn->prepare("SELECT * FROM brand");
+$stmt->execute();
+$brands = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-        $stmt = $pdo->prepare("INSERT INTO product_variants (product_id, size, color, stock, price) VALUES (?, ?, ?, ?, ?)");
-        $stmt->execute([$product_id, $size, $color, $stock, $price]);
+$sizes = [];
+$stmt = $conn->prepare("SELECT * FROM sizes");
+$stmt->execute();
+$sizes = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-        echo "Product added successfully!";
-    }
-
-    // Delete Product
-    if ($action === 'delete') {
-        $product_id = $_POST['product_id'];
-        $pdo->prepare("DELETE FROM products WHERE id = ?")->execute([$product_id]);
-        $pdo->prepare("DELETE FROM product_variants WHERE product_id = ?")->execute([$product_id]);
-
-        echo "Product deleted successfully!";
-    }
-}
-
-
+// Fetch products with variants
+$products = [];
+$stmt = $conn->prepare("
+    SELECT p.*, 
+           c.name AS category_name, 
+           b.name AS brand_name, 
+           pv.color, 
+           pv.image1_display,
+           pv.price AS variant_price 
+    FROM products p
+    JOIN categories c ON p.id = c.id
+    JOIN brand b ON p.id = b.id
+    JOIN product_variants pv ON p.id = pv.product_id
+");
+$stmt->execute();
+$products = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
+
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
-    <title>Admin - Manage Products</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-        }
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Page</title>
 
-        table {
-            border-collapse: collapse;
-            width: 100%;
-            margin-top: 20px;
-        }
+    <!-- Font Awesome CDN link -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 
-        table,
-        th,
-        td {
-            border: 1px solid #ddd;
-        }
+    <!-- Custom CSS file link -->
+    <link rel="stylesheet" type="text/css" href="assets/css/admin_product.css">
 
-        th,
-        td {
-            padding: 8px;
-            text-align: center;
-        }
-
-        th {
-            background-color: #f4f4f4;
-        }
-
-        form {
-            margin: 20px 0;
-        }
-
-        button {
-            cursor: pointer;
-        }
-    </style>
 </head>
 
 <body>
-    <h1>Admin - Manage Products</h1>
 
-    <!-- Add Product Form -->
-    <form method="POST">
-        <input type="hidden" name="action" value="add">
-        <label>Name:</label> <input type="text" name="name" required><br>
-        <label>Category:</label> <input type="text" name="category" required><br>
-        <label>Brand:</label> <input type="text" name="brand" required><br>
-        <label>Size:</label> <input type="text" name="size" required><br>
-        <label>Color:</label> <input type="text" name="color" required><br>
-        <label>Stock:</label> <input type="number" name="stock" required><br>
-        <label>Price:</label> <input type="number" step="0.01" name="price" required><br>
-        <button type="submit">Add Product</button>
-    </form>
+    <div class=" container">
 
-    <!-- Products Table -->
-    <h2>Products</h2>
-    <table>
-        <tr>
-            <th>Name</th>
-            <th>Category</th>
-            <th>Brand</th>
-            <th>Size</th>
-            <th>Color</th>
-            <th>Stock</th>
-            <th>Price</th>
-            <th>Actions</th>
-        </tr>
-        <?php foreach ($products as $product): ?>
-            <tr>
-                <td><?= htmlspecialchars($product['name']) ?></td>
-                <td><?= htmlspecialchars($product['categories']) ?></td>
-                <td><?= htmlspecialchars($product['brand']) ?></td>
-                <td><?= htmlspecialchars($product['size']) ?></td>
-                <td><?= htmlspecialchars($product['color']) ?></td>
-                <td><?= $product['stock'] ?></td>
-                <td>$<?= number_format($product['price'], 2) ?></td>
-                <td>
-                    <form method="POST" style="display:inline;">
-                        <input type="hidden" name="action" value="delete">
-                        <input type="hidden" name="product_id" value="<?= $product['id'] ?>">
-                        <button type="submit" onclick="return confirm('Delete this product?')">Delete</button>
-                    </form>
-                </td>
-            </tr>
-        <?php endforeach; ?>
-    </table>
+        <div class="admin-product-form-container">
+
+            <form method="post" enctype="multipart/form-data">
+                <h3>Add a New Product</h3>
+                <input type="text" placeholder="Enter product name" name="product_name" class="box" required>
+
+
+                <select name="product_category" class="box" required>
+                    <option value="" disabled selected>Select Product Category</option>
+                    <?php foreach ($categories as $category): ?>
+                        <option value="<?= htmlspecialchars($category['id']); ?>"><?= htmlspecialchars($category['name']); ?></option>
+                    <?php endforeach; ?>
+                </select>
+
+                <select name="product_brand" class="box" required>
+                    <option value="" disabled selected>Select Product Brand</option>
+                    <?php foreach ($brands as $brand): ?>
+                        <option value="<?= htmlspecialchars($brand['id']); ?>"><?= htmlspecialchars($brand['name']); ?></option>
+                    <?php endforeach; ?>
+                </select>
+
+
+                <select name="product_size" class="box" required>
+                    <option value="" disabled selected>Select Product Size</option>
+                    <?php foreach ($sizes as $size): ?>
+                        <option value="<?= htmlspecialchars($size['id']); ?>"><?= htmlspecialchars($size['size']); ?></option> <!-- Displaying the size -->
+                    <?php endforeach; ?>
+                </select>
+
+
+                <input type="number" placeholder="Enter product price" name="product_price" class="box" required>
+                <input type="file" accept="image/png, image/jpeg, image/jpg" name="product_image" class="box" required>
+                <input type="submit" class="btn" name="add_product" value="Add Product">
+            </form>
+
+        </div>
+
+        <div class="product-display">
+            <table class="product-display-table">
+                <thead>
+                    <tr>
+                        <th>Product Image</th>
+                        <th>Product Name</th>
+                        <th>Product Category</th>
+                        <th>Product Brand</th>
+                        <th>Product Color</th>
+                        <th>Product Price</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($products as $product): ?>
+                        <tr>
+                            <td><img src="<?= htmlspecialchars($product['image1_display']); ?>" alt="Product Image" width="50"></td>
+                            <td><?= htmlspecialchars($product['name']); ?></td>
+                            <td><?= htmlspecialchars($product['category_name']); ?></td>
+                            <td><?= htmlspecialchars($product['brand_name']); ?></td>
+                            <td><?= htmlspecialchars($product['color']); ?></td>
+                            <td><?= htmlspecialchars($product['variant_price']); ?></td>
+                            <td>
+                                <a href="edit_product.php?id= <?= htmlspecialchars($product['id']); ?>" class="btn">Edit</a>
+                                <a href="delete_product.php?id=<?= htmlspecialchars($product['id']); ?>" class="btn">Delete</a>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+
 </body>
 
 </html>

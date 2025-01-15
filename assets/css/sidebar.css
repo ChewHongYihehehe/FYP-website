@@ -16,17 +16,23 @@ body{
     background-color: #eee;
 }
 
-#sidebar{
+#sidebar {
     position: fixed;
     top: 0;
     left: 0;
-    width: 280px;
+    width: 280px; /* Fixed width for the sidebar */
     height: 100%;
-    background-color: #f9f9f9 ;
+    background-color: #f9f9f9;
     z-index: 1000;
     font-family: 'Times New Roman', Times, serif;
     transition: .3s ease;
     overflow-x: hidden;
+}
+
+#content {
+    margin-left: 280px; /* Adjust this to match the sidebar width */
+    transition: .3s ease;
+    padding: 20px; /* Add padding for the content */
 }
 
 #sidebar.hide{

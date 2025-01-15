@@ -1,17 +1,13 @@
 <?php
 session_start();
-include 'connect.php'; // Ensure this file sets up the $conn variable
+include 'connect.php';
 
-if (!isset($_SESSION['admin_id'])) {
-    header("Location: admin_login.php");
-    exit();
-}
 
-$admin_id = $_SESSION['admin_id']; // Get the admin ID from the session
+$admin_id = $_SESSION['admin_id'];
 
-// Fetch the admin's profile data
+
 try {
-    $query = "SELECT admin_id, admin_name, admin_email, admin_phone, admin_status, age, gender, role FROM admin WHERE admin_id = :admin_id";
+    $query = "SELECT id, admin_name, admin_email, admin_phone, admin_status, age, gender, role FROM admin WHERE id = :admin_id"; // Ensure this matches the column name
     $stmt = $conn->prepare($query);
     $stmt->bindParam(':admin_id', $admin_id, PDO::PARAM_STR);
     $stmt->execute();
@@ -20,112 +16,121 @@ try {
     if (!$admin) {
         die("No admin found with ID $admin_id.");
     }
+
+    $fullname = $admin['admin_name'];
+    $email = $admin['admin_email'];
+    $phone = $admin['admin_phone'];
 } catch (PDOException $e) {
     die("Error fetching admin data: " . $e->getMessage());
 }
+
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $updated_fullname = $_POST['fullname'];
+    $updated_phone = $_POST['phone'];
+
+    try {
+        $update_query = "UPDATE admin SET admin_name = :fullname, admin_phone = :phone WHERE id = :admin_id"; // Ensure this matches the column name
+        $update_stmt = $conn->prepare($update_query);
+        $update_stmt->bindParam(':fullname', $updated_fullname);
+        $update_stmt->bindParam(':phone', $updated_phone);
+        $update_stmt->bindParam(':admin_id', $admin_id);
+        $update_stmt->execute();
+
+
+        header("Location: admin_profile.php");
+        exit();
+    } catch (PDOException $e) {
+        die("Error updating admin data: " . $e->getMessage());
+    }
+}
 ?>
-
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Profile</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f7f7f7;
-            margin: 20px;
-        }
-
-        h1 {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-
-        .profile-container {
-            width: 50%;
-            margin: 0 auto;
-            background-color: #ffffff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
-
-        .profile-container h2 {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-
-        .profile-details {
-            font-size: 16px;
-            line-height: 1.8;
-        }
-
-        .profile-details strong {
-            display: inline-block;
-            width: 120px;
-            text-align: right;
-            margin-right: 10px;
-        }
-
-        .form-container {
-            margin-top: 20px;
-        }
-
-        .form-container label {
-            font-size: 14px;
-            font-weight: bold;
-        }
-
-        .form-container input {
-            width: 100%;
-            padding: 10px;
-            margin-top: 5px;
-            margin-bottom: 15px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-        }
-
-        .form-container button {
-            width: 100%;
-            padding: 10px;
-            background-color: #28a745;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            font-size: 16px;
-        }
-
-        .form-container button:hover {
-            background-color: #218838;
-        }
-    </style>
-</head>
+<link rel="stylesheet" type="text/css" href="assets/css/admin_profile.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css">
 
 <body>
-    <h1>Admin Profile</h1>
-    <div class="profile-container">
-        <h2>Welcome, <?= htmlspecialchars($admin['admin_name']); ?></h2>
-        <div class="profile-details">
-            <p><strong>Admin ID:</strong> <?= htmlspecialchars($admin['admin_id']); ?></p>
-            <p><strong>Name:</strong> <?= htmlspecialchars($admin['admin_name']); ?></p>
-            <p><strong>Email:</strong> <?= htmlspecialchars($admin['admin_email']); ?></p>
-            <p><strong>Phone:</strong> <?= htmlspecialchars($admin['admin_phone']); ?></p>
-            <p><strong>Status:</strong> <?= htmlspecialchars($admin['admin_status']); ?></p>
-            <p><strong>Age:</strong> <?= htmlspecialchars($admin['age']); ?></p>
-            <p><strong>Gender:</strong> <?= htmlspecialchars($admin['gender']); ?></p>
-        </div>
+    <div class="container product_section_container">
+        <?php include 'sidebar.php'; ?>
+        <div class="row">
+            <div class="col product_section clearfix">
+                <div class="section">
+                    <div class="account">
+                        <div class="profile-text-container">
+                            <h1 class="profile-title">
+                                <span class="welcome-text">Welcome,</span> <?php echo htmlspecialchars($fullname); ?>
+                            </h1>
+                        </div>
+                        <div class="account-header">
+                            <h1 class="account-title">Personal Information</h1>
+                            <div class="btn-container">
+                                <button class="btn-save" id="editButton">Edit</button>
+                            </div>
+                        </div>
 
-        <div class="form-container">
-            <form method="POST">
-                <label for="new_password">Change Password</label>
-                <input type="password" id="new_password" name="new_password" placeholder="Enter new password" required>
-                <button type="submit">Update Password</button>
-            </form>
+                        <div class="account-edit">
+                            <div class="input-container">
+                                <label>Email</label>
+                                <div class="user-info"><?php echo htmlspecialchars($email); ?></div>
+                            </div>
+                        </div>
+
+                        <div class="account-edit">
+                            <div class="input-container">
+                                <label>Full Name</label>
+                                <div class="user-info"><?php echo htmlspecialchars($fullname); ?></div>
+                            </div>
+                        </div>
+
+                        <div class="account-edit">
+                            <div class="input-container">
+                                <label>Phone Number</label>
+                                <div class="user-info"><?php echo htmlspecialchars($phone); ?></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="editModal" class="modal">
+                        <div class="modal-content">
+                            <span class="close-button" id="closeModal">&times;</span>
+                            <div class="account-header">
+                                <h1 class="account-title">Edit Account</h1>
+                            </div>
+                            <form id="editForm" method="POST" action="">
+                                <div class="account-edit">
+                                    <div class="input-container">
+                                        <label>Email</label>
+                                        <div class="email-input-wrapper">
+                                            <input type="email" name="email" value="<?php echo htmlspecialchars($email); ?>" placeholder="Email" readonly />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="account-edit">
+                                    <div class="input-container">
+                                        <label>Full Name</label>
+                                        <input type="text" name="fullname" value="<?php echo htmlspecialchars($fullname); ?>" placeholder="Full Name" required />
+                                    </div>
+                                </div>
+
+                                <div class="account-edit">
+                                    <div class="input-container">
+                                        <label>Phone Number</label>
+                                        <input type="text" name="phone" value="<?php echo htmlspecialchars($phone); ?>" placeholder="Phone Number" required />
+                                    </div>
+                                </div>
+
+                                <div class="btn-container">
+                                    <button type="submit" class="btn-save">Save Changes</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
+
+    <script src="assets/js/profiles.js"></script>
 </body>
 
 </html>

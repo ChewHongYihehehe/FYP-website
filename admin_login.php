@@ -5,25 +5,25 @@ include 'connect.php'; // Ensure this file sets up the $conn variable
 $error = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $admin_id = $_POST['admin_id'];
+    $admin_email = trim($_POST['admin_email']);
     $admin_password = $_POST['admin_password'];
 
-    // Prepare a statement to prevent SQL injection
-    $stmt = $conn->prepare("SELECT admin_password, role FROM admin WHERE admin_id = :admin_id");
-    $stmt->bindParam(':admin_id', $admin_id);
+
+    $stmt = $conn->prepare("SELECT id, admin_password, role FROM admin WHERE admin_email = :admin_email");
+    $stmt->bindParam(':admin_email', $admin_email);
     $stmt->execute();
 
     if ($stmt->rowCount() > 0) {
-        $result = $stmt->fetch(PDO::FETCH_ASSOC); // Fetch the result as an associative array
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
         $hashed_password = $result['admin_password'];
-        $role = $result['role']; // Fetch the role
+        $role = $result['role'];
+        $admin_id = $result['id'];
 
-        // Verify the password
         if (password_verify($admin_password, $hashed_password)) {
             $_SESSION['admin_id'] = $admin_id;
+            $_SESSION['admin_email'] = $admin_email;
             $_SESSION['role'] = $role;
 
-            // Redirect based on role
             if ($role === 'super_admin') {
                 header("Location: super_admin.php");
                 exit();
@@ -32,13 +32,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 exit();
             }
         } else {
-            $error = "Invalid Admin ID or Password.";
+            $error = "Invalid Admin Email or Password.";
         }
     } else {
-        $error = "Invalid Admin ID or Password.";
+        $error = "Invalid Admin Email or Password.";
     }
 }
-
 $conn = null; // Close the database connection
 ?>
 <!DOCTYPE html>
@@ -59,8 +58,8 @@ $conn = null; // Close the database connection
         <?php endif; ?>
         <form method="POST" action="admin_login.php">
             <div class="inputbox">
-                <input type="text" name="admin_id" required>
-                <label for="admin_id">Admin ID</label>
+                <input type="text" name="admin_email" required>
+                <label for="admin_email">Admin Email</label>
             </div>
             <div class="inputbox">
                 <input type="password" name="admin_password" id="password-field" required>

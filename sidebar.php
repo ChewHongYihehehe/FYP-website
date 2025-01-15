@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>sidebar</title>
-    <link rel="stylesheet" href="assests/css/sidebar.css">
+    <link rel="stylesheet" href="assets/css/sidebar.css">
     <link href="https://cdn.jsdelivr.net/npm/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
 </head>
 
@@ -23,7 +23,7 @@
                 </a>
             </li>
             <li>
-                <a href="admin_product.html">
+                <a href="admin_product.php">
                     <i class='bx bxs-data'></i>
                     <span class="text">Product</span>
                 </a>
@@ -34,37 +34,37 @@
                     <span class="text">Category</span>
                 </a>
             <li>
-                <a href="admin_order.html">
+                <a href="admin_order.php">
                     <i class="bx bxs-doughnut-chart"></i>
                     <span class="text">Order</span>
                 </a>
             </li>
             <li>
-                <a href="admin_totalsale.html">
+                <a href="admin_total_sale.php">
                     <i class='bx bx-dollar'></i>
                     <span class="text">Total Sale</span>
                 </a>
             </li>
             <li>
-                <a href="admin_payment.html">
+                <a href="admin_payment.php">
                     <i class="bx bxs-wallet"></i>
                     <span class="text">Payment</span>
                 </a>
             </li>
             <li>
-                <a href="admin_message.html">
+                <a href="admin_message.php">
                     <i class="bx bxs-message-dots"></i>
                     <span class="text">Message</span>
                 </a>
             </li>
             <li>
-                <a href="admin_user.html">
+                <a href="admin_user.php">
                     <i class="bx bxs-user"></i>
                     <span class="text">User</span>
                 </a>
             </li>
             <li>
-                <a href="admin_a.html">
+                <a href="admin_a.php">
                     <i class='bx bxs-group'></i>
                     <span class="text">Admin</span>
                 </a>

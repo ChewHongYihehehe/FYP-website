@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,8 +8,9 @@
     <link rel="stylesheet" href="assests/css/sidebar.css">
     <link href="https://cdn.jsdelivr.net/npm/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
 </head>
+
 <body>
-    <section id="sidebar"> 
+    <section id="sidebar">
         <a href="#" class="brand">
             <i class='bx bx-smile'></i>
             <span class="text">Admin Dashboard</span>
@@ -68,7 +70,7 @@
                 </a>
             </li>
             <li>
-                <a href="admin_profile">
+                <a href="admin_profile.php">
                     <i class='bx bx-user-circle'></i>
                     <span class="text">My Profile</span>
                 </a>
@@ -83,4 +85,5 @@
     </section>
     <script src="path/to/sidebar.js"></script>
 </body>
+
 </html>

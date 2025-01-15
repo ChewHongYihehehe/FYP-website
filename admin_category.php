@@ -2,16 +2,9 @@
 
 include 'connect.php';
 
-$dsn = 'mysql:host=localhost;dbname=shoes_db;charset=utf8mb4';
-$username = 'root'; 
-$password = ''; 
 
-try {
-    $pdo = new PDO($dsn, $username, $password);
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-} catch (PDOException $e) {
-    die("Database connection failed: " . $e->getMessage());
-}
+
+
 
 // Handle add / delete / edit operations
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -73,41 +66,45 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 // Fetch data from categories table
-$categoriesStmt = $pdo->query("SELECT * FROM categories");
+$categoriesStmt = $conn->query("SELECT * FROM categories");
 $categories = $categoriesStmt->fetchAll(PDO::FETCH_ASSOC);
 
 // Fetch data from color table
-$colorStmt = $pdo->query("SELECT * FROM color");
+$colorStmt = $conn->query("SELECT * FROM color");
 $colors = $colorStmt->fetchAll(PDO::FETCH_ASSOC);
 
 // Fetch data from brand table
-$brandStmt = $pdo->query("SELECT * FROM brand");
+$brandStmt = $conn->query("SELECT * FROM brand");
 $brands = $brandStmt->fetchAll(PDO::FETCH_ASSOC);
 
 // Fetch data from size table
-$sizeStmt = $pdo->query("SELECT * FROM sizes");
+$sizeStmt = $conn->query("SELECT * FROM sizes");
 $sizes = $sizeStmt->fetchAll(PDO::FETCH_ASSOC);
 
 ?>
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Category Page</title>
     <style>
-            table {
+        table {
             width: 100%;
             border-collapse: collapse;
             margin-bottom: 20px;
         }
 
-        table, th, td {
+        table,
+        th,
+        td {
             border: 1px solid black;
         }
 
-        th, td {
+        th,
+        td {
             padding: 10px;
             text-align: left;
         }
@@ -337,7 +334,7 @@ $sizes = $sizeStmt->fetchAll(PDO::FETCH_ASSOC);
             </form>
         </div>
     </div>
-    
+
     <div id="editCategoryModal" class="modal">
         <div class="modal-content">
             <h3>Edit Category</h3>
@@ -359,7 +356,7 @@ $sizes = $sizeStmt->fetchAll(PDO::FETCH_ASSOC);
             </form>
         </div>
     </div>
-    
+
     <!-- Color -->
     <div id="addColorModal" class="modal">
         <div class="modal-content">
@@ -371,7 +368,7 @@ $sizes = $sizeStmt->fetchAll(PDO::FETCH_ASSOC);
             </form>
         </div>
     </div>
-    
+
     <div id="editColorModal" class="modal">
         <div class="modal-content">
             <h3>Edit Color</h3>
@@ -393,7 +390,7 @@ $sizes = $sizeStmt->fetchAll(PDO::FETCH_ASSOC);
             </form>
         </div>
     </div>
-    
+
     <!-- Brand -->
     <div id="addBrandModal" class="modal">
         <div class="modal-content">
@@ -427,7 +424,7 @@ $sizes = $sizeStmt->fetchAll(PDO::FETCH_ASSOC);
             </form>
         </div>
     </div>
-    
+
     <!-- Size -->
     <div id="addSizeModal" class="modal">
         <div class="modal-content">
@@ -462,4 +459,5 @@ $sizes = $sizeStmt->fetchAll(PDO::FETCH_ASSOC);
         </div>
     </div>
 </body>
+
 </html>

@@ -1,20 +1,18 @@
 <?php
-include 'connect.php'; 
-
 session_start();
+include 'connect.php'; // Ensure this file sets up the $conn variable
 
-// Check if the admin is logged in
 if (!isset($_SESSION['admin_id'])) {
-    die("Access denied. Please log in first.");
+    header("Location: admin_login.php");
+    exit();
 }
 
-// Get the logged-in admin's ID from the session
-$admin_id = $_SESSION['admin_id'];
+$admin_id = $_SESSION['admin_id']; // Get the admin ID from the session
 
 // Fetch the admin's profile data
 try {
-    $query = "SELECT admin_id, admin_name, admin_email, admin_phone, admin_status, age, gender FROM admin WHERE admin_id = :admin_id";
-    $stmt = $db->prepare($query);
+    $query = "SELECT admin_id, admin_name, admin_email, admin_phone, admin_status, age, gender, role FROM admin WHERE admin_id = :admin_id";
+    $stmt = $conn->prepare($query);
     $stmt->bindParam(':admin_id', $admin_id, PDO::PARAM_STR);
     $stmt->execute();
     $admin = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -25,30 +23,11 @@ try {
 } catch (PDOException $e) {
     die("Error fetching admin data: " . $e->getMessage());
 }
-
-// Handle password change
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['new_password'])) {
-    $new_password = $_POST['new_password'];
-    if (!empty($new_password)) {
-        try {
-            $hashed_password = password_hash($new_password, PASSWORD_DEFAULT); // Hash the new password
-            $update_query = "UPDATE admin SET admin_password = :new_password WHERE admin_id = :admin_id";
-            $update_stmt = $db->prepare($update_query);
-            $update_stmt->bindParam(':new_password', $hashed_password, PDO::PARAM_STR);
-            $update_stmt->bindParam(':admin_id', $admin_id, PDO::PARAM_STR);
-            $update_stmt->execute();
-            echo "<script>alert('Password updated successfully!');</script>";
-        } catch (PDOException $e) {
-            die("Error updating password: " . $e->getMessage());
-        }
-    } else {
-        echo "<script>alert('Password cannot be empty!');</script>";
-    }
-}
 ?>
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -124,6 +103,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['new_password'])) {
         }
     </style>
 </head>
+
 <body>
     <h1>Admin Profile</h1>
     <div class="profile-container">
@@ -147,4 +127,5 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['new_password'])) {
         </div>
     </div>
 </body>
+
 </html>

@@ -1,0 +1,107 @@
+body {
+    font-family: Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    background-color: #f9f9f9;
+}
+
+.login-container {
+    text-align: center;
+    background: white;
+    padding: 20px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+    width: 600px;
+}
+
+.logo {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.logo img {
+    max-height: 80px;
+    margin: 0 10px;
+}
+
+.login-container h3 {
+    margin-bottom: 20px;
+    font-size: 18px;
+    color: #333;
+}
+
+.form-group {
+    position: relative;
+    margin-bottom: 20px;
+}
+
+input {
+    width: 100%;
+    padding: 10px 0; /* Adjust padding to only top and bottom */
+    font-size: 16px;
+    border: none; /* Remove all borders */
+    border-bottom: 2px solid #ccc; /* Add a bottom border */
+    outline: none; /* Remove outline on focus */
+    transition: border-bottom-color 0.3s; /* Smooth transition for focus */
+}
+
+input:focus {
+    border-bottom-color: #d43f3a; /* Change bottom border color on focus */
+}
+
+.form-error {
+    position: absolute;
+    bottom: -20px;
+    left: 0;
+    font-size: 14px;
+    color: #d43f3a;
+}
+
+.cancel-icon {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #d43f3a;
+    font-size: 12px;
+}
+
+.btn {
+    background-color: #d43f3a;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    font-size: 16px;
+    border-radius: 5px;
+    cursor: pointer;
+    width: 100%;
+}
+
+.btn:hover {
+    background-color: #b93732;
+}
+
+.back {
+    margin-top: 10px;
+    font-size: 16px;
+    margin-right:17px;
+}
+
+.back a {
+    color: #d43f3a;
+    text-decoration: none;
+    align-items: center;
+}
+
+.back a i {
+    margin-right: 5px;
+}
+
+.back a:hover {
+    text-decoration: underline;
+}

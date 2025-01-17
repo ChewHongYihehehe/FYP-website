@@ -9,17 +9,18 @@ if (!isset($_SESSION['user_id'])) {
 }
 
 // Check if product ID is provided
-if (!isset($_POST['product_id'])) {
+if (!isset($_POST['product_id']) || (!isset($_POST['color']))) {
     echo "error_no_product";
     exit();
 }
 
 
 // Prepare and execute delete query
-$delete_query = "DELETE FROM wishlist WHERE user_id = :user_id AND product_id = :product_id";
+$delete_query = "DELETE FROM wishlist WHERE user_id = :user_id AND product_id = :product_id AND color = :color";
 $stmt = $conn->prepare($delete_query);
 $stmt->bindParam(':user_id', $_SESSION['user_id'], PDO::PARAM_INT);
 $stmt->bindParam(':product_id', $_POST['product_id'], PDO::PARAM_INT);
+$stmt->bindParam(':color', $_POST['color'], PDO::PARAM_STR);
 $result = $stmt->execute();
 
 if ($result) {

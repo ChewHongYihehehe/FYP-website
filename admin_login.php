@@ -1,65 +1,68 @@
-/* got some problem and will make correction soon
-
 <?php
-
-include 'connect.php'; // Ensure your database connection is correct
 session_start();
+include 'connect.php'; // Ensure this file sets up the $conn variable
 
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $admin_id = $_POST["admin_id"];
-    $admin_password = $_POST["admin_password"];
+$error = '';
 
-    try {
-        // Prepare SQL query
-        $stmt = $conn->prepare("SELECT * FROM admin WHERE admin_id = :admin_id");
-        $stmt->bindParam(':admin_id', $admin_id);
-        $stmt->execute();
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $admin_id = $_POST['admin_id'];
+    $admin_password = $_POST['admin_password'];
 
-        // Fetch the result
-        if ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-            $stored_password = $row['admin_password'];
+    // Prepare a statement to prevent SQL injection
+    $stmt = $conn->prepare("SELECT admin_password, role FROM admin WHERE admin_id = :admin_id");
+    $stmt->bindParam(':admin_id', $admin_id);
+    $stmt->execute();
 
-            // Verify the password
-            if (password_verify($admin_password, $stored_password) || $stored_password === $admin_password) {
-                // If password matches
-                $_SESSION['admin_id'] = $row['admin_id'];
+    if ($stmt->rowCount() > 0) {
+        $result = $stmt->fetch(PDO::FETCH_ASSOC); // Fetch the result as an associative array
+        $hashed_password = $result['admin_password'];
+        $role = $result['role']; // Fetch the role
 
-                // Redirect to profile page
-                header('location:admin_profile.php');
+        // Verify the password
+        if (password_verify($admin_password, $hashed_password)) {
+            $_SESSION['admin_id'] = $admin_id;
+            $_SESSION['role'] = $role;
+
+            // Redirect based on role
+            if ($role === 'super_admin') {
+                header("Location: super_admin.php");
                 exit();
             } else {
-                echo "<script>alert('Incorrect admin ID or password!');</script>";
+                header("Location: admin.php");
+                exit();
             }
         } else {
-            echo "<script>alert('Incorrect admin ID or password!');</script>";
+            $error = "Invalid Admin ID or Password.";
         }
-    } catch (PDOException $e) {
-        echo "Error: " . $e->getMessage();
+    } else {
+        $error = "Invalid Admin ID or Password.";
     }
 }
-?>
 
+$conn = null; // Close the database connection
+?>
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
-    <title>Login Page</title>
-    <link rel="stylesheet" href="assets/css/admin_login.css">
+    <title>Admin Login</title>
+    <link rel="stylesheet" type="text/css" href="assets/css/admin_login.css">
 </head>
+
 <body>
-    <div class="form-box">
-        <h2>Login</h2>
-        <form method="post" action="login.php">
+    <div class="form-container">
+        <h2>Admin Login</h2>
+        <?php if (!empty($error)): ?>
+            <div class="error"><?= htmlspecialchars($error); ?></div>
+        <?php endif; ?>
+        <form method="POST" action="admin_login.php">
             <div class="inputbox">
-                <i class="fa fa-user"></i>
                 <input type="text" name="admin_id" required>
                 <label for="admin_id">Admin ID</label>
             </div>
             <div class="inputbox">
-                <i class="fa fa-lock"></i>
                 <input type="password" name="admin_password" id="password-field" required>
                 <label for="admin_password">Password</label>
             </div>
@@ -79,4 +82,5 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
     </script>
 </body>
+
 </html>

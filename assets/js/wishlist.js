@@ -9,6 +9,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
             // Get the product ID
             const productId = this.getAttribute('data-product-id');
+            const productColor = this.getAttribute('data-color');
             const productItem = this.closest('.product-item');
 
             // Confirm removal
@@ -16,6 +17,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Create FormData to send the request
                 const formData = new FormData();
                 formData.append('product_id', productId);
+                formData.append('color', productColor);
 
                 // Send AJAX request using fetch
                 fetch('remove_wishlist_item.php', {

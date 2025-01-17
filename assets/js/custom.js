@@ -521,6 +521,16 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 
+
+
+
+
+
+
+
+
+
+
 document.addEventListener('DOMContentLoaded', function() {
     function setupAddToCart() {
         const quickAddButtons = document.querySelectorAll('.quick-add-button');
@@ -696,8 +706,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
 });
-document.addEventListener('DOMContentLoaded', function() {
-    // Handle favorite icon clicks
+
+
+
+
     document.querySelectorAll('.favorite').forEach(favoriteIcon => {
         favoriteIcon.addEventListener('click', function(e) {
             e.preventDefault();
@@ -711,7 +723,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const color = activeColorCircle ? activeColorCircle.style.backgroundColor : 'Unknown';
 
             // Determine action based on current state
-            const heartIcon = this.querySelector('i');
+            const heartIcon = this.querySelector('i ');
             const isCurrentlyFavorited = heartIcon.classList.contains('fas');
             const action = isCurrentlyFavorited ? 'remove' : 'add';
 
@@ -747,5 +759,46 @@ document.addEventListener('DOMContentLoaded', function() {
                 showToast('Failed to update wishlist', 'error');
             });
         });
-    });
+
+
+			function checkWishlistStatus() {
+				const productItems = document.querySelectorAll('.product-item');
+		
+				productItems.forEach(productItem => {
+					const productId = productItem.getAttribute('data-product-id');
+					const color = productItem.getAttribute('data-color'); // Assuming you have a data-color attribute
+		
+					// Make an AJAX request to check the wishlist status
+					fetch('check_wishlist.php', {
+						method: 'POST',
+						headers: {
+							'Content-Type': 'application/x-www-form-urlencoded',
+						},
+						body: `product_id=${productId}&color=${encodeURIComponent(color)}`
+					})
+					.then(response => response.json())
+					.then(data => {
+						if (data.success) {
+							const heartIcon = productItem.querySelector('.favorite i');
+							if (data.is_favorited) {
+								heartIcon.classList.add('fas'); // Filled heart
+								heartIcon.classList.remove('far'); // Empty heart
+								heartIcon.style.color = '#fe4c50'; // Change color to indicate it's favorited
+							} else {
+								heartIcon.classList.remove('fas'); // Filled heart
+								heartIcon.classList.add('far'); // Empty heart
+								heartIcon.style.color = '#b9b4c7'; // Reset color to indicate it's not favorited
+							}
+						} else {
+							console.error('Error checking wishlist status:', data.message);
+						}
+					})
+					.catch(error => {
+						console.error('Error:', error);
+					});
+				});
+			}
+		
+			// Call the function to check wishlist status
+			checkWishlistStatus();
 });

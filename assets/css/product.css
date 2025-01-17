@@ -1,18 +1,15 @@
-body{
-    margin:0;
-    font-family:
-        'PT Sans', sans-serif;
-    background: #f1f1f1;
+body.product{
+    margin-top:0px;
 }
 
-*{box-sizing: border-box;}
+body.product *{box-sizing: border-box;}
 
-a{
+.product a{
     color: #111;
     text-decoration:none;
 }
 
-p{
+.product p{
     line-height: 25px;
 }
 
@@ -22,19 +19,19 @@ main small{
     color: #a7a7a7;
 }
 
-ul{
+.product ul{
     list-style: none;
     padding:0;
     margin:0;
 }
 
-.container{
+.product-container{
     padding: 2em 2em 0 2em;
     max-width: 1350px;
     margin: 0 auto;
 }
 
-nav{
+.product nav{
     display: flex;
     justify-content: space-between;
     align-items:center;
@@ -58,11 +55,11 @@ main{
     min-height: 75vh;
 }
 
-.title{
+.product title{
     position:relative;
 }
 
-.title .titleOverlay{
+.product .title .titleOverlay{
     display:block;
     position: absolute;
     top:0;
@@ -76,7 +73,7 @@ main{
     transform-origin: top left;
 }
 
-.titleText{
+.product .titleText{
     color: #111;
 }
 
@@ -116,7 +113,7 @@ main{
 
 .options > div,
 .options > ul {
-    padding: 0.6em 0;
+    padding: 1.5em 0;
 }
 
 .sizes li{
@@ -242,6 +239,23 @@ main{
     background: #000;
 }
 
+.product-favorite {
+    cursor: pointer; /* Change cursor to pointer for better UX */
+    margin-left: 1em; /* Add some space between the button and the icon */
+    display: inline-block; /* Ensure it behaves like an inline element */
+}
+
+.product-favorite i {
+    font-size: 1.5em; /* Adjust the size of the heart icon */
+    color: #b9b4c7; /* Default color for the heart icon */
+    transition: color 0.3s ease; /* Smooth transition for color change */
+}
+
+.product-favorite i.fas {
+    color: #fe4c50; /* Color when the heart is filled (favorited) */
+}
+
+
 @media screen and(
     min-width: 1250px;
 ){
@@ -349,3 +363,4 @@ main{
         transform: scaleY(1)
     }
 }
+

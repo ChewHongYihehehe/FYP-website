@@ -5,20 +5,151 @@ document.addEventListener('DOMContentLoaded', function() {
     const mastercardLogo = document.querySelector('.icons img[src*="mastercard"]');
     const expiryInput = document.querySelector('input[placeholder="MM/YY"]');
     const cvvInput = document.getElementById('cvv');
+    const cardholderNameInput = document.getElementById('cardholder-name');
+    const paymentForm = document.getElementById('payment-form');
+    const debitCardInput = document.getElementById('debit-card');
+    const onlineBankInput = document.getElementById('online-bank');
+    const bankSelection = document.getElementById('bank-selection');
+    const showOtherAddressesButton = document.getElementById('showOtherAddresses');
+    const otherAddressesDiv = document.getElementById('otherAddresses');
+    const placeOrderButton = document.getElementById('place-order-btn');
+    const proceedButton = document.getElementById('proceed-btn');
+    const paymentSubmitForm = document.getElementById('PaymentForm');
 
-    //Create CVV tooltip
-    function createCVVTooltip(){
-        const tooltipContainer = document.createElement('div');
-        tooltipContainer.classList.add('cvv-tooltip');
-        tooltipContainer.innerHTML = `
-            <div class="cvv-tooltip-content">
-                <p>3-digit security code usually found on the back of your card</p>
-                <img src=""`
-    }
+
+
+
+
+    proceedButton.addEventListener('click', function(event) {
+        event.preventDefault(); // Prevent default form submission
+        let isValid = true;
+
+    
+        // Remove existing error messages
+        removeExistingError(cardholderNameInput);
+        removeExistingError(cardNumberInput);
+        removeExistingError(expiryInput);
+        removeExistingError(cvvInput);
+
+
+        // Validate Cardholder's name
+        if (cardholderNameInput.value.trim() === '') {
+            createErrorMessage(cardholderNameInput, 'Cardholder\'s name is required.', 'cardholder-error');
+            isValid = false;
+        }
+
+        // Validate Card Number
+        const cardNumber = cardNumberInput.value.replace(/\D/g, '');
+        if (cardNumber.length !== 16) {
+            createErrorMessage(cardNumberInput, 'Card number must be 16 digits.', 'card-error');
+            isValid = false;
+        }
+
+         // Validate Expiry Date
+         const expiryValue = expiryInput.value.replace(/\D/g, '');
+         if (expiryValue.length !== 4) {
+             createErrorMessage(expiryInput, 'Expiry date must be in MM/YY format.', 'expiry-error');
+             isValid = false;
+         }
+ 
+         // Validate CVV
+         const cvvValue = cvvInput.value.replace(/\D/g, '');
+         if (cvvValue.length !== 3) {
+             createErrorMessage(cvvInput, 'CVV must be 3 digits.', 'cvv-error');
+             isValid = false;
+         }
+ 
+         if (isValid) {
+             // Proceed with form submission or further processing
+             paymentSubmitForm.submit();
+         }
+    });
+
+
+
+
+
+
+
+    
+// Place Order button functionality
+    placeOrderButton.addEventListener('click', function(event) {
+        event.preventDefault(); // Prevent default anchor behavior
+        const cimbBankSelected = document.getElementById('cimb-bank').checked;
+
+        if (cimbBankSelected) {
+            // Redirect to cimb_login.php
+            window.location.href = 'cimb_login.php';
+        } else {
+            // Show alert if CIMB Bank is not selected
+            alert('Please select CIMB Bank before placing the order.');
+        }
+    });
+
+    showOtherAddressesButton.addEventListener('click', function(event) {
+        event.stopPropagation(); // Prevent event bubbling
+        console.log("Show Other Addresses element clicked");
+        const isVisible = window.getComputedStyle(otherAddressesDiv).display !== "none";
+        if (!isVisible) {
+            otherAddressesDiv.style.display = "block";
+            this.textContent = "Hide Other Addresses";
+            console.log("Other addresses shown");
+        } else {
+            otherAddressesDiv.style.display = "none";
+            this.textContent = "Show Other Addresses";
+            console.log("Other addresses hidden");
+        }
+    });
+
+    const shippingAddresses = document.querySelectorAll('.shipping-address');
+    shippingAddresses.forEach(address =>{
+        address.addEventListener('click', function(){
+            shippingAddresses.forEach(addr => addr.classList.remove('selected'));
+
+            this.classList.add('selected');
+        });
+    });
+
+
+    cardholderNameInput.addEventListener('keypress', function(e) {
+        const char = String.fromCharCode(e.which);
+        // Allow letters, spaces, and common punctuation
+        if (!/^[a-zA-Z\s.,'-]*$/.test(char)) {
+            e.preventDefault();
+        }
+    });
+
+
+    cvvInput.addEventListener('input', function(){
+        let value = this.value.replace(/\D/g,'');
+
+        value = value.slice(0,3);
+
+        this.value = value;
+
+        removeExistingError(this);
+
+        // Validate CVV
+        if (value.length > 0 && value.length < 3) {
+            createErrorMessage(this, 'CVV must be 3 digits.', 'cvv-error');
+        }
+        
+    });
+
+    // Prevent non-numeric input for CVV
+    cvvInput.addEventListener('keypress', function(e) {
+        const char = String.fromCharCode(e.which);
+        if (!/^\d$/.test(char)) {
+            e.preventDefault();
+        }
+    });
 
     function removeExistingError(element){
         const existingError = element.nextElementSibling;
-        if(existingError && (existingError.classList.contains('card-error') || existingError.classList.contains('expiry-error'))){
+        if(existingError && (existingError.classList.contains('card-error') || 
+        existingError.classList.contains('expiry-error') || 
+        existingError.classList.contains('cvv-error')
+        )){
             existingError.remove();
         }
     }
@@ -120,4 +251,26 @@ document.addEventListener('DOMContentLoaded', function() {
             e.preventDefault();
         }
     });
+
+
+
+    
+    // Initialize payment method display
+    const paymentMethods = document.querySelectorAll('.payment-methods div');
+    paymentMethods.forEach(method => {
+        method.addEventListener('click', function() {
+            if (this.classList.contains('onlineBankMethod')) {
+                onlineBankInput.checked = true;
+                bankSelection.style.display = 'block';
+                paymentForm.style.display = 'none';
+            } else if (this.classList.contains('debitCardMethod')) {
+                debitCardInput.checked = true;
+                paymentForm.style.display = 'block';
+                bankSelection.style.display = 'none';
+            }
+        });
+    });
+
+    
+
 });

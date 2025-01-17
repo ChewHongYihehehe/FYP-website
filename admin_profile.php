@@ -1,28 +1,19 @@
 <?php
-// Start the session
 session_start();
+include 'connect.php'; // Ensure this file sets up the $conn variable
 
-// Database connection using PDO
-try {
-    $db = new PDO('sqlite:shoes_db'); // Ensure 'shoes_db' is the correct file path
-    $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-} catch (PDOException $e) {
-    die("Database connection failed: " . $e->getMessage());
-}
-
-// Check if the admin is logged in
 if (!isset($_SESSION['admin_id'])) {
-    die("Access denied. Please log in first.");
+    header("Location: admin_login.php");
+    exit();
 }
 
-// Get the logged-in admin's ID from the session
-$admin_id = $_SESSION['admin_id'];
+$admin_id = $_SESSION['admin_id']; // Get the admin ID from the session
 
 // Fetch the admin's profile data
 try {
-    $query = "SELECT admin_id, admin_name, admin_email, admin_phone, admin_status FROM admin WHERE admin_id = :admin_id";
-    $stmt = $db->prepare($query);
-    $stmt->bindParam(':admin_id', $admin_id, PDO::PARAM_INT);
+    $query = "SELECT admin_id, admin_name, admin_email, admin_phone, admin_status, age, gender, role FROM admin WHERE admin_id = :admin_id";
+    $stmt = $conn->prepare($query);
+    $stmt->bindParam(':admin_id', $admin_id, PDO::PARAM_STR);
     $stmt->execute();
     $admin = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -36,6 +27,7 @@ try {
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -77,8 +69,41 @@ try {
             text-align: right;
             margin-right: 10px;
         }
+
+        .form-container {
+            margin-top: 20px;
+        }
+
+        .form-container label {
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .form-container input {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        .form-container button {
+            width: 100%;
+            padding: 10px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        .form-container button:hover {
+            background-color: #218838;
+        }
     </style>
 </head>
+
 <body>
     <h1>Admin Profile</h1>
     <div class="profile-container">
@@ -89,7 +114,18 @@ try {
             <p><strong>Email:</strong> <?= htmlspecialchars($admin['admin_email']); ?></p>
             <p><strong>Phone:</strong> <?= htmlspecialchars($admin['admin_phone']); ?></p>
             <p><strong>Status:</strong> <?= htmlspecialchars($admin['admin_status']); ?></p>
+            <p><strong>Age:</strong> <?= htmlspecialchars($admin['age']); ?></p>
+            <p><strong>Gender:</strong> <?= htmlspecialchars($admin['gender']); ?></p>
+        </div>
+
+        <div class="form-container">
+            <form method="POST">
+                <label for="new_password">Change Password</label>
+                <input type="password" id="new_password" name="new_password" placeholder="Enter new password" required>
+                <button type="submit">Update Password</button>
+            </form>
         </div>
     </div>
 </body>
+
 </html>

@@ -1,5 +1,9 @@
 <?php
 require 'connect.php'; // Include the database connection
+require 'vendor/autoload.php'; // Autoload PHPMailer
+
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
 
 $registration_successful = false; // Flag to check if registration was successful
 $error_message = ""; // Variable to hold error messages
@@ -31,24 +35,50 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         if ($stmt->rowCount() > 0) {
             $error_message = "An account with this email already exists.";
         } else {
+            // Generate verification token
+            $verification_token = bin2hex(random_bytes(50));
+            $hashed_password = password_hash($password, PASSWORD_DEFAULT); // Hash the password
+
             // Insert new user into the database
-            $insert_query = "INSERT INTO users (fullname, email, phone, password) VALUES (:fullname, :email, :phone, :password)";
+            $insert_query = "INSERT INTO users (fullname, email, phone, password, verification_token, is_verified) VALUES (:fullname, :email, :phone, :password, :verification_token, 0)";
             $stmt = $conn->prepare($insert_query);
+            $stmt->bindParam(':fullname', $username, PDO::PARAM_STR);
+            $stmt->bindParam(':email', $email, PDO::PARAM_STR);
+            $stmt->bindParam(':phone', $phone, PDO::PARAM_STR);
+            $stmt->bindParam(':password', $hashed_password, PDO::PARAM_STR);
+            $stmt->bindParam(':verification_token', $verification_token, PDO::PARAM_STR);
 
-            if ($stmt) {
-                $hashed_password = password_hash($password, PASSWORD_DEFAULT); // Hash the password
-                $stmt->bindParam(':fullname', $username, PDO::PARAM_STR);
-                $stmt->bindParam(':email', $email, PDO::PARAM_STR);
-                $stmt->bindParam(':phone', $phone, PDO::PARAM_STR);
-                $stmt->bindParam(':password', $hashed_password, PDO::PARAM_STR);
+            if ($stmt->execute()) {
+                // Send verification email
+                $verification_link = "http://localhost/FYP-website/verify.php?token=" . $verification_token;
 
-                if ($stmt->execute()) {
+                $mail = new PHPMailer(true);
+                try {
+                    // Server settings
+                    $mail->isSMTP();
+                    $mail->Host = 'smtp.gmail.com';
+                    $mail->SMTPAuth = true;
+                    $mail->Username = 'huangjiaze81@gmail.com'; // Replace with your email
+                    $mail->Password = 'eqygfyfgaoywwvqj'; // Replace with your app password
+                    $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+                    $mail->Port = 587;
+
+                    // Recipients
+                    $mail->setFrom('huangjiaze81@gmail.com', 'Step Shoes Shop');
+                    $mail->addAddress($email);
+
+                    // Content
+                    $mail->isHTML(true);
+                    $mail->Subject = 'Email Verification';
+                    $mail->Body = "Hi $username,<br><br>Please verify your email by clicking on the link below:<br><a href='$verification_link'>$verification_link</a><br><br>Thank you!";
+
+                    $mail->send();
                     $registration_successful = true; // Set success flag
-                } else {
-                    $error_message = "Database error: " . $stmt->errorInfo()[2];
+                } catch (Exception $e) {
+                    $error_message = "Registration successful, but verification email could not be sent. Mailer Error: {$mail->ErrorInfo}";
                 }
             } else {
-                $error_message = "Error preparing statement: " . $conn->errorInfo()[2];
+                $error_message = "Database error: " . $stmt->errorInfo()[2];
             }
         }
     }
@@ -114,7 +144,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         </div>
     </section>
 
-    <script src="https://unpkg.com/ionicons@5.5.2/dist/ionicons.js"></script>
     <script>
         function checkPasswordMatch() {
             const password = document.getElementById("password").value;
@@ -148,8 +177,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     <?php if ($registration_successful): ?>
         <script>
-            alert("Registration successful! You can now log in.");
-            window.location.href = "login.php";
+            alert("Registration successful! A verification email has been sent to your email address. Please verify to complete the process.");
         </script>
     <?php endif; ?>
 </body>

@@ -22,7 +22,7 @@
     <main>
         <section class="about-section">
             <div class="container">
-                <h2>About</h2>
+                <h2>About Us</h2>
                 <p>Welcome to <strong>Step Online Shoes Shop</strong>, your ultimate destination for trendy and comfortable footwear. We take pride in offering a curated selection of shoes that cater to all styles and preferences.</p>
                 <p>Our journey began with a simple vision: to make stylish and quality footwear accessible to everyone, especially teenagers looking to express their unique personalities. From casual sneakers to formal footwear, we’ve got you covered.</p>
                 <p>With an emphasis on quality, affordability, and exceptional customer service, we aim to provide a seamless shopping experience. Explore our collection and step into style with every purchase.</p>

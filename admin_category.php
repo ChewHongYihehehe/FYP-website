@@ -1,86 +1,99 @@
 <?php
-
 include 'connect.php';
+session_start();
 
+// Fetch categories
+$categories = [];
+$stmt = $conn->prepare("SELECT * FROM categories");
+$stmt->execute();
+$categories = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
+if (isset($_POST['add_category'])) {
+    $category_name = $_POST['category_name'];
 
+    // Handle file upload
+    if (isset($_FILES['category_image']) && $_FILES['category_image']['error'] == 0) {
+        $target_dir = "assets/image/";
 
+        // Create directory if it doesn't exist
+        if (!file_exists($target_dir)) {
+            mkdir($target_dir, 0777, true);
+        }
 
-// Handle add / delete / edit operations
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if (isset($_POST['add_category'])) {
-        $name = $_POST['name'];
-        $stmt = $pdo->prepare("INSERT INTO categories (name) VALUES (:name)");
-        $stmt->execute(['name' => $name]);
-    } elseif (isset($_POST['edit_category'])) {
-        $id = $_POST['id'];
-        $name = $_POST['name'];
-        $stmt = $pdo->prepare("UPDATE categories SET name = :name WHERE id = :id");
-        $stmt->execute(['id' => $id, 'name' => $name]);
-    } elseif (isset($_POST['delete_category'])) {
-        $id = $_POST['id'];
-        $stmt = $pdo->prepare("DELETE FROM categories WHERE id = :id");
-        $stmt->execute(['id' => $id]);
-    } elseif (isset($_POST['add_color'])) {
-        $name = $_POST['color_name'];
-        $stmt = $pdo->prepare("INSERT INTO color (color_name) VALUES (:color_name)");
-        $stmt->execute(['color_name' => $name]);
-    } elseif (isset($_POST['edit_color'])) {
-        $id = $_POST['id'];
-        $name = $_POST['color_name'];
-        $stmt = $pdo->prepare("UPDATE color SET color_name = :color_name WHERE id = :id");
-        $stmt->execute(['id' => $id, 'color_name' => $name]);
-    } elseif (isset($_POST['delete_color'])) {
-        $id = $_POST['id'];
-        $stmt = $pdo->prepare("DELETE FROM color WHERE id = :id");
-        $stmt->execute(['id' => $id]);
-    } elseif (isset($_POST['add_brand'])) {
-        $name = $_POST['brand_name'];
-        $stmt = $pdo->prepare("INSERT INTO brand (name) VALUES (:name)");
-        $stmt->execute(['name' => $name]);
-    } elseif (isset($_POST['edit_brand'])) {
-        $id = $_POST['id'];
-        $name = $_POST['brand_name'];
-        $stmt = $pdo->prepare("UPDATE brand SET name = :name WHERE id = :id");
-        $stmt->execute(['id' => $id, 'name' => $name]);
-    } elseif (isset($_POST['delete_brand'])) {
-        $id = $_POST['id'];
-        $stmt = $pdo->prepare("DELETE FROM brand WHERE id = :id");
-        $stmt->execute(['id' => $id]);
-    } elseif (isset($_POST['add_size'])) {
-        $value = $_POST['size'];
-        $stmt = $pdo->prepare("INSERT INTO sizes (size) VALUES (:size)");
-        $stmt->execute(['size' => $value]);
-    } elseif (isset($_POST['edit_size'])) {
-        $id = $_POST['id'];
-        $value = $_POST['size'];
-        $stmt = $pdo->prepare("UPDATE sizes SET size = :size WHERE id = :id");
-        $stmt->execute(['id' => $id, 'size' => $value]);
-    } elseif (isset($_POST['delete_size'])) {
-        $id = $_POST['id'];
-        $stmt = $pdo->prepare("DELETE FROM sizes WHERE id = :id");
-        $stmt->execute(['id' => $id]);
+        // Generate unique filename
+        $file_extension = pathinfo($_FILES['category_image']['name'], PATHINFO_EXTENSION);
+        $unique_filename = uniqid() . '.' . $file_extension;
+        $target_file = $target_dir . $unique_filename;
+
+        // Move uploaded file
+        if (move_uploaded_file($_FILES['category_image']['tmp_name'], $target_file)) {
+            // Prepare SQL to insert new category with image
+            $stmt = $conn->prepare("INSERT INTO categories (name, image) VALUES (:name, :image)");
+            $stmt->bindParam(':name', $category_name);
+            $stmt->bindParam(':image', $unique_filename);
+        } else {
+            $error_message = "Sorry, there was an error uploading your file.";
+        }
+    } else {
+        // Prepare SQL to insert new category without image
+        $stmt = $conn->prepare("INSERT INTO categories (name) VALUES (:name)");
+        $stmt->bindParam(':name', $category_name);
     }
-    header("Location: " . $_SERVER['PHP_SELF']);
-    exit;
+
+    // Execute the statement
+    if ($stmt->execute()) {
+        header("Location: admin_category.php");
+        exit();
+    } else {
+        $error_message = "Error adding category.";
+    }
 }
 
-// Fetch data from categories table
-$categoriesStmt = $conn->query("SELECT * FROM categories");
-$categories = $categoriesStmt->fetchAll(PDO::FETCH_ASSOC);
 
-// Fetch data from color table
-$colorStmt = $conn->query("SELECT * FROM color");
-$colors = $colorStmt->fetchAll(PDO::FETCH_ASSOC);
+// Handle editing a category
+if (isset($_POST['edit_category'])) {
+    $category_id = $_POST['category_id'];
+    $category_name = $_POST['category_name'];
 
-// Fetch data from brand table
-$brandStmt = $conn->query("SELECT * FROM brand");
-$brands = $brandStmt->fetchAll(PDO::FETCH_ASSOC);
+    // Handle file upload
+    if (isset($_FILES['category_image']) && $_FILES['category_image']['error'] == 0) {
+        $target_dir = "assets/image/";
 
-// Fetch data from size table
-$sizeStmt = $conn->query("SELECT * FROM sizes");
-$sizes = $sizeStmt->fetchAll(PDO::FETCH_ASSOC);
+        // Create directory if it doesn't exist
+        if (!file_exists($target_dir)) {
+            mkdir($target_dir, 0777, true);
+        }
 
+        // Generate unique filename
+        $file_extension = pathinfo($_FILES['category_image']['name'], PATHINFO_EXTENSION);
+        $unique_filename = uniqid() . '.' . $file_extension;
+        $target_file = $target_dir . $unique_filename;
+
+        // Move uploaded file
+        if (move_uploaded_file($_FILES['category_image']['tmp_name'], $target_file)) {
+            // Prepare SQL to update with new image
+            $stmt = $conn->prepare("UPDATE categories SET name = :name, image = :image WHERE id = :id");
+            $stmt->bindParam(':name', $category_name);
+            $stmt->bindParam(':image', $unique_filename);
+            $stmt->bindParam(':id', $category_id, PDO::PARAM_INT);
+        } else {
+            $error_message = "Sorry, there was an error uploading your file.";
+        }
+    } else {
+        // Update category without changing the image
+        $stmt = $conn->prepare("UPDATE categories SET name = :name WHERE id = :id");
+        $stmt->bindParam(':name', $category_name);
+        $stmt->bindParam(':id', $category_id, PDO::PARAM_INT);
+    }
+
+    // Execute the statement
+    if ($stmt->execute()) {
+        header("Location: admin_category.php");
+        exit();
+    } else {
+        $error_message = "Error updating category.";
+    }
+}
 ?>
 
 <!DOCTYPE html>
@@ -88,376 +101,138 @@ $sizes = $sizeStmt->fetchAll(PDO::FETCH_ASSOC);
 
 <head>
     <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Category Page</title>
-    <style>
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 20px;
-        }
-
-        table,
-        th,
-        td {
-            border: 1px solid black;
-        }
-
-        th,
-        td {
-            padding: 10px;
-            text-align: left;
-        }
-
-        .actions a {
-            margin-right: 10px;
-        }
-
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            justify-content: center;
-            align-items: center;
-        }
-
-        .modal-content {
-            background: white;
-            padding: 20px;
-            border-radius: 5px;
-            width: 300px;
-        }
-
-        .confirm-delete {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            justify-content: center;
-            align-items: center;
-        }
-    </style>
-
-    <script>
-        function showModal(id) {
-            document.getElementById(id).style.display = 'flex';
-        }
-
-        function closeModal(id) {
-            document.getElementById(id).style.display = 'none';
-        }
-
-        function confirmDelete(entity, id) {
-            const confirmation = document.getElementById('confirmDeleteModal');
-            confirmation.style.display = 'flex';
-            document.getElementById('deleteForm').action = `?delete_${entity}=${id}`;
-        }
-
-        function openEditCategoryModal(id, name) {
-            document.getElementById('edit_category_id').value = id;
-            document.getElementById('edit_category_name').value = name;
-            showModal('editCategoryModal');
-        }
-
-        function openEditBrandModal(id, name) {
-            document.getElementById('edit_brand_id').value = id;
-            document.getElementById('edit_brand_name').value = name;
-            showModal('editBrandModal');
-        }
-
-        function openEditSizeModal(id, size) {
-            document.getElementById('edit_size_id').value = id;
-            document.getElementById('edit_size_value').value = size;
-            showModal('editSizeModal');
-        }
-    </script>
+    <title>Manage Categories</title>
+    <link rel="stylesheet" type="text/css" href="assets/css/admin_categories.css">
 </head>
 
 <body>
-    <h1>Category Page</h1>
-    <h2>Categories</h2>
-    <table>
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Name</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            <?php foreach ($categories as $category): ?>
-                <tr>
-                    <td><?= htmlspecialchars($category['id']) ?></td>
-                    <td><?= htmlspecialchars($category['name']) ?></td>
-                    <td class="actions">
-                        <button onclick="showModal('editCategoryModal_<?= $category['id'] ?>')">Edit</button>
-                        <button onclick="confirmDelete('category', <?= $category['id'] ?>)">Delete</button>
-                    </td>
-                </tr>
-                <div id="editCategoryModal<?= $category['id'] ?>" class="modal">
-                    <div class="modal-content">
-                        <h3>Edit Category</h3>
-                        <form method="post">
-                            <input type="hidden" name="id" value="<?= $category['id'] ?>">
-                            <input type="text" name="name" value="<?= htmlspecialchars($category['name']) ?>" required>
-                            <button type="submit" name="edit_category">Save</button>
-                            <button type="button" onclick="closeModal('editCategoryModal<?= $category['id'] ?>')">Cancel</button>
-                        </form>
+
+    <?php
+    include 'sidebar.php';
+    ?>
+    <div class="container">
+        <!-- Add Category Button -->
+        <div class="btn-container page-top">
+            <button class="btn-add-new" id="addCategoryBtn">
+                Add New Category
+            </button>
+        </div>
+
+        <!-- Modal for Add Category Form -->
+        <div id="addCategoryModal" class="modal">
+            <div class="modal-content">
+                <span class="close-button" id="closeAddModal">&times;</span>
+                <form method="post" enctype="multipart/form-data">
+                    <div class="account-header">
+                        <h1 class="account-title">Add a New Category</h1>
                     </div>
-                </div>
-            <?php endforeach; ?>
-        </tbody>
-    </table>
-    <button onclick="showModal('addCategoryModal')">Add New Category</button>
-
-    <h2>Colors</h2>
-    <table>
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Name</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            <?php foreach ($colors as $color): ?>
-                <tr>
-                    <td><?= htmlspecialchars($color['id']) ?></td>
-                    <td><?= htmlspecialchars($color['color_name']) ?></td>
-                    <td class="actions">
-                        <button onclick="showModal('editColorModal_<?= $category['id'] ?>')">Edit</button>
-                        <button onclick="confirmDelete('color', <?= $category['id'] ?>)">Delete</button>
-                    </td>
-                </tr>
-                <div id="editColorModal<?= $color['id'] ?>" class="modal">
-                    <div class="modal-content">
-                        <h3>Edit Color</h3>
-                        <form method="post">
-                            <input type="hidden" name="id" value="<?= $color['id'] ?>">
-                            <input type="text" name="name" value="<?= htmlspecialchars($color['name']) ?>" required>
-                            <button type="submit" name="edit_color">Save</button>
-                            <button type="button" onclick="closeModal('editColorModal<?= $color['id'] ?>')">Cancel</button>
-                        </form>
+                    <div class="account-edit">
+                        <div class="input-container">
+                            <label>Category Name</label>
+                            <input type="text" placeholder="Enter category name" name="category_name" required>
+                        </div>
                     </div>
-                </div>
-            <?php endforeach; ?>
-        </tbody>
-    </table>
-    <button onclick="showModal('addColorModal')">Add New Color</button>
-
-    <h2>Brands</h2>
-    <table>
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Name</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            <?php foreach ($brands as $brand): ?>
-                <tr>
-                    <td><?= htmlspecialchars($brand['id']) ?></td>
-                    <td><?= htmlspecialchars($brand['name']) ?></td>
-                    <td class="actions">
-                        <button onclick="showModal('editBrandModal_<?= $brand['id'] ?>')">Edit</button>
-                        <button onclick="confirmDelete('brand', <?= $category['id'] ?>)">Delete</button>
-                    </td>
-                </tr>
-                <div id="editBrandModal<?= $brand['id'] ?>" class="modal">
-                    <div class="modal-content">
-                        <h3>Edit Brand</h3>
-                        <form method="post">
-                            <input type="hidden" name="id" value="<?= $brand['id'] ?>">
-                            <input type="text" name="name" value="<?= htmlspecialchars($brand['name']) ?>" required>
-                            <button type="submit" name="edit_brand">Save</button>
-                            <button type="button" onclick="closeModal('editBrandModal<?= $brand['id'] ?>')">Cancel</button>
-                        </form>
+                    <div class="account-edit">
+                        <div class="input-container">
+                            <label>Category Image</label>
+                            <input type="file" name="category_image" accept="image/*">
+                        </div>
                     </div>
-                </div>
-            <?php endforeach; ?>
-        </tbody>
-    </table>
-    <button onclick="showModal('addBrandModal')">Add New Brand</button>
-
-    <h2>Sizes</h2>
-    <table>
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Value</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            <?php foreach ($sizes as $size): ?>
-                <tr>
-                    <td><?= htmlspecialchars($size['id']) ?></td>
-                    <td><?= htmlspecialchars($size['size']) ?></td>
-                    <td class="actions">
-                        <button onclick="showModal('editSizeModal_<?= $size['id'] ?>')">Edit</button>
-                        <button onclick="confirmDelete('size', <?= $size['id'] ?>)">Delete</button>
-                    </td>
-                </tr>
-                <div id="editSizeModal<?= $size['id'] ?>" class="modal">
-                    <div class="modal-content">
-                        <h3>Edit Size</h3>
-                        <form method="post">
-                            <input type="hidden" name="id" value="<?= $size['id'] ?>">
-                            <input type="text" name="name" value="<?= htmlspecialchars($category['name']) ?>" required>
-                            <button type="submit" name="edit_category">Save</button>
-                            <button type="button" onclick="closeModal('editCategoryModal<?= $category['id'] ?>')">Cancel</button>
-                        </form>
+                    <div class="btn-container">
+                        <button type="submit" class="btn-save" name="add_category">Add Category</button>
                     </div>
-                </div>
-            <?php endforeach; ?>
-        </tbody>
-    </table>
-    <button onclick="showModal('addSizeModal')">Add New Size</button>
-
-    <!-- Modals -->
-    <!-- Category -->
-    <div id="addCategoryModal" class="modal">
-        <div class="modal-content">
-            <h3>Add New Category</h3>
-            <form method="post">
-                <input type="text" name="name" placeholder="Category Name" required>
-                <button type="submit" name="add_category">Add</button>
-                <button type="button" onclick="closeModal('addCategoryModal')">Cancel</button>
-            </form>
+                </form>
+            </div>
         </div>
-    </div>
 
-    <div id="editCategoryModal" class="modal">
-        <div class="modal-content">
-            <h3>Edit Category</h3>
-            <form method="post">
-                <input type="hidden" name="edit_id" id="edit_category_id">
-                <input type="text" name="name" id="edit_category_name" placeholder="Category Name" required>
-                <button type="submit" name="edit_category">Save Changes</button>
-                <button type="button" onclick="closeModal('editCategoryModal')">Cancel</button>
-            </form>
+
+
+
+
+
+
+        <!-- Modal for Edit Category Form -->
+        <div id="editCategoryModal" class="modal">
+            <div class="modal-content">
+                <span class="close-button" id="closeEditModal">&times;</span>
+                <form method="post" enctype="multipart/form-data">
+                    <input type="hidden" name="category_id" id="editCategoryId">
+                    <div class="account-header">
+                        <h1 class="account-title">Edit Category</h1>
+                    </div>
+                    <div class="account-edit">
+                        <div class="input-container">
+                            <label>Category Name</label>
+                            <input type="text" placeholder="Enter category name" name="category_name" id="editCategoryName" required>
+                        </div>
+                    </div>
+                    <div class="account-edit">
+                        <div class="input-container">
+                            <label>Category Image</label>
+                            <input type="file" name="category_image" accept="image/*">
+                        </div>
+                    </div>
+                    <div class="account-edit">
+                        <div class="input-container">
+                            <label>Current Image</label>
+                            <div id="currentImageContainer">
+                                <img id="currentCategoryImage" src="" alt="Current Category Image" class="category-image" style="max-width:100px; display:none;">
+                                <p id="noImageText" style="display: none;">No Image</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="btn-container">
+                        <button type="submit" class="btn-save" name="edit_category">Save</button>
+                    </div>
+                </form>
+            </div>
         </div>
-    </div>
 
-    <div id="confirmDeleteModal" class="modal">
-        <div class="modal-content">
-            <h3>Are you sure you want to delete this item?</h3>
-            <form method="post" id="deleteForm">
-                <button type="submit">Yes, Delete</button>
-                <button type="button" onclick="closeModal('confirmDeleteModal')">Cancel</button>
-            </form>
-        </div>
-    </div>
 
-    <!-- Color -->
-    <div id="addColorModal" class="modal">
-        <div class="modal-content">
-            <h3>Add New Color</h3>
-            <form method="post">
-                <input type="text" name="color_name" placeholder="Color Name" required>
-                <button type="submit" name="add_color">Add</button>
-                <button type="button" onclick="closeModal('addColorModal')">Cancel</button>
-            </form>
-        </div>
-    </div>
 
-    <div id="editColorModal" class="modal">
-        <div class="modal-content">
-            <h3>Edit Color</h3>
-            <form method="post">
-                <input type="hidden" name="edit_id" id="edit_color_id">
-                <input type="text" name="name" id="edit_color_name" placeholder="Color Name" required>
-                <button type="submit" name="edit_color">Save Changes</button>
-                <button type="button" onclick="closeModal('editColorModal')">Cancel</button>
-            </form>
-        </div>
-    </div>
 
-    <div id="confirmDeleteModal" class="modal">
-        <div class="modal-content">
-            <h3>Are you sure you want to delete this item?</h3>
-            <form method="post" id="deleteForm">
-                <button type="submit">Yes, Delete</button>
-                <button type="button" onclick="closeModal('confirmDeleteModal')">Cancel</button>
-            </form>
-        </div>
-    </div>
 
-    <!-- Brand -->
-    <div id="addBrandModal" class="modal">
-        <div class="modal-content">
-            <h3>Add New Brand</h3>
-            <form method="post">
-                <input type="text" name="brand_name" placeholder="Brand Name" required>
-                <button type="submit" name="add_brand">Add</button>
-                <button type="button" onclick="closeModal('addBrandModal')">Cancel</button>
-            </form>
-        </div>
-    </div>
-
-    <div id="editBrandModal" class="modal">
-        <div class="modal-content">
-            <h3>Edit Brand</h3>
-            <form method="post">
-                <input type="hidden" name="edit_id" id="edit_brand_id">
-                <input type="text" name="name" id="edit_brand_name" placeholder="Brand Name" required>
-                <button type="submit" name="edit_brand">Save Changes</button>
-                <button type="button" onclick="closeModal('editBrandModal')">Cancel</button>
-            </form>
-        </div>
-    </div>
-
-    <div id="confirmDeleteModal" class="modal">
-        <div class="modal-content">
-            <h3>Are you sure you want to delete this item?</h3>
-            <form method="post" id="deleteForm">
-                <button type="submit">Yes, Delete</button>
-                <button type="button" onclick="closeModal('confirmDeleteModal')">Cancel</button>
-            </form>
-        </div>
-    </div>
-
-    <!-- Size -->
-    <div id="addSizeModal" class="modal">
-        <div class="modal-content">
-            <h3>Add New Size</h3>
-            <form method="post">
-                <input type="text" name="size" placeholder="Size Value" required>
-                <button type="submit" name="add_size">Add</button>
-                <button type="button" onclick="closeModal('addSizeModal')">Cancel</button>
-            </form>
-        </div>
-    </div>
-
-    <div id="editSizeModal" class="modal">
-        <div class="modal-content">
-            <h3>Edit Size</h3>
-            <form method="post">
-                <input type="hidden" name="edit_id" id="edit_size_id">
-                <input type="text" name="size" id="edit_size_value" placeholder="Size Value" required>
-                <button type="submit" name="edit_size">Save Changes</button>
-                <button type="button" onclick="closeModal('editSizeModal')">Cancel</button>
-            </form>
-        </div>
-    </div>
-
-    <div id="confirmDeleteModal" class="modal">
-        <div class="modal-content">
-            <h3>Are you sure you want to delete this item?</h3>
-            <form method="post" id="deleteForm">
-                <button type="submit">Yes, Delete</button>
-                <button type="button" onclick="closeModal('confirmDeleteModal')">Cancel</button>
-            </form>
+        <div class="product-display">
+            <table class="product-display-table">
+                <thead>
+                    <tr>
+                        <th>Image</th>
+                        <th>Category Name</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($categories as $category): ?>
+                        <tr>
+                            <td>
+                                <?php if (!empty($category['image'])): ?>
+                                    <img src="assets/image/<?= htmlspecialchars($category['image']); ?>"
+                                        alt="<?= htmlspecialchars($category['name']); ?>"
+                                        class="category-image">
+                                <?php else: ?>
+                                    No Image
+                                <?php endif; ?>
+                            </td>
+                            <td><?= htmlspecialchars($category['name']); ?></td>
+                            <td>
+                                <button class="btn edit-category-btn"
+                                    data-id="<?= htmlspecialchars($category['id']); ?>"
+                                    data-name="<?= htmlspecialchars($category['name']); ?>"
+                                    data-image="<?= htmlspecialchars($category['image']); ?>"> <!-- Add this line -->
+                                    Edit
+                                </button>
+                                <a href="?delete_id=<?= htmlspecialchars($category['id']); ?>" class="btn">Delete</a>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
         </div>
     </div>
 </body>
+
+<script src="assets/js/admin_category.js"></script>
 
 </html>

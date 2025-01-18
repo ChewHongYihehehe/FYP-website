@@ -139,6 +139,26 @@ body{
     }
 }
 
+
+ /* Add styles for the dropdown */
+ .dropdown {
+    display: none;
+    margin-left: 20px; /* Indent for sub-menu */
+}
+.dropdown a {
+    display: block;
+    padding: 5px 0;
+    color: #555;
+    text-decoration: none;
+}
+.dropdown a:hover {
+    color: #000;
+}
+.has-dropdown.active .dropdown {
+    display: block;
+}
+
+
 #content{
     position: relative;
     width: calc(100%-280px);

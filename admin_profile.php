@@ -7,7 +7,7 @@ $admin_id = $_SESSION['admin_id'];
 
 
 try {
-    $query = "SELECT id, admin_name, admin_email, admin_phone, admin_status, age, gender, role FROM admin WHERE id = :admin_id"; // Ensure this matches the column name
+    $query = "SELECT id, admin_name, admin_email, admin_phone, admin_status,role FROM admin WHERE id = :admin_id"; // Ensure this matches the column name
     $stmt = $conn->prepare($query);
     $stmt->bindParam(':admin_id', $admin_id, PDO::PARAM_STR);
     $stmt->execute();

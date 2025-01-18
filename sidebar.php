@@ -28,16 +28,26 @@
                     <span class="text">Product</span>
                 </a>
             </li>
-            <li>
-                <a href="admin_category.php">
+            <li class="has-dropdown">
+                <a href="javascript:void(0)" onclick="toggleDropdown(this)">
                     <i class='bx bx-category'></i>
                     <span class="text">Category</span>
                 </a>
+                <div class="dropdown">
+                    <a href="admin_category.php">Category</a>
+                    <a href="admin_brand.html">Brand</a>
+                    <a href="admin_color.html">Color</a>
+                    <a href="admin_size.html">Size</a>
+                </div>
+            </li>
             <li>
-                <a href="admin_order.php">
+                <a href="admin_order.html">
                     <i class="bx bxs-doughnut-chart"></i>
-                    <span class="text">Order</span>
-                </a>
+
+                    <a href="admin_order.php">
+                        <i class="bx bxs-doughnut-chart"></i>
+                        <span class="text">Order</span>
+                    </a>
             </li>
             <li>
                 <a href="admin_total_sale.php">
@@ -64,7 +74,7 @@
                 </a>
             </li>
             <li>
-                <a href="admin_a.php">
+                <a href="admin_list.php">
                     <i class='bx bxs-group'></i>
                     <span class="text">Admin</span>
                 </a>
@@ -84,6 +94,14 @@
         </ul>
     </section>
     <script src="path/to/sidebar.js"></script>
+    <script>
+        // JavaScript for dropdown toggle
+        function toggleDropdown(element) {
+            const parentLi = element.parentElement;
+            parentLi.classList.toggle('active');
+        }
+    </script>
+
 </body>
 
 </html>

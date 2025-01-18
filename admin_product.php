@@ -1,43 +1,227 @@
 <?php
 include 'connect.php';
-
 session_start();
 
-//Fetch categories
-$categories = [];
+// Fetch products
+$products = [];
+$stmt = $conn->prepare("
+    SELECT p.id, p.name, c.name AS category, b.name AS brand, 
+           pv.size, pv.color, pv.stock, pv.price,
+           pv.image1_display, pv.image2_display, pv.image3_display, pv.image4_display,
+           pv.image1_thumb, pv.image2_thumb, pv.image3_thumb, pv.image4_thumb
+    FROM products p 
+    JOIN categories c ON p.category = c.name 
+    JOIN brand b ON p.brand = b.name
+    LEFT JOIN product_variants pv ON p.id = pv.product_id
+    ORDER BY p.id, pv.color
+");
+$stmt->execute();
+$products = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
+if (isset($_POST['add_product'])) {
+    try {
+        // Start a transaction
+        $conn->beginTransaction();
+
+        $product_name = $_POST['product_name'];
+        $category_name = $_POST['category_name'];
+        $brand_name = $_POST['brand_name'];
+        $price = $_POST['price']; // Capture price
+
+        // Insert product
+        $stmt = $conn->prepare("INSERT INTO products (name, category, brand) VALUES (:name, :category, :brand)"); // Exclude price in insert
+        $stmt->bindParam(':name', $product_name);
+        $stmt->bindParam(':category', $category_name);
+        $stmt->bindParam(':brand', $brand_name);
+        $stmt->execute();
+        $product_id = $conn->lastInsertId();
+
+        // Prepare colors
+        $colors = $_POST['colors'];
+
+        // Create directories
+        $thumbs_dir = "img/showcase/thumbs/shoe{$product_id}-1/";
+        $showcase_dir = "img/showcase/shoe{$product_id}-1/";
+
+        if (!is_dir($thumbs_dir)) {
+            mkdir($thumbs_dir, 0777, true);
+        }
+        if (!is_dir($showcase_dir)) {
+            mkdir($showcase_dir, 0777, true);
+        }
+
+        // Process and move uploaded images
+        $thumb_image_paths = [];
+        $showcase_image_paths = [];
+
+        // Process thumbnail images
+        for ($i = 1; $i <= 4; $i++) {
+            $thumb_image_key = "thumb_image{$i}";
+            if (isset($_FILES[$thumb_image_key]) && $_FILES[$thumb_image_key]['error'] == UPLOAD_ERR_OK) {
+                $image_tmp = $_FILES[$thumb_image_key]['tmp_name'];
+                $image_name = $_FILES[$thumb_image_key]['name'];
+                $unique_filename = uniqid() . '_' . basename($image_name);
+                $thumb_image_path = $thumbs_dir . $unique_filename;
+
+                if (move_uploaded_file($image_tmp, $thumb_image_path)) {
+                    $thumb_image_paths[] = $thumb_image_path;
+                } else {
+                    throw new Exception("Failed to upload thumbnail image: " . $image_name);
+                }
+            }
+        }
+
+        // Process showcase images
+        for ($i = 1; $i <= 4; $i++) {
+            $showcase_image_key = "showcase_image{$i}";
+            if (isset($_FILES[$showcase_image_key]) && $_FILES[$showcase_image_key]['error'] == UPLOAD_ERR_OK) {
+                $image_tmp = $_FILES[$showcase_image_key]['tmp_name'];
+                $image_name = $_FILES[$showcase_image_key]['name'];
+                $unique_filename = uniqid() . '_' . basename($image_name);
+                $showcase_image_path = $showcase_dir . $unique_filename;
+
+                if (move_uploaded_file($image_tmp, $showcase_image_path)) {
+                    $showcase_image_paths[] = $showcase_image_path;
+                } else {
+                    throw new Exception("Failed to upload showcase image: " . $image_name);
+                }
+            }
+        }
+
+        // Insert product variants
+        foreach ($colors as $color) {
+            // Prepare the SQL statement
+            $stmt = $conn->prepare("
+                INSERT INTO product_variants (
+                    product_id, color, 
+                    image1_display, image2_display, image3_display, image4_display,
+                    image1_thumb, image2_thumb, image3_thumb, image4_thumb,
+                    price
+                ) VALUES (
+                    :product_id, :color, 
+                    :image1_display, :image2_display, :image3_display, :image4_display,
+                    :image1_thumb, :image2_thumb, :image3_thumb, :image4_thumb,
+                    :price
+                )
+            ");
+
+            // Prepare image paths with null fallback
+            $display_images = array_pad($showcase_image_paths, 4, null);
+            $thumb_images = array_pad($thumb_image_paths, 4, null);
+
+            // Bind values
+            $stmt->bindParam(':product_id', $product_id, PDO::PARAM_INT);
+            $stmt->bindParam(':color', $color);
+            $stmt->bindValue(':price', $price); // Bind price
+
+            // Bind display images
+            $stmt->bindValue(':image1_display', $display_images[0]);
+            $stmt->bindValue(':image2_display', $display_images[1]);
+            $stmt->bindValue(':image3_display', $display_images[2]);
+            $stmt->bindValue(':image4_display', $display_images[3]);
+
+            // Bind thumbnail images
+            $stmt->bindValue(':image1_thumb', $thumb_images[0]);
+            $stmt->bindValue(':image2_thumb', $thumb_images[1]);
+            $stmt->bindValue(':image3_thumb', $thumb_images[2]);
+            $stmt->bindValue(':image4_thumb', $thumb_images[3]);
+
+            // Execute the statement
+            if (!$stmt->execute()) {
+                // Detailed error logging
+                $errorInfo = $stmt->errorInfo();
+                error_log("Failed to insert product variant. Error details: " . print_r($errorInfo, true));
+
+                // Prepare detailed error message
+                $error_details = [
+                    'product_id' => $product_id,
+                    'color' => $color,
+                    'display_images' => $display_images,
+                    'thumb_images' => $thumb_images
+                ];
+                error_log("Variant Insert Failure Details: " . print_r($error_details, true));
+
+                throw new Exception("Failed to insert product variant for color: " . $color);
+            }
+        }
+
+        // Commit the transaction
+        $conn->commit();
+
+        // Redirect on success
+        header("Location: admin_product.php");
+        exit();
+    } catch (Exception $e) {
+        // Rollback the transaction
+        $conn->rollBack();
+
+        // Log the error
+        error_log("Product addition error: " . $e->getMessage());
+
+        // Set error message
+        $error_message = "Error adding product: " . $e->getMessage();
+
+        // Optional: Display error message to user
+        echo "<div style='color:red;'>" . htmlspecialchars($error_message) . "</div>";
+    }
+}
+
+
+// Handle editing a product
+if (isset($_POST['edit_product'])) {
+    $product_id = $_POST['product_id'];
+    $product_name = $_POST['product_name'];
+    $category_name = $_POST['category_name'];
+    $brand_name = $_POST['brand_name'];
+    $price = $_POST['price']; // Capture price for editing
+
+    // Prepare SQL to update product
+    $stmt = $conn->prepare("UPDATE products SET name = :name, category = :category, brand = :brand WHERE id = :id"); // Exclude price in update
+    $stmt->bindParam(':name', $product_name);
+    $stmt->bindParam(':category', $category_name);
+    $stmt->bindParam(':brand', $brand_name);
+    $stmt->bindParam(':id', $product_id, PDO::PARAM_INT);
+
+    // Execute the statement
+    if ($stmt->execute()) {
+        // Update product variants price
+        $stmt = $conn->prepare("UPDATE product_variants SET price = :price WHERE product_id = :id");
+        $stmt->bindParam(':price', $price);
+        $stmt->bindParam(':id', $product_id, PDO::PARAM_INT);
+        $stmt->execute();
+
+        header("Location: admin_product.php");
+        exit();
+    } else {
+        $error_message = "Error updating product.";
+    }
+}
+
+// Handle deletion of a product
+if (isset($_GET['delete_id'])) {
+    $delete_id = $_GET['delete_id'];
+    $stmt = $conn->prepare("DELETE FROM products WHERE id = :id");
+    $stmt->bindParam(':id', $delete_id, PDO::PARAM_INT);
+    $stmt->execute();
+    header("Location: admin_product.php");
+    exit();
+}
+
+// Fetch categories and brands for dropdowns
+$categories = [];
+$brands = [];
 $stmt = $conn->prepare("SELECT * FROM categories");
 $stmt->execute();
 $categories = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-$brands = [];
 $stmt = $conn->prepare("SELECT * FROM brand");
 $stmt->execute();
 $brands = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-$sizes = [];
-$stmt = $conn->prepare("SELECT * FROM sizes");
+$stmt = $conn->prepare("SELECT * FROM color");
 $stmt->execute();
-$sizes = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-// Fetch products with variants
-$products = [];
-$stmt = $conn->prepare("
-    SELECT p.*, 
-           c.name AS category_name, 
-           b.name AS brand_name, 
-           pv.color, 
-           pv.image1_display,
-           pv.price AS variant_price 
-    FROM products p
-    JOIN categories c ON p.id = c.id
-    JOIN brand b ON p.id = b.id
-    JOIN product_variants pv ON p.id = pv.product_id
-");
-$stmt->execute();
-$products = $stmt->fetchAll(PDO::FETCH_ASSOC);
+$colors = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
-
 
 <!DOCTYPE html>
 <html lang="en">
@@ -46,55 +230,215 @@ $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Page</title>
-
-    <!-- Font Awesome CDN link -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-
-    <!-- Custom CSS file link -->
+    <title>Manage Products</title>
     <link rel="stylesheet" type="text/css" href="assets/css/admin_product.css">
-
 </head>
 
 <body>
 
-    <div class=" container">
+    <?php include 'sidebar.php'; ?>
+    <div class="container">
+        <div class="btn-container page-top">
+            <button class="btn-add-new" id="addProductBtn">Add New Product</button>
+        </div>
 
-        <div class="admin-product-form-container">
+        <!-- Modal for Add Product Form -->
+        <div id="addProductModal" class="modal">
+            <div class="modal-content">
+                <span class="close-button" id="closeAddModal">&times;</span>
+                <form method="post" enctype="multipart/form-data">
+                    <div class="account-header">
+                        <h1 class="account-title">Add a New Product</h1>
+                    </div>
+                    <div class="account-edit">
+                        <div class="input-container">
+                            <label>Product Name</label>
+                            <input type="text" placeholder="Enter product name" name="product_name" required>
+                        </div>
+                    </div>
+                    <div class="account-edit">
+                        <div class="input-container">
+                            <label>Category</label>
+                            <select name="category_name" required>
+                                <option value="">Select Category</option>
+                                <?php foreach ($categories as $category): ?>
+                                    <option value="<?= htmlspecialchars($category['name']); ?>"><?= htmlspecialchars($category['name']); ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="account-edit">
+                        <div class="input-container">
+                            <label>Brand</label>
+                            <select name="brand_name" required>
+                                <option value="">Select Brand</option>
+                                <?php foreach ($brands as $brand): ?>
+                                    <option value="<?= htmlspecialchars($brand['name']); ?>"><?= htmlspecialchars($brand['name']); ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="account-edit">
+                        <div class="input-container">
+                            <label>Colors</label>
+                            <select name="colors[]" multiple required>
+                                <?php foreach ($colors as $color): ?>
+                                    <option value="<?= htmlspecialchars($color['color_name']); ?>"><?= htmlspecialchars($color['color_name']); ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="account-edit">
+                        <div class="input-container">
+                            <label>Price</label>
+                            <input type="number" step="0.01" min="0" placeholder="Enter product price" name="price" required>
+                        </div>
+                    </div>
 
-            <form method="post" enctype="multipart/form-data">
-                <h3>Add a New Product</h3>
-                <input type="text" placeholder="Enter product name" name="product_name" class="box" required>
+                    <!-- Thumbnail Images -->
+                    <div class="account-edit">
+                        <div class="input-container">
+                            <label>Thumbnail Images</label>
+                            <div class="image-uploads">
+                                <label for="thumb_image1">Image 1:</label>
+                                <input type="file" name="thumb_image1" accept="image/*" required></br>
+                                <label for="thumb_image2">Image 2:</label>
+                                <input type="file" name="thumb_image2" accept="image/*" required></br>
+                                <label for="thumb_image3">Image 3:</label>
+                                <input type="file" name="thumb_image3" accept="image/*" required></br>
+                                <label for="thumb_image4">Image 4:</label>
+                                <input type="file" name="thumb_image4" accept="image/*" required></br>
+                            </div>
+                        </div>
+                    </div>
 
+                    <!-- Showcase Images -->
+                    <div class="account-edit">
+                        <div class="input-container">
+                            <label>Showcase Images</label>
+                            <div class="image-uploads">
+                                <label for="showcase_image1">Image 1:</label>
+                                <input type="file" name="showcase_image1" accept="image/*" required></br>
+                                <label for="showcase_image2">Image 2:</label>
+                                <input type="file" name="showcase_image2" accept="image/*" required></br>
+                                <label for="showcase_image3">Image 3:</label>
+                                <input type="file" name="showcase_image3" accept="image/*" required></br>
+                                <label for="showcase_image4">Image 4:</label>
+                                <input type="file" name="showcase_image4" accept="image/*" required></br>
+                            </div>
+                        </div>
+                    </div>
 
-                <select name="product_category" class="box" required>
-                    <option value="" disabled selected>Select Product Category</option>
-                    <?php foreach ($categories as $category): ?>
-                        <option value="<?= htmlspecialchars($category['id']); ?>"><?= htmlspecialchars($category['name']); ?></option>
-                    <?php endforeach; ?>
-                </select>
+                    <div class="btn-container">
+                        <button type="submit" class="btn-save" name="add_product">Add Product</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <!-- Modal for Edit Product Form -->
+        <div id="editProductModal" class="modal">
+            <div class="modal-content">
+                <span class="close-button" id="closeEditModal">&times;</span>
+                <form method="post" enctype="multipart/form-data">
+                    <input type="hidden" name="product_id" id="editProductId">
+                    <div class="account-header">
+                        <h1 class="account-title">Edit Product</h1>
+                    </div>
+                    <div class="account-edit">
+                        <div class="input-container">
+                            <label>Product Name</label>
+                            <input type="text" placeholder="Enter product name" name="product_name" id="editProductName" required>
+                        </div>
+                    </div>
+                    <div class="account-edit">
+                        <div class="input-container">
+                            <label>Price</label>
+                            <input type="number" step="0.01" min="0" placeholder="Enter product price" name="price" id="editProductPrice" required>
+                        </div>
+                    </div>
+                    <div class="account-edit">
+                        <div class="input-container">
+                            <label>Category</label>
+                            <select name="category_name" id="editCategoryName" required>
+                                <?php foreach ($categories as $category): ?>
+                                    <option value="<?= htmlspecialchars($category['name']); ?>"><?= htmlspecialchars($category['name']); ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="account-edit">
+                        <div class="input-container">
+                            <label>Brand</label>
+                            <select name="brand_name" id="editBrandName" required>
+                                <?php foreach ($brands as $brand): ?>
+                                    <option value="<?=
+                                                    htmlspecialchars($brand['name']); ?>"><?= htmlspecialchars($brand['name']); ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="account-edit">
+                        <div class="input-container">
+                            <label>Colors</label>
+                            <select name="color" id="editColorName" required>
+                                <?php foreach ($colors as $color): ?>
+                                    <option value="<?= htmlspecialchars($color['color_name']); ?>"><?= htmlspecialchars($color['color_name']); ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                    </div>
+                    <!-- Current Thumbnail Images -->
+                    <div class="account-edit">
+                        <div class="input-container">
+                            <label>Current Thumbnail Images</label>
+                            <div class="image-uploads">
+                                <img id="currentThumb1" src="" alt="Current Thumbnail 1" width="100">
+                                <img id="currentThumb2" src="" alt="Current Thumbnail 2" width="100">
+                                <img id="currentThumb3" src="" alt="Current Thumbnail 3" width="100">
+                                <img id="currentThumb4" src="" alt="Current Thumbnail 4" width="100">
+                            </div>
+                            <label>New Thumbnail Images (optional)</label>
+                            <div class="image-uploads">
+                                <label for="thumb_image1">Image 1:</label>
+                                <input type="file" name="thumb_image1" accept="image/*"></br>
+                                <label for="thumb_image2">Image 2:</label>
+                                <input type="file" name="thumb_image2" accept="image/*"></br>
+                                <label for="thumb_image3">Image 3:</label>
+                                <input type="file" name="thumb_image3" accept="image/*"></br>
+                                <label for="thumb_image4">Image 4:</label>
+                                <input type="file" name="thumb_image4" accept="image/*"></br>
+                            </div>
+                        </div>
+                    </div>
 
-                <select name="product_brand" class="box" required>
-                    <option value="" disabled selected>Select Product Brand</option>
-                    <?php foreach ($brands as $brand): ?>
-                        <option value="<?= htmlspecialchars($brand['id']); ?>"><?= htmlspecialchars($brand['name']); ?></option>
-                    <?php endforeach; ?>
-                </select>
-
-
-                <select name="product_size" class="box" required>
-                    <option value="" disabled selected>Select Product Size</option>
-                    <?php foreach ($sizes as $size): ?>
-                        <option value="<?= htmlspecialchars($size['id']); ?>"><?= htmlspecialchars($size['size']); ?></option> <!-- Displaying the size -->
-                    <?php endforeach; ?>
-                </select>
-
-
-                <input type="number" placeholder="Enter product price" name="product_price" class="box" required>
-                <input type="file" accept="image/png, image/jpeg, image/jpg" name="product_image" class="box" required>
-                <input type="submit" class="btn" name="add_product" value="Add Product">
-            </form>
-
+                    <!-- Current Showcase Images -->
+                    <div class="account-edit">
+                        <div class="input-container">
+                            <label>Current Showcase Images</label>
+                            <div class="image-uploads">
+                                <img id="currentShowcase1" src="" alt="Current Showcase 1" width="100">
+                                <img id="currentShowcase2" src="" alt="Current Showcase 2" width="100">
+                                <img id="currentShowcase3" src="" alt="Current Showcase 3" width="100">
+                                <img id="currentShowcase4" src="" alt="Current Showcase 4" width="100">
+                            </div>
+                            <label>New Showcase Images (optional)</label>
+                            <div class="image-uploads">
+                                <label for="showcase_image1">Image 1:</label>
+                                <input type="file" name="showcase_image1" accept="image/*"></br>
+                                <label for="showcase_image2">Image 2:</label>
+                                <input type="file" name="showcase_image2" accept="image/*"></br>
+                                <label for="showcase_image3">Image 3:</label>
+                                <input type="file" name="showcase_image3" accept="image/*"></br>
+                                <label for="showcase_image4">Image 4:</label>
+                                <input type="file" name="showcase_image4" accept="image/*"></br>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="btn-container">
+                        <button type="submit" class="btn-save" name="edit_product">Save</button>
+                    </div>
+                </form>
+            </div>
         </div>
 
         <div class="product-display">
@@ -102,35 +446,58 @@ $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 <thead>
                     <tr>
                         <th>Product Image</th>
-                        <th>Product Name</th>
-                        <th>Product Category</th>
-                        <th>Product Brand</th>
-                        <th>Product Color</th>
-                        <th>Product Price</th>
+                        <th>Name</th>
+                        <th>Category</th>
+                        <th>Brand</th>
+                        <th>Color</th>
+                        <th>Price</th>
                         <th>Action</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <?php foreach ($products as $product): ?>
-                        <tr>
-                            <td><img src="<?= htmlspecialchars($product['image1_display']); ?>" alt="Product Image" width="50"></td>
-                            <td><?= htmlspecialchars($product['name']); ?></td>
-                            <td><?= htmlspecialchars($product['category_name']); ?></td>
-                            <td><?= htmlspecialchars($product['brand_name']); ?></td>
-                            <td><?= htmlspecialchars($product['color']); ?></td>
-                            <td><?= htmlspecialchars($product['variant_price']); ?></td>
-                            <td>
-                                <a href="edit_product.php?id= <?= htmlspecialchars($product['id']); ?>" class="btn">Edit</a>
-                                <a href="delete_product.php?id=<?= htmlspecialchars($product['id']); ?>" class="btn">Delete</a>
-                            </td>
-                        </tr>
-                    <?php endforeach; ?>
+                    <?php
+                    $current_product_id = null;
+                    $current_color = null;
+                    foreach ($products as $product):
+                        if ($current_product_id !== $product['id'] || $current_color !== $product['color']):
+                            $current_product_id = $product['id'];
+                            $current_color = $product['color']; ?>
+                            <tr>
+                                <td><img src="<?= htmlspecialchars($product['image1_display']); ?>" alt="Product Image" width="100"></td>
+                                <td><?= htmlspecialchars($product['name']); ?></td>
+                                <td><?= htmlspecialchars($product['category']); ?></td>
+                                <td><?= htmlspecialchars($product['brand']); ?></td>
+                                <td><?= htmlspecialchars($product['color']); ?></td>
+                                <td><?= htmlspecialchars($product['price']); ?></td>
+                                <td>
+                                    <button class="btn edit-product-btn"
+                                        data-id="<?= htmlspecialchars($product['id']); ?>"
+                                        data-name="<?= htmlspecialchars($product['name']); ?>"
+                                        data-category="<?= htmlspecialchars($product['category']); ?>"
+                                        data-brand="<?= htmlspecialchars($product['brand']); ?>"
+                                        data-color="<?= htmlspecialchars($product['color']); ?>"
+                                        data-price="<?= htmlspecialchars($product['price']); ?>"
+                                        data-thumb1="<?= htmlspecialchars($product['image1_thumb'] ?? ''); ?>"
+                                        data-thumb2="<?= htmlspecialchars($product['image2_thumb'] ?? ''); ?>"
+                                        data-thumb3="<?= htmlspecialchars($product['image3_thumb'] ?? ''); ?>"
+                                        data-thumb4="<?= htmlspecialchars($product['image4_thumb'] ?? ''); ?>"
+                                        data-showcase1="<?= htmlspecialchars($product['image1_display'] ?? ''); ?>"
+                                        data-showcase2="<?= htmlspecialchars($product['image2_display'] ?? ''); ?>"
+                                        data-showcase3="<?= htmlspecialchars($product['image3_display'] ?? ''); ?>"
+                                        data-showcase4="<?= htmlspecialchars($product['image4_display'] ?? ''); ?>">
+                                        Edit
+                                    </button>
+                                    <a href="?delete_id=<?= htmlspecialchars($product['id']); ?>" class="btn">Delete</a>
+                                </td>
+                            </tr>
+                    <?php endif;
+                    endforeach; ?>
                 </tbody>
             </table>
         </div>
-
     </div>
-
 </body>
+
+<script src="assets/js/admin_product.js"></script>
 
 </html>

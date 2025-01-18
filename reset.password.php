@@ -59,6 +59,7 @@ $conn = null;
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -66,6 +67,7 @@ $conn = null;
     <link rel="stylesheet" href="assets/css/reset_password.css">
     <title>Reset Password</title>
 </head>
+
 <body>
     <section>
         <div class="form-box">
@@ -91,4 +93,5 @@ $conn = null;
         </div>
     </section>
 </body>
+
 </html>

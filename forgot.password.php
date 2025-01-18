@@ -31,7 +31,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $stmt->execute();
 
         // Send reset link to the user's email using PHPMailer
-        $reset_link = "http://localhost/FYP-website/reset.password.php?token=" . $token;
+        $reset_link = "http://localhost/FYP-website-3/reset.password.php?token=" . $token;
 
         $mail = new PHPMailer(true);
 
@@ -44,22 +44,21 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $mail->Password = 'eqygfyfgaoywwvqj';    // Replace with your app password
             $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
             $mail->Port = 587;
-        
+
             // Recipients
             $mail->setFrom('huangjiaze81@gmail.com', 'Step Shoes Shop');
             $mail->addAddress($email);
-        
+
             // Content
             $mail->isHTML(true);
             $mail->Subject = 'Password Reset Request';
             $mail->Body = "Click the following link to reset your password: <a href='$reset_link'>$reset_link</a>";
-        
+
             $mail->send();
             $success_message = "Password reset link has been sent to your email.";
         } catch (Exception $e) {
             $error_message = "Message could not be sent. Mailer Error: {$mail->ErrorInfo}";
         }
-        
     } else {
         $error_message = "No user found with this email.";
     }
@@ -73,6 +72,7 @@ $conn = null;
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -81,6 +81,7 @@ $conn = null;
     <script nomodule src="https://cdn.jsdelivr.net/npm/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
     <title>Forgot Password</title>
 </head>
+
 <body>
     <section>
         <div class="form-box">
@@ -105,7 +106,5 @@ $conn = null;
         </div>
     </section>
 </body>
+
 </html>
-
-
-

@@ -1,27 +1,40 @@
 <?php
-require 'connect.php'; // Include database connection
+include 'connect.php'; // Include database connection
 
 session_start();
 
+
 $error_message = ""; // Variable to hold error messages
+$show_terminated_options = false;
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $email = $_POST['email'];
     $password = $_POST['password'];
 
-    // Prepare statement to prevent SQL injection
+
     $stmt = $conn->prepare("SELECT * FROM users WHERE email = :email");
     $stmt->bindParam(":email", $email, PDO::PARAM_STR);
     $stmt->execute();
 
     if ($stmt->rowCount() > 0) {
+
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
-        if (password_verify($password, $row['password'])) {
-            // Regenerate session ID to prevent session fixation
+
+
+        if ($row['status'] === 'terminated') {
+
+            $error_message = "This account has been terminated. 
+                Please contact administrator or register a new account.";
+
+            $show_terminated_options = true;
+        }
+        // Only attempt password verification if not terminated
+        elseif (password_verify($password, $row['password'])) {
+
             session_regenerate_id(true);
             $_SESSION['user_id'] = $row['id'];
-            $_SESSION['user_email'] = $row['email']; // Optional for user tracking
-            header("Location: home.php"); // Redirect to the homepage
+            $_SESSION['user_email'] = $row['email'];
+            header("Location: home.php");
             exit();
         } else {
             $error_message = "Invalid password.";
@@ -29,13 +42,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     } else {
         $error_message = "No user found with this email.";
     }
-
-    // Reset the statement object (optional, PDO will clean up automatically)
-    $stmt = null;
 }
-
-// Close the connection (optional, PDO will close automatically when the script finishes)
-$conn = null;
 ?>
 
 <!DOCTYPE html>

@@ -1,5 +1,5 @@
 <?php
-
+include 'user_status.php';
 include 'connect.php';
 session_start();
 
@@ -114,8 +114,6 @@ function getAvailableSizes($conn, $productId)
 		return [];
 	}
 }
-// Fetch all available sizes
-$availableSizes = getAvailableSizes($conn, $productId);
 
 
 

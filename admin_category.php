@@ -94,6 +94,33 @@ if (isset($_POST['edit_category'])) {
         $error_message = "Error updating category.";
     }
 }
+
+// Handle deletion of a category
+if (isset($_GET['delete_id'])) {
+    $delete_id = $_GET['delete_id'];
+
+    // Fetch the category details before deletion
+    $stmt = $conn->prepare("SELECT * FROM categories WHERE id = :id");
+    $stmt->bindParam(':id', $delete_id, PDO::PARAM_INT);
+    $stmt->execute();
+    $category = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if ($category) {
+        // Insert the category into the deleted_categories table
+        $stmt = $conn->prepare("INSERT INTO deleted_categories (name, image) VALUES (:name, :image)");
+        $stmt->bindParam(':name', $category['name']);
+        $stmt->bindParam(':image', $category['image']);
+        $stmt->execute();
+
+        // Now delete the category from the categories table
+        $stmt = $conn->prepare("DELETE FROM categories WHERE id = :id");
+        $stmt->bindParam(':id', $delete_id, PDO::PARAM_INT);
+        $stmt->execute();
+
+        header("Location: admin_category.php");
+        exit();
+    }
+}
 ?>
 
 <!DOCTYPE html>

@@ -200,13 +200,77 @@ if (isset($_POST['edit_product'])) {
 // Handle deletion of a product
 if (isset($_GET['delete_id'])) {
     $delete_id = $_GET['delete_id'];
+
+    // First, delete any entries in the product_variants that reference this product
+    $stmt = $conn->prepare("DELETE FROM product_variants WHERE product_id = :id");
+    $stmt->bindParam(':id', $delete_id, PDO::PARAM_INT);
+    $stmt->execute();
+
+    // Next, delete any entries in the cart that reference this product
+    $stmt = $conn->prepare("DELETE FROM cart WHERE pid = :id");
+    $stmt->bindParam(':id', $delete_id, PDO::PARAM_INT);
+    $stmt->execute();
+
+    // Now delete the product from the products table
     $stmt = $conn->prepare("DELETE FROM products WHERE id = :id");
     $stmt->bindParam(':id', $delete_id, PDO::PARAM_INT);
     $stmt->execute();
+
     header("Location: admin_product.php");
     exit();
 }
 
+// Handle deletion of a product
+if (isset($_GET['delete_id'])) {
+    $delete_id = $_GET['delete_id'];
+
+    // Fetch the product details before deletion
+    $stmt = $conn->prepare("SELECT * FROM products WHERE id = :id");
+    $stmt->bindParam(':id', $delete_id, PDO::PARAM_INT);
+    $stmt->execute();
+    $product = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    // Fetch the product variants
+    $stmt = $conn->prepare("SELECT * FROM product_variants WHERE product_id = :id");
+    $stmt->bindParam(':id', $delete_id, PDO::PARAM_INT);
+    $stmt->execute();
+    $variants = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    // Insert the product into the deleted_products table
+    $stmt = $conn->prepare("INSERT INTO deleted_products (name, category, brand, size, color, stock, price, image1_thumb, image2_thumb, image3_thumb, image4_thumb, image1_display, image2_display, image3_display, image4_display) VALUES (:name, :category, :brand, :size, :color, :stock, :price, :image1_thumb, :image2_thumb, :image3_thumb, :image4_thumb, :image1_display, :image2_display, :image3_display, :image4_display)");
+
+    // Bind values for the main product
+    $stmt->bindParam(':name', $product['name']);
+    $stmt->bindParam(':category', $product['category']);
+    $stmt->bindParam(':brand', $product['brand']);
+
+    // Loop through each variant and insert into deleted_products
+    foreach ($variants as $variant) {
+        $stmt->bindParam(':size', $variant['size']);
+        $stmt->bindParam(':color', $variant['color']);
+        $stmt->bindParam(':stock', $variant['stock']);
+        $stmt->bindParam(':price', $variant['price']);
+        $stmt->bindParam(':image1_thumb', $variant['image1_thumb']);
+        $stmt->bindParam(':image2_thumb', $variant['image2_thumb']);
+        $stmt->bindParam(':image3_thumb', $variant['image3_thumb']);
+        $stmt->bindParam(':image4_thumb', $variant['image4_thumb']);
+        $stmt->bindParam(':image1_display', $variant['image1_display']);
+        $stmt->bindParam(':image2_display', $variant['image2_display']);
+        $stmt->bindParam(':image3_display', $variant['image3_display']);
+        $stmt->bindParam(':image4_display', $variant['image4_display']);
+
+        // Execute the statement to insert into deleted_products
+        $stmt->execute();
+    }
+
+    // Now delete the product from the products table
+    $stmt = $conn->prepare("DELETE FROM products WHERE id = :id");
+    $stmt->bindParam(':id', $delete_id, PDO::PARAM_INT);
+    $stmt->execute();
+
+    header("Location: admin_product.php");
+    exit();
+}
 // Fetch categories and brands for dropdowns
 $categories = [];
 $brands = [];
@@ -468,7 +532,7 @@ $colors = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                 <td><?= htmlspecialchars($product['category']); ?></td>
                                 <td><?= htmlspecialchars($product['brand']); ?></td>
                                 <td><?= htmlspecialchars($product['color']); ?></td>
-                                <td><?= htmlspecialchars($product['price']); ?></td>
+                                <td>RM <?= htmlspecialchars($product['price']); ?></td>
                                 <td>
                                     <button class="btn edit-product-btn"
                                         data-id="<?= htmlspecialchars($product['id']); ?>"

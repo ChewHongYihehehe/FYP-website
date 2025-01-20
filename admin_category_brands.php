@@ -30,14 +30,30 @@ if (isset($_POST['edit_brand'])) {
     exit();
 }
 
-// Handle deleting a brand
+// Handle deletion of a brand
 if (isset($_GET['delete_id'])) {
     $brand_id = $_GET['delete_id'];
-    $stmt = $conn->prepare("DELETE FROM brand WHERE id = :id");
+
+    // Fetch the brand details before deletion
+    $stmt = $conn->prepare("SELECT * FROM brand WHERE id = :id");
     $stmt->bindParam(':id', $brand_id, PDO::PARAM_INT);
     $stmt->execute();
-    header("Location: admin_category_brands.php");
-    exit();
+    $brand = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if ($brand) {
+        // Insert the brand into the deleted_brands table
+        $stmt = $conn->prepare("INSERT INTO deleted_brands (name) VALUES (:name)");
+        $stmt->bindParam(':name', $brand['name']);
+        $stmt->execute();
+
+        // Now delete the brand from the brand table
+        $stmt = $conn->prepare("DELETE FROM brand WHERE id = :id");
+        $stmt->bindParam(':id', $brand_id, PDO::PARAM_INT);
+        $stmt->execute();
+
+        header("Location: admin_category_brands.php");
+        exit();
+    }
 }
 ?>
 

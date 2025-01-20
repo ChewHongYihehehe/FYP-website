@@ -30,14 +30,30 @@ if (isset($_POST['edit_size'])) {
     exit();
 }
 
-// Handle deleting a size
+// Handle deletion of a size
 if (isset($_GET['delete_id'])) {
     $size_id = $_GET['delete_id'];
-    $stmt = $conn->prepare("DELETE FROM sizes WHERE id = :id");
+
+    // Fetch the size details before deletion
+    $stmt = $conn->prepare("SELECT * FROM sizes WHERE id = :id");
     $stmt->bindParam(':id', $size_id, PDO::PARAM_INT);
     $stmt->execute();
-    header("Location: admin_category_sizes.php");
-    exit();
+    $size = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if ($size) {
+        // Insert the size into the deleted_sizes table
+        $stmt = $conn->prepare("INSERT INTO deleted_sizes (size) VALUES (:size)");
+        $stmt->bindParam(':size', $size['size']);
+        $stmt->execute();
+
+        // Now delete the size from the sizes table
+        $stmt = $conn->prepare("DELETE FROM sizes WHERE id = :id");
+        $stmt->bindParam(':id', $size_id, PDO::PARAM_INT);
+        $stmt->execute();
+
+        header("Location: admin_category_sizes.php");
+        exit();
+    }
 }
 ?>
 

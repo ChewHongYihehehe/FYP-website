@@ -5,33 +5,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>sidebar</title>
-    <link rel="stylesheet" href="assests/css/sidebar.css">
+    <link rel="stylesheet" href="assets/css/sidebar.css">
     <link href="https://cdn.jsdelivr.net/npm/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
 </head>
 
-<style>
-    /* Add styles for the dropdown */
-    .dropdown {
-        display: none;
-        margin-left: 20px;
-        /* Indent for sub-menu */
-    }
-
-    .dropdown a {
-        display: block;
-        padding: 5px 0;
-        color: #555;
-        text-decoration: none;
-    }
-
-    .dropdown a:hover {
-        color: #000;
-    }
-
-    .has-dropdown.active .dropdown {
-        display: block;
-    }
-</style>
 
 <body>
     <section id="sidebar">
@@ -47,7 +24,7 @@
                 </a>
             </li>
             <li>
-                <a href="admin_product.html">
+                <a href="admin_product.php">
                     <i class='bx bxs-data'></i>
                     <span class="text">Product</span>
                 </a>
@@ -64,25 +41,25 @@
                 </a>
             </li>
             <li>
-                <a href="admin_totalsale.html">
+                <a href="admin_totalsale.php">
                     <i class='bx bx-dollar'></i>
                     <span class="text">Total Sale</span>
                 </a>
             </li>
             <li>
-                <a href="admin_payment.html">
+                <a href="admin_payment.php">
                     <i class="bx bxs-wallet"></i>
                     <span class="text">Payment</span>
                 </a>
             </li>
             <li>
-                <a href="admin_message.html">
+                <a href="admin_message.php">
                     <i class="bx bxs-message-dots"></i>
                     <span class="text">Message</span>
                 </a>
             </li>
             <li>
-                <a href="admin_user.html">
+                <a href="admin_user.php">
                     <i class="bx bxs-user"></i>
                     <span class="text">User</span>
                 </a>
@@ -94,7 +71,7 @@
                 </a>
             </li>
             <li>
-                <a href="admin_profile">
+                <a href="admin_profile.php">
                     <i class='bx bx-user-circle'></i>
                     <span class="text">My Profile</span>
                 </a>
@@ -107,7 +84,7 @@
             </li>
         </ul>
     </section>
-    <script src="path/to/sidebar.js"></script>
+    <script src="assets/js/sidebar.js"></script>
 </body>
 
 </html>

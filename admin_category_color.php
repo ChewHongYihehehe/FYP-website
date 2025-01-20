@@ -30,14 +30,30 @@ if (isset($_POST['edit_color'])) {
     exit();
 }
 
-// Handle deleting a color
+// Handle deletion of a color
 if (isset($_GET['delete_id'])) {
     $color_id = $_GET['delete_id'];
-    $stmt = $conn->prepare("DELETE FROM color WHERE id = :id");
+
+    // Fetch the color details before deletion
+    $stmt = $conn->prepare("SELECT * FROM color WHERE id = :id");
     $stmt->bindParam(':id', $color_id, PDO::PARAM_INT);
     $stmt->execute();
-    header("Location: admin_category_color.php");
-    exit();
+    $color = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if ($color) {
+        // Insert the color into the deleted_colors table
+        $stmt = $conn->prepare("INSERT INTO deleted_colors (color_name) VALUES (:color_name)");
+        $stmt->bindParam(':color_name', $color['color_name']);
+        $stmt->execute();
+
+        // Now delete the color from the color table
+        $stmt = $conn->prepare("DELETE FROM color WHERE id = :id");
+        $stmt->bindParam(':id', $color_id, PDO::PARAM_INT);
+        $stmt->execute();
+
+        header("Location: admin_category_color.php");
+        exit();
+    }
 }
 ?>
 

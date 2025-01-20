@@ -1,0 +1,364 @@
+@import url('https://fonts.googleapis.com/css?family=Poppins:400,500,600,700,900');
+
+:root {
+   --green: #27ae60;
+   --black: #333;
+   --white: #fff;
+   --bg-color: #eee;
+   --box-shadow: 0 .5rem 1rem rgba(0, 0, 0, .1);
+   --border: .1rem solid var(--black);
+}
+
+* {
+   font-family: 'Poppins', sans-serif;
+   margin: 0;
+   padding: 0;
+   box-sizing: border-box;
+   outline: none;
+   border: none;
+   text-decoration: none;
+   text-transform: capitalize;
+}
+
+html {
+   font-size: 62.5%;
+   overflow-x: hidden;
+}
+
+.btn {
+   display: block;
+   width: 100%;
+   cursor: pointer;
+   border-radius: .5rem;
+   margin-top: 1rem;
+   font-size: 1.7rem;
+   padding: 1rem 3rem;
+   background: var(--green);
+   color: var(--white);
+   text-align: center;
+}
+
+.btn:hover {
+   background: var(--black);
+}
+
+.container {
+   max-width: 1200px;
+   padding: 2rem;
+   margin: 0 auto;
+   margin-left:30rem;
+}
+
+.category-image {
+   max-width: 100px;
+   max-height: 100px;
+   object-fit: cover;
+   border-radius: 5px;
+}
+
+#editCurrentImagePreview {
+   margin-bottom: 10px;
+   border: 1px solid #ddd;
+   border-radius: 5px;
+}
+
+
+.admin-product-form-container {
+   display: none;
+   position: fixed;
+   z-index: 1;
+   left: 0;
+   top: 0;
+   width: 100%;
+   height: 100%;
+   overflow: auto;
+   background-color: rgba(0,0,0,0.4);
+}
+
+/* Add these styles to admin_categories.css */
+
+/* Input and Form Styling from profiles.css */
+.account-edit {
+   display: flex;
+   justify-content: space-between;
+   margin: 15px 0;
+   flex-direction:column;
+}
+
+.input-container {
+   width: 100%;
+   display: flex;
+   flex-direction: column;
+   gap:30px;
+}
+
+.input-container label {
+   font-family: "Poppins", sans-serif;
+   color:#fe4c50;
+   font-size: 14px;
+   text-align: left;
+   white-space:nowrap;
+   min-width:150px;
+   font-weight:500;
+}
+
+.input-container input {
+   height: 45px;
+   border: 1.5px solid #768499;
+   border-radius: 5px;
+   padding: 10px;
+   font-family: "Poppins", sans-serif;
+   font-size: 16px;
+   flex-grow:1;
+   width:auto;
+}
+
+.input-container input:focus {
+   outline: none;
+   border: 1.5px solid #fe4c50;
+}
+
+.input-container textarea{
+   display:block;
+   width:100%;
+   height:100px;
+   padding:5px;
+   border-radius: 5px;
+   font-family: "Poppins", sans-serif;
+}
+
+.input-container textarea:focus{
+   outline:none;
+   border: 1.5px solid  #fe4c50;
+}
+
+.input-container select{
+   width:30%;
+   padding:10px;
+   border: 1.5px solid #ccc;
+   border-radius: 4px;
+}
+
+
+
+
+.account-header {
+   display: flex;
+   justify-content: space-between;
+   align-items: center;
+   padding: 15px;
+   border-bottom: 1px solid #FE7C7F;
+}
+
+.account-title {
+   font-family: "Poppins", sans-serif;
+   font-size: 24px;
+   color: #1e293b;
+   font-weight: 500;
+   margin-left: 10px;
+}
+
+/* Add to your admin_categories.css */
+.btn-container.page-top {
+   margin-right: 0;
+   margin-top: 30px;
+   display: flex;
+   justify-content: flex-end;
+   width: 100%;
+}
+
+.btn-add-new {
+   display: flex;
+   align-items: center;
+   justify-content: center;
+   width: 12em;
+   height: 3.5em;
+   cursor: pointer;
+   border: 1px solid #FE7C7F;
+   border-radius: 0.5em; /* Less rounded corners */
+   color: #fff;
+   font-weight: bold;
+   background-color: #fe4c50;
+   transition-duration: 0.3s;
+   gap: 10px; /* Space between icon and text */
+}
+
+.btn-add-new:hover {
+   background-color: #FE7C7F;
+}
+
+.btn-add-new i {
+   margin-right: 5px;
+}
+
+
+.btn-container {
+   margin-right: 5px;
+   margin-top: 30px;
+   display:flex;
+   align-items:center;
+   justify-content:center;
+}
+
+.btn-save {
+   width: 8em;
+   height: 3em;
+   cursor: pointer;
+   border: 1px solid #FE7C7F;
+   border-radius: 2em;
+   color: #fff;
+   font-weight: bold;
+   margin-left: 5px;
+   background-color: #fe4c50;
+   transition-duration: 0.3s;
+   box-shadow: rgba(0,0,0,0.1);
+}
+
+
+.btn-save:hover {
+   background-color: #FE7C7F;
+}
+
+.modal {
+   margin-top: 50px;
+   display: none;
+   position: fixed;
+   z-index: 1;
+   left: 0;
+   top: 0;
+   width: 100%;
+   height: 100%;
+   overflow: auto;
+   background-color: rgb(0,0,0);
+   background-color: rgba(0,0,0,0.4);
+}
+
+.modal-content {
+   background-color: #fefefe;
+   margin: 10% auto;
+   padding: 30px;
+   border: 1px solid #888;
+   width: 90%;
+   max-width: 800px;
+   border-radius: 5px;
+   box-shadow: rgba(0, 0, 0, 0.16) 0px 0px 20px;
+}
+
+.close-button {
+   color: #aaa;
+   float: right;
+   font-size: 28px;
+   font-weight: bold;
+}
+
+.close-button:hover,
+.close-button:focus {
+   color: #FE7C7F;
+   text-decoration: none;
+   cursor: pointer;
+}
+
+
+.admin-product-form-container form {
+   max-width: 50rem;
+   margin: 0 auto;
+   padding: 2rem;
+   border-radius: .5rem;
+   background: var(--bg-color);
+}
+
+.admin-product-form-container form h3 {
+   text-transform: uppercase;
+   color: var(--black);
+   margin-bottom: 1rem;
+   text-align: center;
+   font-size: 2.5rem;
+}
+
+.admin-product-form-container form .box {
+   width: 100%;
+   border-radius: .5rem;
+   padding: 1.2rem 1.5rem;
+   font-size: 1.7rem;
+   margin: 1rem 0;
+   background: var(--white);
+   text-transform: none;
+}
+
+.product-display {
+   margin: 2rem 0;
+}
+
+.product-display .product-display-table {
+   width
+   : 100%;
+   text-align: center;
+}
+
+.product-display .product-display-table thead {
+   background: #fe4c50;
+   color: white;
+}
+
+.product-display .product-display-table th {
+   padding: 1rem;
+   font-size: 2rem;
+}
+
+.product-display .product-display-table td {
+   padding: 1rem;
+   font-size: 2rem;
+   border-bottom: var(--border);
+}
+
+.product-display .product-display-table .btn:first-child {
+   margin-top: 0;
+}
+
+.product-display .product-display-table .btn:last-child {
+   background: crimson;
+}
+
+.product-display .product-display-table .btn:last-child:hover {
+   background: var(--black);
+}
+
+.size-list{
+    line-height:2;
+}
+
+@media (max-width: 991px) {
+   html {
+      font-size: 55%;
+   }
+}
+
+@media (max-width: 768px) {
+   .product-display {
+      overflow-y: scroll;
+   }
+
+   .product-display .product-display-table {
+      width: 80rem;
+   }
+
+   account-edit {
+      flex-direction: column;
+      margin: 10px;
+  }
+
+  .input-container {
+      margin: 10px;
+  }
+
+  .input-container input {
+      margin-right: 10px;
+  }
+}
+
+@media (max-width: 450px) {
+   html {
+      font-size: 50%;
+   }
+}
+

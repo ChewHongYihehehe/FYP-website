@@ -21,7 +21,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if ($stmt->rowCount() > 0) {
         // Generate a unique token
         $token = bin2hex(random_bytes(50));
-        $expiry = date("Y-m-d H:i:s", strtotime("+1 hour")); // Token expires in 1 hour
+        $expiry = date("Y-m-d H:i:s", strtotime("+5 minutes")); // Token expires in 5 minutes
 
         // Update the database with the token and expiry
         $stmt = $conn->prepare("UPDATE users SET reset_token = :reset_token, reset_token_expiry = :reset_token_expiry WHERE email = :email");

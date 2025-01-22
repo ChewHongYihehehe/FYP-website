@@ -19,6 +19,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Validate input
     if (empty($username) || empty($email) || empty($phone) || empty($password) || empty($confirm_password)) {
         $error_message = "All fields are required.";
+    } elseif (!preg_match("/^[a-zA-Z\s]+$/", $username)) {
+        $error_message = "Full name can only include letters and spaces.";
+    } elseif (!preg_match("/^\+601\d{7,9}$/", $phone)) {
+        $error_message = "Phone number must start with +601 and be 10-12 digits long.";
     } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
         $error_message = "Invalid email format.";
     } elseif (!preg_match("/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_])[A-Za-z\d\W_]{8,12}$/", $password)) {
@@ -114,7 +118,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                             <ion-icon name="mail-outline"></ion-icon>
                         </div>
                         <div class="inputbox">
-                            <input type="tel" name="phone" required>
+                            <input type="tel" name="phone" id="phone" required value="+601" oninput="enforceMalaysianPhoneFormat()">
                             <label>Phone</label>
                             <ion-icon name="call-outline"></ion-icon>
                         </div>
@@ -145,6 +149,19 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     </section>
 
     <script>
+        function enforceMalaysianPhoneFormat() {
+            const phoneInput = document.getElementById("phone");
+            const prefix = "+601";
+
+            // Ensure the phone input always starts with +601
+            if (!phoneInput.value.startsWith(prefix)) {
+                phoneInput.value = prefix;
+            }
+
+            // Remove any non-digit characters after the prefix
+            phoneInput.value = phoneInput.value.replace(/[^+601\d]/g, '');
+        }
+
         function checkPasswordMatch() {
             const password = document.getElementById("password").value;
             const confirmPassword = document.getElementById("confirm_password").value;

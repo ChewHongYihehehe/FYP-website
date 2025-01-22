@@ -169,55 +169,142 @@ if (isset($_POST['add_product'])) {
 
 // Handle editing a product
 if (isset($_POST['edit_product'])) {
-    $product_id = $_POST['product_id'];
-    $product_name = $_POST['product_name'];
-    $category_name = $_POST['category_name'];
-    $brand_name = $_POST['brand_name'];
-    $price = $_POST['price']; // Capture price for editing
+    try {
+        // Start a transaction
+        $conn->beginTransaction();
 
-    // Prepare SQL to update product
-    $stmt = $conn->prepare("UPDATE products SET name = :name, category = :category, brand = :brand WHERE id = :id"); // Exclude price in update
-    $stmt->bindParam(':name', $product_name);
-    $stmt->bindParam(':category', $category_name);
-    $stmt->bindParam(':brand', $brand_name);
-    $stmt->bindParam(':id', $product_id, PDO::PARAM_INT);
+        $product_id = $_POST['product_id'];
+        $product_name = $_POST['product_name'];
+        $category_name = $_POST['category_name'];
+        $brand_name = $_POST['brand_name'];
+        $price = $_POST['price'];
+        $color = $_POST['color'];
 
-    // Execute the statement
-    if ($stmt->execute()) {
-        // Update product variants price
-        $stmt = $conn->prepare("UPDATE product_variants SET price = :price WHERE product_id = :id");
-        $stmt->bindParam(':price', $price);
+        // Prepare SQL to update product
+        $stmt = $conn->prepare("UPDATE products SET name = :name, category = :category, brand = :brand WHERE id = :id");
+        $stmt->bindParam(':name', $product_name);
+        $stmt->bindParam(':category', $category_name);
+        $stmt->bindParam(':brand', $brand_name);
         $stmt->bindParam(':id', $product_id, PDO::PARAM_INT);
         $stmt->execute();
 
+        // Fetch existing product variant
+        $stmt = $conn->prepare("SELECT * FROM product_variants WHERE product_id = :id AND color = :color LIMIT 1");
+        $stmt->bindParam(':id', $product_id, PDO::PARAM_INT);
+        $stmt->bindParam(':color', $color);
+        $stmt->execute();
+        $existing_variant = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        // Prepare image paths
+        $thumb_image_paths = [
+            $existing_variant['image1_thumb'],
+            $existing_variant['image2_thumb'],
+            $existing_variant['image3_thumb'],
+            $existing_variant['image4_thumb']
+        ];
+        $showcase_image_paths = [
+            $existing_variant['image1_display'],
+            $existing_variant['image2_display'],
+            $existing_variant['image3_display'],
+            $existing_variant['image4_display']
+        ];
+
+        // Create directories if they don't exist
+        $thumbs_dir = "img/showcase/thumbs/shoe{$product_id}-{$color}/";
+        $showcase_dir = "img/showcase/shoe{$product_id}-{$color}/";
+
+        if (!is_dir($thumbs_dir)) {
+            mkdir($thumbs_dir, 0777, true);
+        }
+        if (!is_dir($showcase_dir)) {
+            mkdir($showcase_dir, 0777, true);
+        }
+
+        // Process thumbnail images
+        for ($i = 1; $i <= 4; $i++) {
+            $thumb_image_key = "thumb_image{$i}";
+            if (isset($_FILES[$thumb_image_key]) && $_FILES[$thumb_image_key]['error'] == UPLOAD_ERR_OK) {
+                $image_tmp = $_FILES[$thumb_image_key]['tmp_name'];
+                $image_name = $_FILES[$thumb_image_key]['name'];
+                $unique_filename = uniqid() . '_' . basename($image_name);
+                $thumb_image_path = $thumbs_dir . $unique_filename;
+
+                if (move_uploaded_file($image_tmp, $thumb_image_path)) {
+                    // Remove old image if exists
+                    if (!empty($thumb_image_paths[$i - 1]) && file_exists($thumb_image_paths[$i - 1])) {
+                        unlink($thumb_image_paths[$i - 1]);
+                    }
+                    $thumb_image_paths[$i - 1] = $thumb_image_path;
+                }
+            }
+        }
+
+        // Process showcase images
+        for ($i = 1; $i <= 4; $i++) {
+            $showcase_image_key = "showcase_image{$i}";
+            if (isset($_FILES[$showcase_image_key]) && $_FILES[$showcase_image_key]['error'] == UPLOAD_ERR_OK) {
+                $image_tmp = $_FILES[$showcase_image_key]['tmp_name'];
+                $image_name = $_FILES[$showcase_image_key]['name'];
+                $unique_filename = uniqid() . '_' . basename($image_name);
+                $showcase_image_path = $showcase_dir . $unique_filename;
+
+                if (move_uploaded_file($image_tmp, $showcase_image_path)) {
+                    // Remove old image if exists
+                    if (!empty($showcase_image_paths[$i - 1]) && file_exists($showcase_image_paths[$i - 1])) {
+                        unlink($showcase_image_paths[$i - 1]);
+                    }
+                    $showcase_image_paths[$i - 1] = $showcase_image_path;
+                }
+            }
+        }
+
+        // Update product variant with new images and price
+        $stmt = $conn->prepare("
+    UPDATE product_variants 
+    SET price = :price, 
+        image1_thumb = :image1_thumb, 
+        image2_thumb = :image2_thumb, 
+        image3_thumb = :image3_thumb, 
+        image4_thumb = :image4_thumb,
+        image1_display = :image1_display, 
+        image2_display = :image2_display, 
+        image3_display = :image3_display, 
+        image4_display = :image4_display
+    WHERE product_id = :product_id AND color = :color
+");
+
+        $stmt->bindParam(':price', $price);
+        $stmt->bindParam(':image1_thumb', $thumb_image_paths[0]);
+        $stmt->bindParam(':image2_thumb', $thumb_image_paths[1]);
+        $stmt->bindParam(':image3_thumb', $thumb_image_paths[2]);
+        $stmt->bindParam(':image4_thumb', $thumb_image_paths[3]);
+        $stmt->bindParam(':image1_display', $showcase_image_paths[0]);
+        $stmt->bindParam(':image2_display', $showcase_image_paths[1]);
+        $stmt->bindParam(':image3_display', $showcase_image_paths[2]);
+        $stmt->bindParam(':image4_display', $showcase_image_paths[3]);
+        $stmt->bindParam(':product_id', $product_id, PDO::PARAM_INT);
+        $stmt->bindParam(':color', $_POST['color']); // Bind the color
+
+        $stmt->execute();
+
+        // Commit the transaction
+        $conn->commit();
+
         header("Location: admin_product.php");
         exit();
-    } else {
-        $error_message = "Error updating product.";
+    } catch (Exception $e) {
+        // Rollback the transaction
+        $conn->rollBack();
+
+        // Log the error
+        error_log("Product edit error: " . $e->getMessage());
+
+        // Set error message
+        $error_message = "Error editing product: " . $e->getMessage();
+
+        // Optional: Display error message to user
+        echo "<div style='color:red;'>" . htmlspecialchars($error_message) . "</div>";
     }
-}
-
-// Handle deletion of a product
-if (isset($_GET['delete_id'])) {
-    $delete_id = $_GET['delete_id'];
-
-    // First, delete any entries in the product_variants that reference this product
-    $stmt = $conn->prepare("DELETE FROM product_variants WHERE product_id = :id");
-    $stmt->bindParam(':id', $delete_id, PDO::PARAM_INT);
-    $stmt->execute();
-
-    // Next, delete any entries in the cart that reference this product
-    $stmt = $conn->prepare("DELETE FROM cart WHERE pid = :id");
-    $stmt->bindParam(':id', $delete_id, PDO::PARAM_INT);
-    $stmt->execute();
-
-    // Now delete the product from the products table
-    $stmt = $conn->prepare("DELETE FROM products WHERE id = :id");
-    $stmt->bindParam(':id', $delete_id, PDO::PARAM_INT);
-    $stmt->execute();
-
-    header("Location: admin_product.php");
-    exit();
 }
 
 // Handle deletion of a product
@@ -237,9 +324,10 @@ if (isset($_GET['delete_id'])) {
     $variants = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     // Insert the product into the deleted_products table
-    $stmt = $conn->prepare("INSERT INTO deleted_products (name, category, brand, size, color, stock, price, image1_thumb, image2_thumb, image3_thumb, image4_thumb, image1_display, image2_display, image3_display, image4_display) VALUES (:name, :category, :brand, :size, :color, :stock, :price, :image1_thumb, :image2_thumb, :image3_thumb, :image4_thumb, :image1_display, :image2_display, :image3_display, :image4_display)");
+    $stmt = $conn->prepare("INSERT INTO deleted_products (product_id, name, category, brand, size, color, stock, price, image1_thumb, image2_thumb, image3_thumb, image4_thumb, image1_display, image2_display, image3_display, image4_display) VALUES (:product_id, :name, :category, :brand, :size, :color, :stock, :price, :image1_thumb, :image2_thumb, :image3_thumb, :image4_thumb, :image1_display, :image2_display, :image3_display, :image4_display)");
 
     // Bind values for the main product
+    $stmt->bindParam(':product_id', $delete_id, PDO::PARAM_INT); // Bind the product_id
     $stmt->bindParam(':name', $product['name']);
     $stmt->bindParam(':category', $product['category']);
     $stmt->bindParam(':brand', $product['brand']);
@@ -271,6 +359,7 @@ if (isset($_GET['delete_id'])) {
     header("Location: admin_product.php");
     exit();
 }
+
 // Fetch categories and brands for dropdowns
 $categories = [];
 $brands = [];
@@ -405,6 +494,7 @@ $colors = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 <span class="close-button" id="closeEditModal">&times;</span>
                 <form method="post" enctype="multipart/form-data">
                     <input type="hidden" name="product_id" id="editProductId">
+                    <input type="hidden" name="color" id="editColor" required>
                     <div class="account-header">
                         <h1 class="account-title">Edit Product</h1>
                     </div>
@@ -509,6 +599,7 @@ $colors = $stmt->fetchAll(PDO::FETCH_ASSOC);
             <table class="product-display-table">
                 <thead>
                     <tr>
+                        <th>#</th>
                         <th>Product Image</th>
                         <th>Name</th>
                         <th>Category</th>
@@ -522,11 +613,13 @@ $colors = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     <?php
                     $current_product_id = null;
                     $current_color = null;
+                    $row_count = 1;
                     foreach ($products as $product):
                         if ($current_product_id !== $product['id'] || $current_color !== $product['color']):
                             $current_product_id = $product['id'];
                             $current_color = $product['color']; ?>
                             <tr>
+                                <td><?= $row_count++; ?></td>
                                 <td><img src="<?= htmlspecialchars($product['image1_display']); ?>" alt="Product Image" width="100"></td>
                                 <td><?= htmlspecialchars($product['name']); ?></td>
                                 <td><?= htmlspecialchars($product['category']); ?></td>

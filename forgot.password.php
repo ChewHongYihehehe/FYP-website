@@ -31,7 +31,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $stmt->execute();
 
         // Send reset link to the user's email using PHPMailer
-        $reset_link = "http://localhost/FYP-website-3/reset.password.php?token=" . $token;
+        $reset_link = "http://localhost/FYP-website/reset.password.php?token=" . $token;
 
         $mail = new PHPMailer(true);
 

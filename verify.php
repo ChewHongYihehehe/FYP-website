@@ -37,23 +37,29 @@ $conn = null; // Close the connection
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="assets/css/style.css">
     <title>Email Verification</title>
 </head>
+
 <body>
     <div class="container">
         <?php if (!empty($success_message)): ?>
             <div class="success-message">
                 <?php echo $success_message; ?>
+                <br>
+                <a href="login.php" class="btn">Login Now</a>
             </div>
         <?php elseif (!empty($error_message)): ?>
             <div class="error-message">
                 <?php echo $error_message; ?>
+                <a href="register.php" class="btn">Register Again</a>
             </div>
         <?php endif; ?>
     </div>
 </body>
+
 </html>

@@ -126,13 +126,17 @@ if (isset($_GET['delete_id'])) {
             <table class="product-display-table">
                 <thead>
                     <tr>
+                        <th>#</th>
                         <th>Color Name</th>
                         <th>Action</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <?php foreach ($colors as $color): ?>
+                    <?php
+                    $row_count = 1;
+                    foreach ($colors as $color): ?>
                         <tr>
+                            <td><?= $row_count++; ?></td>
                             <td><?= htmlspecialchars($color['color_name']); ?></td>
                             <td>
                                 <button class="btn edit-color-btn"

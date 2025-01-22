@@ -2,7 +2,18 @@
 include 'connect.php';
 session_start();
 // Fetch deleted products
-$stmt = $conn->prepare("SELECT * FROM deleted_products");
+$stmt = $conn->prepare("
+    SELECT 
+        MIN(id) AS id, 
+        name, 
+        category, 
+        brand, 
+        color, 
+        price, 
+        image1_display 
+    FROM deleted_products 
+    GROUP BY product_id
+");
 $stmt->execute();
 $deleted_products = $stmt->fetchAll(PDO::FETCH_ASSOC);
 

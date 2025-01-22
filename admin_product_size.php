@@ -104,19 +104,23 @@ if (isset($_GET['delete_id'])) {
     $size = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if ($size) {
-        // Insert the size into the deleted_product_sizes table
-        $stmt = $conn->prepare("INSERT INTO deleted_product_sizes (product_id, size, color, stock, price) VALUES (:product_id, :size, :color, :stock, :price)");
-        $stmt->bindParam(':product_id', $size['product_id']);
-        $stmt->bindParam(':size', $size['size']);
-        $stmt->bindParam(':color', $size['color']);
-        $stmt->bindParam(':stock', $size['stock']);
-        $stmt->bindParam(':price', $size['price']); // Ensure this is correctly bound
+        //Check how many sizes exist for this product
+        $stmt = $conn->prepare("SELECT COUNT(*) FROM product_variants WHERE product_id = :product_id");
+        $stmt->bindParam(':product_id', $size['product_id'], PDO::PARAM_INT);
         $stmt->execute();
+        $size_count = $stmt->fetchColumn();
 
-        // Now delete the size from the product_variants table
-        $stmt = $conn->prepare("DELETE FROM product_variants WHERE id = :id");
-        $stmt->bindParam(':id', $delete_id, PDO::PARAM_INT);
-        $stmt->execute();
+        if ($size_count > 1) {
+            // If there are other sizes, just delete the size variant
+            $stmt = $conn->prepare("DELETE FROM product_variants WHERE id = :id");
+            $stmt->bindParam(':id', $delete_id, PDO::PARAM_INT);
+            $stmt->execute();
+        } else {
+            // If this is the only size, delete the size variant
+            $stmt = $conn->prepare("DELETE FROM product_variants WHERE id = :id");
+            $stmt->bindParam(':id', $delete_id, PDO::PARAM_INT);
+            $stmt->execute();
+        }
 
         header("Location: admin_product_size.php");
         exit();
@@ -228,7 +232,7 @@ if (isset($_GET['edit_id'])) {
             <table class="product-display-table">
                 <thead>
                     <tr>
-                        <th>ID</th>
+                        <th>#</th>
                         <th>Product Image</th>
                         <th>Sizes and Stock</th>
                         <th>Action</th>
@@ -237,6 +241,7 @@ if (isset($_GET['edit_id'])) {
                 <tbody>
                     <?php
                     $processed_combinations = [];
+                    $row_count = 1;
 
                     foreach ($product_sizes as $variant):
                         $unique_key = $variant['product_id'] . '_' . $variant['color'];
@@ -248,7 +253,7 @@ if (isset($_GET['edit_id'])) {
                         $processed_combinations[$unique_key] = true;
                     ?>
                         <tr>
-                            <td><?= htmlspecialchars($variant['product_id']); ?></td>
+                            <td><?= $row_count++; ?></td>
                             <td>
                                 <img src="<?= htmlspecialchars($variant['image1_display']); ?>" alt="Product Image" width="100">
                             </td>

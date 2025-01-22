@@ -126,13 +126,17 @@ if (isset($_GET['delete_id'])) {
             <table class="product-display-table">
                 <thead>
                     <tr>
+                        <th>#</th>
                         <th>Size(UK)</th>
                         <th>Action</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <?php foreach ($sizes as $size): ?>
+                    <?php
+                    $row_count = 1;
+                    foreach ($sizes as $size): ?>
                         <tr>
+                            <td><?= $row_count++; ?></td>
                             <td><?= htmlspecialchars($size['size']); ?></td> <!-- Assuming the column in the database is 'name' -->
                             <td>
                                 <button class="btn edit-size-btn"

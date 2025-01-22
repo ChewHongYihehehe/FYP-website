@@ -12,7 +12,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $password = $_POST['password'];
 
 
-    $stmt = $conn->prepare("SELECT * FROM users WHERE email = :email");
+    $query = "SELECT * FROM users WHERE email = :email";
+    $stmt = $conn->prepare($query);
     $stmt->bindParam(":email", $email, PDO::PARAM_STR);
     $stmt->execute();
 
@@ -31,11 +32,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         // Only attempt password verification if not terminated
         elseif (password_verify($password, $row['password'])) {
 
-            session_regenerate_id(true);
-            $_SESSION['user_id'] = $row['id'];
-            $_SESSION['user_email'] = $row['email'];
-            header("Location: home.php");
-            exit();
+            if ($row['is_verified'] == 0) {
+                $error_message = "Please verify your email before logging in.";
+            } else {
+                session_regenerate_id(true);
+                $_SESSION['user_id'] = $row['id'];
+                $_SESSION['user_email'] = $row['email'];
+                header("Location: home.php");
+                exit();
+            }
         } else {
             $error_message = "Invalid password.";
         }
@@ -79,6 +84,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     <p><a href="forgot.password.php">Forgot Password? Click here</a></p>
                 </div>
             </form>
+            <?php if ($show_terminated_options): ?>
+                <div class="terminated-options">
+                    <p>If you believe this is a mistake, please contact support.</p>
+                    <p><a href="register.php">Register a new account</a></p>
+                </div>
+            <?php endif; ?>
         </div>
     </section>
 </body>

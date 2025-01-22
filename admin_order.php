@@ -58,6 +58,7 @@ if (isset($_POST['update_order'])) {
             <table class="product-display-table">
                 <thead>
                     <tr>
+                        <th>#</th>
                         <th>Order Number</th>
                         <th>Order Date</th>
                         <th>Payment Method</th>
@@ -70,8 +71,11 @@ if (isset($_POST['update_order'])) {
                     </tr>
                 </thead>
                 <tbody>
-                    <?php foreach ($orders as $order): ?>
+                    <?php
+                    $row_count = 1;
+                    foreach ($orders as $order): ?>
                         <tr>
+                            <td><?= $row_count++; ?></td>
                             <td><?= htmlspecialchars($order['order_number']); ?></td>
                             <td><?= htmlspecialchars(date('Y-m-d', strtotime($order['placed_on']))); ?></td>
                             <td><?= htmlspecialchars(strtoupper($order['method'])); ?></td>

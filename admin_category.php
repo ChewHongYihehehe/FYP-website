@@ -225,14 +225,18 @@ if (isset($_GET['delete_id'])) {
             <table class="product-display-table">
                 <thead>
                     <tr>
+                        <th>#</th>
                         <th>Image</th>
                         <th>Category Name</th>
                         <th>Action</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <?php foreach ($categories as $category): ?>
+                    <?php
+                    $row_count = 1;
+                    foreach ($categories as $category): ?>
                         <tr>
+                            <td><?= $row_count++; ?></td>
                             <td>
                                 <?php if (!empty($category['image'])): ?>
                                     <img src="assets/image/<?= htmlspecialchars($category['image']); ?>"

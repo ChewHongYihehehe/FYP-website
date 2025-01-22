@@ -71,6 +71,8 @@ foreach ($cart_items as $item) {
     $product_image = $stmt->fetchColumn();
 
     $stmt = $conn->prepare("INSERT INTO order_items (order_id, product_id, name, size, color, quantity, price, image) VALUES (:order_id, :product_id, :name, :size, :color, :quantity, :price, :image)");
+
+    // Bind parameters
     $stmt->bindParam(':order_id', $order_id);
     $stmt->bindParam(':product_id', $item['pid']); // Assuming you have product_id in the cart
     $stmt->bindParam(':name', $item['name']); // Assuming you have name in the cart

@@ -4,126 +4,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>sidebar</title>
+    <title>Sidebar</title>
     <link rel="stylesheet" href="assets/css/sidebar.css">
     <link href="https://cdn.jsdelivr.net/npm/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css">
 </head>
 
-<style>
-    * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-    }
-
-    a {
-        text-decoration: none;
-    }
-
-    li {
-        list-style: none;
-    }
-
-    body {
-        background-color: #eee;
-    }
-
-    #sidebar {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 280px;
-        height: 100%;
-        background-color: #f9f9f9;
-        z-index: 1000;
-        font-family: 'Times New Roman', Times, serif;
-        transition: .3s ease;
-        overflow-x: hidden;
-    }
-
-    #sidebar .brand {
-        font-size: 26px;
-        font-weight: 700;
-        height: 56px;
-        display: flex;
-        align-items: center;
-        background: linear-gradient(90deg, red, black);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-    }
-
-    #sidebar .brand .bx {
-        min-width: 60px;
-        display: flex;
-        justify-content: center;
-    }
-
-    #sidebar .side-menu {
-        width: 100%;
-        margin-top: 48px;
-    }
-
-    #sidebar .side-menu li {
-        height: 48px;
-        background-color: transparent;
-        margin-left: 6px;
-        border-radius: 48px 0 0 48px;
-        padding: 4px;
-    }
-
-    #sidebar .side-menu li a {
-        width: 100%;
-        height: 100%;
-        background-color: #f9f9f9;
-        display: flex;
-        align-items: center;
-        border-radius: 48px;
-        font-size: 16px;
-        color: rgb(32, 149, 196);
-        font-size: 18px;
-        white-space: nowrap;
-        overflow: hidden;
-    }
-
-    #sidebar .side-menu li a.logout {
-        color: red;
-    }
-
-    #sidebar .side-menu.top li a:hover {
-        color: rgb(0, 0, 0);
-    }
-
-    #sidebar .side-menu li a .bx {
-        min-width: 60px;
-        display: flex;
-        justify-content: center;
-    }
-
-    .dropdown {
-        display: none;
-        margin-left: 20px;
-    }
-
-    .dropdown a {
-        display: block;
-        padding: 5px 0;
-        color: #555;
-        text-decoration: none;
-    }
-
-    .dropdown a:hover {
-        color: #000;
-    }
-
-    .has-dropdown.active .dropdown {
-        display: block;
-    }
-
-    button {
-        color: darkred;
-        /* Change button text color */
-    }
-</style>
 
 <body>
     <section id="sidebar">
@@ -137,16 +23,20 @@
 
         <ul class="side-menu top">
             <li class="active">
-                <a href="#">
+                <a href="admin.php">
                     <i class="bx bxs-shopping-bag-alt"></i>
                     <span class="text">My Store</span>
                 </a>
             </li>
-            <li>
-                <a href="admin_product.html">
+            <li class="has-dropdown">
+                <a href="javascript:void(0)" onclick="toggleDropdown(this)">
                     <i class='bx bxs-data'></i>
                     <span class="text">Product</span>
                 </a>
+                <div class="dropdown">
+                    <a href="admin_product.php">Product Info</a>
+                    <a href="admin_product_size.php">Product Sizes and Stock</a>
+                </div>
             </li>
             <li class="has-dropdown">
                 <a href="javascript:void(0)" onclick="toggleDropdown(this)">
@@ -155,49 +45,63 @@
                 </a>
                 <div class="dropdown">
                     <a href="admin_category.php">Category</a>
-                    <a href="admin_brand.html">Brand</a>
-                    <a href="admin_color.html">Color</a>
-                    <a href="admin_size.html">Size</a>
+                    <a href="admin_category_brands.php">Brand</a>
+                    <a href="admin_category_color.php">Color</a>
+                    <a href="admin_category_sizes.php">Size</a>
+                </div>
+            </li>
+            <li class="has-dropdown">
+                <a href="javascript:void(0)" onclick="toggleDropdown(this)">
+                    <i class='fas fa-trash-restore-alt'></i>
+                    <span class="text">Restore</span>
+                </a>
+                <div class="dropdown" id="restoreProductDropdown">
+                    <a href="javascript:void(0)" onclick="toggleSubDropdown(this, 'restoreProductInfoDropdown')">Restore Product</a>
+                    <div class="sub-dropdown" id="restoreProductInfoDropdown">
+                        <a href="admin_restore_products.php">Restore Product Info</a>
+                        <a href="admin_restore_product_size.php">Restore Product Sizes</a>
+                    </div>
+                    <a href="javascript:void(0)" onclick="toggleSubDropdown(this, 'restoreCategoryDropdown')">Restore Category</a>
+                    <div class="sub-dropdown" id="restoreCategoryDropdown">
+                        <a href="admin_restore_categories.php">Restore Category</a>
+                        <a href="admin_restore_brands.php">Restore Brand</a>
+                        <a href="admin_restore_colors.php">Restore Color</a>
+                        <a href="admin_restore_sizes.php">Restore Size</a>
+                    </div>
                 </div>
             </li>
             <li>
-                <a href="admin_order.html">
+                <a href="admin_order.php">
                     <i class="bx bxs-doughnut-chart"></i>
                     <span class="text">Order</span>
                 </a>
             </li>
             <li>
-                <a href="admin_totalsale.html">
+                <a href="admin_sales_report.php">
                     <i class='bx bx-dollar'></i>
-                    <span class="text">Total Sale</span>
+                    <span class="text">Sale Report</span>
                 </a>
             </li>
             <li>
-                <a href="admin_payment.html">
-                    <i class="bx bxs-wallet"></i>
-                    <span class="text">Payment</span>
-                </a>
-            </li>
-            <li>
-                <a href="admin_message.html">
+                <a href="admin_contact.php">
                     <i class="bx bxs-message-dots"></i>
                     <span class="text">Message</span>
                 </a>
             </li>
             <li>
-                <a href="admin_user.html">
+                <a href="admin_user.php">
                     <i class="bx bxs-user"></i>
-                    <span class="text">User</span>
+                    <span class="text">User </span>
                 </a>
             </li>
             <li>
-                <a href="admin_a.html">
+                <a href="admin_list.php">
                     <i class='bx bxs-group'></i>
                     <span class="text">Admin</span>
                 </a>
             </li>
             <li>
-                <a href="admin_profile">
+                <a href="admin_profile.php">
                     <i class='bx bx-user-circle'></i>
                     <span class="text">My Profile</span>
                 </a>
@@ -220,21 +124,28 @@
         });
 
         function toggleDropdown(element) {
-            const parentLi = element.parentElement;
-            const dropdown = parentLi.querySelector('.dropdown');
-            const isActive = parentLi.classList.toggle('active');
+            const dropdown = element.nextElementSibling; // Get the next sibling (the dropdown)
+            dropdown.classList.toggle('show'); // Toggle the 'show' class
 
-            if (isActive) {
-                dropdown.style.display = 'block';
-                dropdown.style.animation = 'moveDown 0.3s forwards';
-            } else {
-                dropdown.style.animation = 'moveUp 0.3s forwards';
-                setTimeout(() => {
-                    dropdown.style.display = 'none';
-                }, 300);
-            }
+            // Hide all other dropdowns
+            document.querySelectorAll('.dropdown').forEach(d => {
+                if (d !== dropdown) {
+                    d.classList.remove('show');
+                }
+            });
         }
 
+        function toggleSubDropdown(element, subDropdownId) {
+            const subDropdown = document.getElementById(subDropdownId);
+            subDropdown.classList.toggle('show'); // Toggle the 'show' class
+
+            // Hide all other sub-dropdowns
+            document.querySelectorAll('.sub-dropdown').forEach(sd => {
+                if (sd !== subDropdown) {
+                    sd.classList.remove('show');
+                }
+            });
+        }
         const style = document.createElement('style');
         style.innerHTML = `
             @keyframes moveDown {

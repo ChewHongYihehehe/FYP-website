@@ -23,6 +23,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const editColorIdInput = document.getElementById('editColorName');
     const editProductPriceInput = document.getElementById('editProductPrice');
 
+
     // Current images for thumbnails
     const currentThumb1 = document.getElementById('currentThumb1');
     const currentThumb2 = document.getElementById('currentThumb2');
@@ -43,7 +44,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const brand = button.getAttribute('data-brand');
             const color = button.getAttribute('data-color');
             const price = button.getAttribute('data-price');
-
+    
             // Set the values in the edit modal
             editProductIdInput.value = productId;
             editProductNameInput.value = productName;
@@ -52,18 +53,22 @@ document.addEventListener('DOMContentLoaded', function() {
             editColorIdInput.value = color; // Set the color
             editProductPriceInput.value = price;
 
+              // Set the selected color in the dropdown
+        const editColorSelect = document.getElementById('editColorName');
+        editColorSelect.value = color; // Set the selected color in the dropdown
+    
             // Set the current thumbnail images
             currentThumb1.src = button.getAttribute('data-thumb1') || '';
             currentThumb2.src = button.getAttribute('data-thumb2') || '';
             currentThumb3.src = button.getAttribute('data-thumb3') || '';
             currentThumb4.src = button.getAttribute('data-thumb4') || '';
-
+    
             // Set the current showcase images
             currentShowcase1.src = button.getAttribute('data-showcase1') || '';
             currentShowcase2.src = button.getAttribute('data-showcase2') || '';
             currentShowcase3.src = button.getAttribute('data-showcase3') || '';
             currentShowcase4.src = button.getAttribute('data-showcase4') || '';
-
+    
             editProductModal.style.display = 'block'; // Show the modal
         });
     });

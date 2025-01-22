@@ -192,6 +192,7 @@ function exportToCSV($sales_data)
             <table class="product-display-table">
                 <thead>
                     <tr>
+                        <th>#</th>
                         <th>Date</th>
                         <th>No. Orders</th>
                         <th>Products Sold</th>
@@ -199,13 +200,16 @@ function exportToCSV($sales_data)
                     </tr>
                 </thead>
                 <tbody>
-                    <?php if (empty($sales_data)): ?>
+                    <?php
+                    $row_count = 1;
+                    if (empty($sales_data)): ?>
                         <tr>
                             <td colspan="4">No sales data found for the selected date range.</td>
                         </tr>
                     <?php else: ?>
                         <?php foreach ($sales_data as $data): ?>
                             <tr>
+                                <td><?= $row_count++; ?></td>
                                 <td><?= htmlspecialchars($data['order_date']); ?></td>
                                 <td><?= htmlspecialchars($data['total_orders']); ?></td>
                                 <td><?= htmlspecialchars($data['total_products_sold']); ?></td>

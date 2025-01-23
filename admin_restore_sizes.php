@@ -41,6 +41,7 @@ $deleted_sizes = $stmt->fetchAll(PDO::FETCH_ASSOC);
                         $row_count = 1;
                         foreach ($deleted_sizes as $deleted_size): ?>
                             <tr>
+                                <td><?= $row_count++; ?></td>
                                 <td><?= htmlspecialchars($deleted_size['size']); ?></td>
                                 <td>
                                     <a href="restore_size.php?id=<?= htmlspecialchars($deleted_size['id']); ?>" class="btn">Restore</a>

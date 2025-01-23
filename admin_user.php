@@ -7,6 +7,25 @@ if (!isset($_SESSION['admin_id'])) {
     exit();
 }
 
+
+if (isset($_GET['id']) && isset($_GET['status'])) {
+    $user_id = $_GET['id'];
+    $status = $_GET['status'];
+
+    // Prepare the SQL statement to update the user status
+    if ($status === 'terminate') {
+        $stmt = $conn->prepare("UPDATE users SET status = 'terminated', termination_date = NOW() WHERE id = :id");
+    } else {
+        $stmt = $conn->prepare("UPDATE users SET status = 'active', termination_date = NULL WHERE id = :id");
+    }
+    $stmt->bindParam(':id', $user_id, PDO::PARAM_INT);
+    $stmt->execute();
+
+    // Redirect to the same page to see the updated status
+    header("Location: " . $_SERVER['PHP_SELF']);
+    exit();
+}
+
 // Fetch users
 $users = [];
 $stmt = $conn->prepare("SELECT * FROM users");

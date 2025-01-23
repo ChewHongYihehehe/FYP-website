@@ -52,7 +52,7 @@ if (isset($_POST['filter'])) {
 $sales_data = [];
 $stmt = $conn->prepare("SELECT 
                             DATE(o.placed_on) AS order_date,
-                            COUNT(o.id) AS total_orders,
+                            COUNT(DISTINCT o.id) AS total_orders,
                             SUM(oi.quantity) AS total_products_sold,
                             SUM(o.total_price) AS total_sales
                         FROM 
@@ -73,11 +73,8 @@ $sales_data = $stmt->fetchAll(PDO::FETCH_ASSOC);
 if (isset($_POST['export'])) {
     $export_type = $_POST['export_type'];
 
-    if ($export_type == 'excel') {
-        // Redirect to the Excel export script
-        header('Location: export_sales.php?filter=' . $filter . '&start_date=' . $start_date . '&end_date=' . $end_date);
-        exit();
-    } elseif ($export_type == 'pdf') {
+
+    if ($export_type == 'pdf') {
         // Redirect to the PDF generation script
         header('Location: generatePDF.php?filter=' . $filter . '&start_date=' . $start_date . '&end_date=' . $end_date);
         exit();
@@ -179,7 +176,7 @@ function exportToCSV($sales_data)
                 <!-- Export selection and button aligned to the right -->
                 <div class="export-container">
                     <select name="export_type">
-                        <option value="excel">Export to Excel</option>
+
                         <option value="pdf">Generate PDF</option>
                         <option value="csv">Export to CSV</option>
                     </select>
@@ -204,7 +201,7 @@ function exportToCSV($sales_data)
                     $row_count = 1;
                     if (empty($sales_data)): ?>
                         <tr>
-                            <td colspan="4">No sales data found for the selected date range.</td>
+                            <td colspan="5">No sales data found for the selected date range.</td>
                         </tr>
                     <?php else: ?>
                         <?php foreach ($sales_data as $data): ?>

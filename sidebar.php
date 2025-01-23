@@ -95,12 +95,6 @@
                 </a>
             </li>
             <li>
-                <a href="admin_list.php">
-                    <i class='bx bxs-group'></i>
-                    <span class="text">Admin</span>
-                </a>
-            </li>
-            <li>
                 <a href="admin_profile.php">
                     <i class='bx bx-user-circle'></i>
                     <span class="text">My Profile</span>

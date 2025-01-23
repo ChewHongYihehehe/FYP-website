@@ -26,6 +26,7 @@ $deleted_categories = $stmt->fetchAll(PDO::FETCH_ASSOC);
             <table class="product-display-table">
                 <thead>
                     <tr>
+                        <th>#</th>
                         <th>Image</th>
                         <th>Category Name</th>
                         <th>Action</th>
@@ -37,8 +38,11 @@ $deleted_categories = $stmt->fetchAll(PDO::FETCH_ASSOC);
                             <td colspan="3">No deleted categories found.</td>
                         </tr>
                     <?php else: ?>
-                        <?php foreach ($deleted_categories as $deleted_category): ?>
+                        <?php
+                        $row_count = 1;
+                        foreach ($deleted_categories as $deleted_category): ?>
                             <tr>
+                                <td><?= $row_count++; ?></td>
                                 <td>
                                     <?php if (!empty($deleted_category['image'])): ?>
                                         <img src="assets/image/<?= htmlspecialchars($deleted_category['image']); ?>" alt="<?= htmlspecialchars($deleted_category['name']); ?>" class="category-image" style="max-width:100px;">

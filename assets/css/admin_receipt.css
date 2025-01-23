@@ -1,0 +1,98 @@
+body {
+    padding-left: 200px;
+    padding-right:200px;
+    margin-left:200px;
+}
+
+.brand-logo-container {
+    position: relative; /* Change to relative */
+    top: -30%; /* Adjust this value to create space from the top */
+    left: 50%;
+    transform: translateX(-50%);
+    margin-bottom: 20px; /* Optional: Add space below the logo */
+    text-align:center;
+}
+
+.brand-logo-container a {
+    font-size: 24px;
+    color: #1e1e27;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.brand-logo-container a span {
+    color: #fe4c50;
+}
+
+.receipt_container{
+    display: flex;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    padding-top:60px;
+}
+
+.left-section {
+    padding: 20px;
+    width: 50%;
+    border-right: 1px solid #ddd;
+}
+
+.right-section {
+    padding: 20px;
+    width: 50%;
+}
+
+h2 {
+    font-size: 18px;
+    margin-bottom: 10px;
+}
+
+
+.order-status {
+    background-color: #fe4c50;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+.order-status:hover {
+    background-color:  #FE7C7F;
+    color:white;
+}
+
+table {
+    width: 100%;
+    margin-top: 20px;
+}
+
+td {
+    padding: 10px;
+    border-top: 1px solid #ddd;
+}
+
+img {
+    max-width: 100%;
+    height: auto;
+    max-height:200px;
+    object-fit:cover;
+}
+
+.item-container{
+    display:flex;
+    align-items:center;
+    margin-bottom:20px;
+}
+
+.item-container img{
+    max-width:150px;
+    height:auto;
+    margin-right:20px;
+}
+
+.item-info{
+    flex:1;
+}

@@ -37,6 +37,7 @@ $deleted_products = $stmt->fetchAll(PDO::FETCH_ASSOC);
             <table class="product-display-table">
                 <thead>
                     <tr>
+                        <th>#</th>
                         <th>Product Image</th>
                         <th>Name</th>
                         <th>Category</th>
@@ -47,8 +48,11 @@ $deleted_products = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     </tr>
                 </thead>
                 <tbody>
-                    <?php foreach ($deleted_products as $product): ?>
+                    <?php
+                    $row_count = 1;
+                    foreach ($deleted_products as $product): ?>
                         <tr>
+                            <td><?= $row_count++; ?></td>
                             <td><img src="<?= htmlspecialchars($product['image1_display']); ?>" alt="Product Image" width="100"></td>
                             <td><?= htmlspecialchars($product['name']); ?></td>
                             <td><?= htmlspecialchars($product['category']); ?></td>

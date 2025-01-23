@@ -43,28 +43,23 @@ if (isset($_GET['delete_id'])) {
             <table class="product-display-table">
                 <thead>
                     <tr>
-                        <th>ID</th>
+                        <th>#</th>
                         <th>Name</th>
                         <th>Email</th>
                         <th>Number</th>
                         <th>Message</th>
-                        <th>Action</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <?php foreach ($messages as $message): ?>
+                    <?php
+                    $row_count = 1;
+                    foreach ($messages as $message): ?>
                         <tr>
-                            <td><?= htmlspecialchars($message['id']); ?></td>
+                            <td><?= $row_count++; ?></td>
                             <td><?= htmlspecialchars($message['name']); ?></td>
                             <td><?= htmlspecialchars($message['email']); ?></td>
                             <td><?= htmlspecialchars($message['number']); ?></td>
                             <td><?= htmlspecialchars($message['message']); ?></td>
-                            <td>
-                                <button class="btn edit-message-btn"
-                                    data-id="<?= htmlspecialchars($message['id']); ?>"
-                                    data-message="<?= htmlspecialchars($message['message']); ?>">Edit</button>
-                                <a href="?delete_id=<?= htmlspecialchars($message['id']); ?>" class="btn">Delete</a>
-                            </td>
                         </tr>
                     <?php endforeach; ?>
                 </tbody>

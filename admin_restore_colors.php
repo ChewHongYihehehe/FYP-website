@@ -26,18 +26,23 @@ $deleted_colors = $stmt->fetchAll(PDO::FETCH_ASSOC);
             <table class="product-display-table">
                 <thead>
                     <tr>
+                        <th>#</th>
                         <th>Color Name</th>
                         <th>Action</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <?php if (empty($deleted_colors)): ?>
+                    <?php
+                    if (empty($deleted_colors)): ?>
                         <tr>
-                            <td colspan="2">No deleted colors found.</td>
+                            <td colspan="3">No deleted colors found.</td>
                         </tr>
                     <?php else: ?>
-                        <?php foreach ($deleted_colors as $deleted_color): ?>
+                        <?php
+                        $row_count = 1;
+                        foreach ($deleted_colors as $deleted_color): ?>
                             <tr>
+                                <td><?= $row_count++; ?></td>
                                 <td><?= htmlspecialchars($deleted_color['color_name']); ?></td>
                                 <td>
                                     <a href="restore_color.php?id=<?= htmlspecialchars($deleted_color['id']); ?>" class="btn">Restore</a>

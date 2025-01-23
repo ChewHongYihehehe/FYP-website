@@ -94,38 +94,47 @@ if (isset($_POST['edit_size'])) {
 
 
 // Handle deletion of a size
-if (isset($_GET['delete_id'])) {
+if (isset($_GET['delete_id']) && isset($_GET['size'])) {
     $delete_id = $_GET['delete_id'];
+    $size = $_GET['size'];
+
 
     // Fetch the size details before deletion
-    $stmt = $conn->prepare("SELECT * FROM product_variants WHERE id = :id");
+    $stmt = $conn->prepare("SELECT * FROM product_variants WHERE id = :id AND size = :size");
     $stmt->bindParam(':id', $delete_id, PDO::PARAM_INT);
+    $stmt->bindParam(':size', $size);
     $stmt->execute();
     $size = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if ($size) {
-        //Check how many sizes exist for this product
+        // Insert the size details into the deleted_product_size table
+        $stmt = $conn->prepare("
+            INSERT INTO deleted_product_sizes(product_id, size, color, stock, price, deleted_at)
+            VALUES (:product_id, :size, :color, :stock, :price, NOW())
+        ");
+        $stmt->bindParam(':product_id', $size['product_id'], PDO::PARAM_INT);
+        $stmt->bindParam(':size', $size['size']);
+        $stmt->bindParam(':color', $size['color']);
+        $stmt->bindParam(':stock', $size['stock'], PDO::PARAM_INT);
+        $stmt->bindParam(':price', $size['price']);
+        $stmt->execute();
+
+        // Check how many sizes exist for this product
         $stmt = $conn->prepare("SELECT COUNT(*) FROM product_variants WHERE product_id = :product_id");
         $stmt->bindParam(':product_id', $size['product_id'], PDO::PARAM_INT);
         $stmt->execute();
         $size_count = $stmt->fetchColumn();
 
-        if ($size_count > 1) {
-            // If there are other sizes, just delete the size variant
-            $stmt = $conn->prepare("DELETE FROM product_variants WHERE id = :id");
-            $stmt->bindParam(':id', $delete_id, PDO::PARAM_INT);
-            $stmt->execute();
-        } else {
-            // If this is the only size, delete the size variant
-            $stmt = $conn->prepare("DELETE FROM product_variants WHERE id = :id");
-            $stmt->bindParam(':id', $delete_id, PDO::PARAM_INT);
-            $stmt->execute();
-        }
+        // Delete the size variant
+        $stmt = $conn->prepare("DELETE FROM product_variants WHERE id = :id");
+        $stmt->bindParam(':id', $delete_id, PDO::PARAM_INT);
+        $stmt->execute();
 
         header("Location: admin_product_size.php");
         exit();
     }
 }
+
 
 // Fetch products for the dropdown
 $products = [];
@@ -286,7 +295,7 @@ if (isset($_GET['edit_id'])) {
                                                             data-stock="<?= htmlspecialchars($size['stock']); ?>"> <!-- Add stock data -->
                                                             Edit
                                                         </button>
-                                                        <a href="?delete_id=<?= htmlspecialchars($variant['variant_id']); ?>" class="btn delete-size-btn">Delete</a>
+                                                        <a href="?delete_id=<?= htmlspecialchars($size['variant_id']); ?>&size=<?= htmlspecialchars($size['size']); ?>" class="btn delete-size-btn">Delete</a>
                                                     </div>
                                             <?php endforeach;
                                             } else {

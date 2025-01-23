@@ -115,7 +115,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
                                             <?php foreach ($orders as $order): ?>
                                                 <tr class="<?php echo ($order['payment_status'] === 'Completed') ? 'completed-order' : ''; ?>">
                                                     <td><?php echo htmlspecialchars($order['order_number']); ?></td>
-                                                    <td><?php echo htmlspecialchars(date('Y-m-d', strtotime($order['placed_on']))); ?></td>
+                                                    <td><?php echo htmlspecialchars(date('Y-m-d H:i:s', strtotime($order['placed_on']))); ?></td>
                                                     <td><?php echo htmlspecialchars(strtoupper($order['method'])); ?></td>
                                                     <td>
                                                         <?php if ($order['payment_status'] === 'Completed'): ?>

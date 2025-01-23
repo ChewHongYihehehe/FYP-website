@@ -26,6 +26,7 @@ $deleted_sizes = $stmt->fetchAll(PDO::FETCH_ASSOC);
             <table class="product-display-table">
                 <thead>
                     <tr>
+                        <th>#</th>
                         <th>Size Name</th>
                         <th>Action</th>
                     </tr>
@@ -36,7 +37,9 @@ $deleted_sizes = $stmt->fetchAll(PDO::FETCH_ASSOC);
                             <td colspan="2">No deleted sizes found.</td>
                         </tr>
                     <?php else: ?>
-                        <?php foreach ($deleted_sizes as $deleted_size): ?>
+                        <?php
+                        $row_count = 1;
+                        foreach ($deleted_sizes as $deleted_size): ?>
                             <tr>
                                 <td><?= htmlspecialchars($deleted_size['size']); ?></td>
                                 <td>

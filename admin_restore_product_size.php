@@ -2,8 +2,11 @@
 include 'connect.php';
 session_start();
 
-// Fetch deleted product sizes, including stock
-$stmt = $conn->prepare("SELECT * FROM deleted_product_sizes");
+$stmt = $conn->prepare("
+    SELECT d.*, pv.image1_display
+    FROM deleted_product_sizes d
+    LEFT JOIN product_variants pv ON d.product_id = pv.product_id AND d.color = pv.color
+");
 $stmt->execute();
 $deleted_sizes = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
@@ -26,7 +29,8 @@ $deleted_sizes = $stmt->fetchAll(PDO::FETCH_ASSOC);
             <table class="product-display-table">
                 <thead>
                     <tr>
-                        <th>Product ID</th>
+                        <th>#</th>
+                        <th>Product Image</th>
                         <th>Size</th>
                         <th>Color</th>
                         <th>Stock</th> <!-- Added Stock Column -->
@@ -36,12 +40,17 @@ $deleted_sizes = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 <tbody>
                     <?php if (empty($deleted_sizes)): ?>
                         <tr>
-                            <td colspan="5">No deleted sizes found.</td>
+                            <td colspan="6">No deleted sizes found.</td>
                         </tr>
                     <?php else: ?>
-                        <?php foreach ($deleted_sizes as $deleted_size): ?>
+                        <?php
+                        $row_count = 1;
+                        foreach ($deleted_sizes as $deleted_size): ?>
                             <tr>
-                                <td><?= htmlspecialchars($deleted_size['product_id']); ?></td>
+                                <td><?= $row_count++; ?></td>
+                                <td>
+                                    <img src="<?= htmlspecialchars($deleted_size['image1_display']); ?>" alt="Product Image" width="50"> <!-- Display Image -->
+                                </td>
                                 <td><?= htmlspecialchars($deleted_size['size']); ?></td>
                                 <td><?= htmlspecialchars($deleted_size['color']); ?></td>
                                 <td><?= htmlspecialchars($deleted_size['stock']); ?></td> <!-- Display Stock -->

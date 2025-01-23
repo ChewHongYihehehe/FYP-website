@@ -77,7 +77,7 @@ if (isset($_POST['update_order'])) {
                         <tr>
                             <td><?= $row_count++; ?></td>
                             <td><?= htmlspecialchars($order['order_number']); ?></td>
-                            <td><?= htmlspecialchars(date('Y-m-d', strtotime($order['placed_on']))); ?></td>
+                            <td><?php echo htmlspecialchars(date('Y-m-d H:i:s', strtotime($order['placed_on']))); ?></td>
                             <td><?= htmlspecialchars(strtoupper($order['method'])); ?></td>
                             <td>
                                 <form method="POST" action="">
@@ -103,8 +103,9 @@ if (isset($_POST['update_order'])) {
                                 <p><?= htmlspecialchars($order['shipping_city'] . ', ' . $order['shipping_post_code'] . ', ' . $order['shipping_state']); ?></p>
                             </td>
                             <td>
-                                <a href="receipt.php?order_id=<?= $order['id']; ?>" class="btn">
-                                    View Receipt</a>
+                                <a href="admin_receipt.php?order_id=<?= $order['id']; ?>&order_number=<?= htmlspecialchars($order['order_number']); ?>" class="btn">
+                                    View Receipt
+                                </a>
                             </td>
                         </tr>
                     <?php endforeach; ?>

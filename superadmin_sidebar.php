@@ -1,3 +1,15 @@
+<?php
+session_start();
+
+//Check if the user is logged in and has the super admin role
+if (!isset($_SESSION['role']) || $_SESSION['role'] !==  'super_admin') {
+    $_SESSION['error_message'] = "You do not have permission to access this page.";
+    // Redirect to the same page to display the error message
+    header("Location: " . $_SERVER['PHP_SELF']);
+    exit();
+}
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -88,6 +100,12 @@
                 <a href="admin_profile.php">
                     <i class='bx bx-user-circle'></i>
                     <span class="text">My Profile</span>
+                </a>
+            </li>
+            <li>
+                <a href="admin_list_s.php">
+                    <i class="bx bxs-user"></i>
+                    <span class="text">Admin List</span>
                 </a>
             </li>
             <li>

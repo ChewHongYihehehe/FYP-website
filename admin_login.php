@@ -25,10 +25,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $_SESSION['role'] = $role;
 
             if ($role === 'super_admin') {
-                header("Location: super_admin.php");
+                header("Location: superadmin_sidebar.php");
                 exit();
             } else {
-                header("Location: admin.php");
+                header("Location: admin_profile.php");
                 exit();
             }
         } else {

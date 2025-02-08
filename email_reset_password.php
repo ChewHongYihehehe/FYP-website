@@ -85,7 +85,7 @@
         </div>
         <p>The button will expire at <?php echo date("h:i A", strtotime($expiry)); ?> on <?php echo date("d-m-Y", strtotime($expiry)); ?>.</p>
         <p>If you did not request a password reset, please ignore this email.</p>
-        <p>Or, you can <a class="store-link" href="http://localhost/FYP-website-3/home.php">visit our store</a> to browse our products. </p>
+        <p>Or, you can <a class="store-link" href="http://localhost/FYP-website/home.php">visit our store</a> to browse our products. </p>
         <footer>
             <p>Thank you!<br>Step Shoes Team</p>
         </footer>

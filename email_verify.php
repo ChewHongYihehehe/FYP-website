@@ -82,7 +82,7 @@
         <p>Thank you for registering with us. To complete your registration, please verify your email address by clicking the button below:</p>
         <a href="<?php echo $verification_link; ?>">Verify Email Address</a>
         <p>If you did not create an account, no further action is required.</p>
-        <p>Or, you can <a class="store-link" href="http://localhost/FYP-website-3/home.php">visit our store</a> to browse our products. </p>
+        <p>Or, you can <a class="store-link" href="http://localhost/FYP-website/home.php">visit our store</a> to browse our products. </p>
         <footer>
             <p>Thank you!<br>Step Shoes Shop Team</p>
         </footer>

@@ -72,7 +72,7 @@
         <p>You can change your password after logging in.</p>
         <p>To log in, please click the button below:</p>
         <div class="button-container">
-            <a href="http://localhost/FYP-website-3/admin_login.php" class="button-link">Login to Admin Panel</a>
+            <a href="http://localhost/FYP-website/admin_login.php" class="button-link">Login to Admin Panel</a>
         </div>
         <p>Thank you for being a part of our team!</p>
         <div class="footer">

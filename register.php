@@ -54,7 +54,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
                 if ($stmt->execute()) {
                     // Send verification email
-                    $verification_link = "http://localhost/FYP-website-3/verify.php?token=" . $verification_token;
+                    $verification_link = "http://localhost/FYP-website/verify.php?token=" . $verification_token;
 
                     $mail = new PHPMailer(true);
                     try {

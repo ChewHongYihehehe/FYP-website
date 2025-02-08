@@ -43,10 +43,26 @@ if (isset($_POST['add_brand'])) {
 if (isset($_POST['edit_brand'])) {
     $brand_id = $_POST['brand_id']; // Corrected to match the input name
     $brand_name = $_POST['brand_name']; // Corrected to match the input name
+
+    // Fetch the old brand name before updating
+    $stmt = $conn->prepare("SELECT name FROM brand WHERE id = :id");
+    $stmt->bindParam(':id', $brand_id, PDO::PARAM_INT);
+    $stmt->execute();
+    $old_brand = $stmt->fetchColumn();
+
     $stmt = $conn->prepare("UPDATE brand SET name = :name WHERE id = :id"); // Changed 'brand' to 'name'
     $stmt->bindParam(':name', $brand_name); // Corrected parameter binding
     $stmt->bindParam(':id', $brand_id, PDO::PARAM_INT);
     $stmt->execute();
+
+    // Update all products that have the old brand name
+    if ($old_brand) {
+        $stmt = $conn->prepare("UPDATE products SET brand = :new_brand WHERE brand = :old_brand");
+        $stmt->bindParam(':new_brand', $brand_name);
+        $stmt->bindParam(':old_brand', $old_brand);
+        $stmt->execute();
+    }
+
     header("Location: admin_category_brands.php");
     exit();
 }

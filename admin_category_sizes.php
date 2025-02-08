@@ -44,10 +44,27 @@ if (isset($_POST['add_size'])) {
 if (isset($_POST['edit_size'])) {
     $size_id = $_POST['size_id']; // Corrected to match the input name
     $size_name = $_POST['size_name']; // Corrected to match the input name
+
+    // Fetch the old size name before updating
+    $stmt = $conn->prepare("SELECT size FROM sizes WHERE id = :id");
+    $stmt->bindParam(':id', $size_id, PDO::PARAM_INT);
+    $stmt->execute();
+    $old_size = $stmt->fetchColumn();
+
+
     $stmt = $conn->prepare("UPDATE sizes SET size = :size WHERE id = :id"); // Changed 'name' to 'size'
     $stmt->bindParam(':size', $size_name); // Corrected parameter binding
     $stmt->bindParam(':id', $size_id, PDO::PARAM_INT);
     $stmt->execute();
+
+    // Update all product variants that have the old size name
+    if ($old_size) {
+        $stmt = $conn->prepare("UPDATE product_variants SET size = :new_size WHERE size = :old_size");
+        $stmt->bindParam(':new_size', $size_name);
+        $stmt->bindParam(':old_size', $old_size);
+        $stmt->execute();
+    }
+
     header("Location: admin_category_sizes.php");
     exit();
 }

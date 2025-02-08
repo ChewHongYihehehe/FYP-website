@@ -41,10 +41,28 @@ if (isset($_POST['add_color'])) {
 if (isset($_POST['edit_color'])) {
     $color_id = $_POST['color_id']; // Corrected to match the input name
     $color_name = $_POST['color_name']; // Corrected to match the input name
+
+    // Fetch the old color name before updating
+    $stmt = $conn->prepare("SELECT color_name FROM color WHERE id = :id");
+    $stmt->bindParam(':id', $color_id, PDO::PARAM_INT);
+    $stmt->execute();
+    $old_color = $stmt->fetchColumn();
+
+
     $stmt = $conn->prepare("UPDATE color SET color_name = :color_name WHERE id = :id"); // Changed 'color' to 'color_name'
     $stmt->bindParam(':color_name', $color_name); // Corrected parameter binding
     $stmt->bindParam(':id', $color_id, PDO::PARAM_INT);
     $stmt->execute();
+
+    // Update all product variants that have the old color name
+    if ($old_color) {
+        $stmt = $conn->prepare("UPDATE product_variants SET color = :new_color WHERE color = :old_color");
+        $stmt->bindParam(':new_color', $color_name);
+        $stmt->bindParam(':old_color', $old_color);
+        $stmt->execute();
+    }
+
+
     header("Location: admin_category_color.php");
     exit();
 }

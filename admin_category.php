@@ -76,6 +76,14 @@ if (isset($_POST['edit_category'])) {
     $category_id = $_POST['category_id'];
     $category_name = $_POST['category_name'];
 
+
+    // Fetch the old category name before updating
+    $stmt = $conn->prepare("SELECT name FROM categories WHERE id = :id");
+    $stmt->bindParam(':id', $category_id, PDO::PARAM_INT);
+    $stmt->execute();
+    $old_category = $stmt->fetchColumn();
+
+
     // Handle file upload
     if (isset($_FILES['category_image']) && $_FILES['category_image']['error'] == 0) {
         $target_dir = "assets/image/";
@@ -107,8 +115,16 @@ if (isset($_POST['edit_category'])) {
         $stmt->bindParam(':id', $category_id, PDO::PARAM_INT);
     }
 
-    // Execute the statement
+    // Execute the statement to update the category
     if ($stmt->execute()) {
+        // Update all products that have the old category name
+        if ($old_category) {
+            $stmt = $conn->prepare("UPDATE products SET category = :new_category WHERE category = :old_category");
+            $stmt->bindParam(':new_category', $category_name);
+            $stmt->bindParam(':old_category', $old_category);
+            $stmt->execute();
+        }
+
         header("Location: admin_category.php");
         exit();
     } else {

@@ -25,7 +25,7 @@ if (!isset($_SESSION['admin_id'])) {
 
 // Fetch brands
 $brands = [];
-$stmt = $conn->prepare("SELECT * FROM brand"); // Assuming your table is named 'brands'
+$stmt = $conn->prepare("SELECT * FROM brand ORDER BY id DESC"); // Assuming your table is named 'brands'
 $stmt->execute();
 $brands = $stmt->fetchAll(PDO::FETCH_ASSOC);
 

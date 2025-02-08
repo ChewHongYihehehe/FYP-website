@@ -25,7 +25,7 @@ if (!isset($_SESSION['admin_id'])) {
 
 // Fetch categories
 $categories = [];
-$stmt = $conn->prepare("SELECT * FROM categories");
+$stmt = $conn->prepare("SELECT * FROM categories ORDER BY id DESC");
 $stmt->execute();
 $categories = $stmt->fetchAll(PDO::FETCH_ASSOC);
 

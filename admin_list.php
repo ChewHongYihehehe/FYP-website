@@ -72,7 +72,7 @@ $admins = $stmt->fetchAll(PDO::FETCH_ASSOC);
             <table class="product-display-table">
                 <thead>
                     <tr>
-                        <th>ID</th>
+                        <th>#</th>
                         <th>Name</th>
                         <th>Email</th>
                         <th>Phone</th>
@@ -80,9 +80,11 @@ $admins = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     </tr>
                 </thead>
                 <tbody>
-                    <?php foreach ($admins as $admin): ?>
+                    <?php
+                    $row_count = 1;
+                    foreach ($admins as $admin): ?>
                         <tr>
-                            <td><?= htmlspecialchars($admin['id']); ?></td>
+                            <td><?= $row_count++; ?></td>
                             <td><?= htmlspecialchars($admin['admin_name']); ?></td>
                             <td><?= htmlspecialchars($admin['admin_email']); ?></td>
                             <td><?= htmlspecialchars($admin['admin_phone']); ?></td>

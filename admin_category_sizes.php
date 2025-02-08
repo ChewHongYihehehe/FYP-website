@@ -26,7 +26,7 @@ if (!isset($_SESSION['admin_id'])) {
 
 // Fetch sizes
 $sizes = [];
-$stmt = $conn->prepare("SELECT * FROM sizes");
+$stmt = $conn->prepare("SELECT * FROM sizes ORDER BY size DESC");
 $stmt->execute();
 $sizes = $stmt->fetchAll(PDO::FETCH_ASSOC);
 

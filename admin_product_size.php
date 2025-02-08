@@ -33,7 +33,7 @@ $stmt = $conn->prepare("
     JOIN categories c ON p.category = c.name 
     JOIN brand b ON p.brand = b.name
     LEFT JOIN product_variants pv ON p.id = pv.product_id
-    ORDER BY p.id, pv.color, pv.size
+    ORDER BY p.id DESC, pv.color, pv.size
 ");
 $stmt->execute();
 $product_sizes = $stmt->fetchAll(PDO::FETCH_ASSOC);

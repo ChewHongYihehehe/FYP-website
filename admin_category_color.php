@@ -23,7 +23,7 @@ if (!isset($_SESSION['admin_id'])) {
 
 // Fetch colors
 $colors = [];
-$stmt = $conn->prepare("SELECT * FROM color"); // Assuming your table is named 'colors'
+$stmt = $conn->prepare("SELECT * FROM color ORDER BY id DESC"); // Assuming your table is named 'colors'
 $stmt->execute();
 $colors = $stmt->fetchAll(PDO::FETCH_ASSOC);
 

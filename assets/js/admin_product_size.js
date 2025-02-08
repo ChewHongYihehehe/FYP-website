@@ -26,18 +26,18 @@ document.addEventListener('DOMContentLoaded', function() {
     const editSizeButtons = document.querySelectorAll('.edit-size-btn');
     const editSizeModal = document.getElementById('editSizeModal');
     const closeEditSizeModal = document.getElementById('closeEditSizeModal');
-
+    
     editSizeButtons.forEach(button => {
         button.addEventListener('click', function() {
-            const sizeId = button.getAttribute('data-id');
+            const sizeId = button.getAttribute('data-id'); // This should be the unique variant_id
             const size = button.getAttribute('data-size');
             const stock = button.getAttribute('data-stock');
-
+    
             // Set the values in the edit modal
-            document.getElementById('editSizeId').value = sizeId;
-            document.getElementById('editSize').value = size;
-            document.getElementById('editStock').value = stock;
-
+            document.getElementById('editSizeId').value = sizeId; // Set the unique size ID
+            document.getElementById('editSize').value = size; // Set the size
+            document.getElementById('editStock').value = stock; // Set the stock
+    
             editSizeModal.style.display = 'block'; // Show the modal
         });
     });

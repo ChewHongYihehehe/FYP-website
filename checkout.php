@@ -3,11 +3,29 @@
 include 'connect.php';
 session_start();
 
-if (isset($_SESSION['user_id'])) {
-    $user_id = $_SESSION['user_id'];
+
+$error_messages = '';
+$error_message = '';
+$error_messagess = '';
+
+
+// Check if the user is logged in
+if (!isset($_SESSION['user_id'])) {
+    $error_messages = 'You must be logged in to view this page.';
 } else {
-    $user_id = '';
+    // Fetch user details
+    $user_id = $_SESSION['user_id'];
+    $stmt = $conn->prepare("SELECT status FROM users WHERE id = :user_id");
+    $stmt->bindParam(':user_id', $user_id);
+    $stmt->execute();
+    $user = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    // Check if the user's status is terminated
+    if ($user && strtolower($user['status']) === 'terminated') {
+        $error_messages = 'Your account has been terminated. Please contact support.';
+    }
 }
+
 
 include 'header.php';
 
@@ -74,6 +92,8 @@ if ($current_shipping_address) {
         $shipping_zip_code = 'N/A';
         $shipping_state = 'N/A';
         $shipping_full_address = 'N/A';
+
+        $error_message = "Please set your shipping address first.";
     }
 }
 
@@ -116,11 +136,18 @@ $cart_items = $stmt->fetchAll(PDO::FETCH_ASSOC);
 $total_price = 0;
 
 
+$emptyCart = empty($cart_items);
+
+// Check if the cart is empty
+if (empty($cart_items)) {
+    $error_messagess = "Your cart is empty. Please add items to your cart before proceeding to checkout.";
+}
 
 
 ?>
 
 <link rel="stylesheet" type="text/css" href="assets/css/checkout.css">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 
 <div class="card-body">
@@ -298,6 +325,45 @@ $total_price = 0;
 
 
 <script src="assets/js/checkout.js"></script>
+
+
+<script>
+    var errorMessages = <?= json_encode($error_messages); ?>;
+    var errorMessage = <?= json_encode($error_message); ?>;
+    var errorMessagess = <?= json_encode($error_messagess); ?>;
+    var emptyCart = <?= json_encode($emptyCart); ?>; // Add this line
+
+    window.onload = function() {
+        if (errorMessages) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Access Denied',
+                text: errorMessages,
+                confirmButtonText: 'OK'
+            }).then(() => {
+                window.location.href = 'login.php';
+            });
+        } else if (errorMessage) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Address Required',
+                text: errorMessage,
+                confirmButtonText: 'OK'
+            }).then(() => {
+                window.location.href = 'user_address.php';
+            });
+        } else if (emptyCart) { // Check for empty cart
+            Swal.fire({
+                icon: 'error',
+                title: 'Empty Cart',
+                text: "Your cart is empty. Please add items to your cart before proceeding to checkout.",
+                confirmButtonText: 'OK'
+            }).then(() => {
+                window.location.href = 'home.php'; // Redirect to home.php
+            });
+        }
+    };
+</script>
 
 </body>
 

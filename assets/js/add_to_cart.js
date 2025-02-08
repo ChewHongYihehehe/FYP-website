@@ -93,28 +93,38 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // Quantity adjustment function
-    function adjustQuantity(cartId, newQuantity) {
+        // Function to show SweetAlert2 message
+        function showAlert(message) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Stock Alert',
+                text: message,
+                confirmButtonText: 'OK'
+            });
+        }
+    
+
+     // Function to adjust quantity
+     function adjustQuantity(cartId, newQuantity, currentQuantity, productId, size, color) {
         fetch('add_to_cart_process.php', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
             },
-            body: `cart_id=${cartId}&quantity=${newQuantity}`
+            body: `cart_id=${cartId}&quantity=${newQuantity}&current_quantity=${currentQuantity}&product_id=${productId}&size=${size}&color=${color}`
         })
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                // Find the specific row and input
+                // Update the quantity input and total price
                 const row = document.querySelector(`.row [data-cart-id="${cartId}"]`).closest('.row');
                 const input = row.querySelector('.quantity-input');
                 const itemTotalElement = row.querySelector('.item-total-price strong');
-                
-                // Update item quantity and total
+
                 if (input) {
                     input.value = newQuantity;
                 }
-                
+
                 if (itemTotalElement) {
                     const price = parseFloat(input.getAttribute('data-price'));
                     const itemTotal = (price * newQuantity).toFixed(2);
@@ -124,7 +134,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Recalculate total price
                 recalculateTotalPrice();
             } else {
-                alert(data.message);
+                showAlert(data.message);
             }
         })
         .catch(error => {
@@ -133,7 +143,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Quantity adjustment buttons
+    // Setup quantity buttons
     function setupQuantityButtons() {
         // Decrease quantity buttons
         const decreaseButtons = document.querySelectorAll('.decrease-quantity');
@@ -141,14 +151,15 @@ document.addEventListener('DOMContentLoaded', function() {
             button.addEventListener('click', function() {
                 const row = this.closest('.row');
                 const input = row.querySelector('.quantity-input');
-                
-                if (input) {
-                    const currentValue = parseInt(input.value);
-                    const cartId = input.getAttribute('data-cart-id');
-                    
-                    if (currentValue > 1) {
-                        adjustQuantity(cartId, currentValue - 1);
-                    }
+                const cartId = input.getAttribute('data-cart-id');
+                const currentValue = parseInt(input.value);
+                const productId = input.getAttribute('data-product-id');
+                const size = input.getAttribute('data-size');
+                const color = input.getAttribute('data-color');
+                const availableStock = parseInt(input.getAttribute('data-stock'));
+
+                if (currentValue > 1) {
+                    adjustQuantity(cartId, currentValue - 1, currentValue, productId, size, color);
                 }
             });
         });
@@ -159,12 +170,17 @@ document.addEventListener('DOMContentLoaded', function() {
             button.addEventListener('click', function() {
                 const row = this.closest('.row');
                 const input = row.querySelector('.quantity-input');
-                
-                if (input) {
-                    const currentValue = parseInt(input.value);
-                    const cartId = input.getAttribute('data-cart-id');
-                    
-                    adjustQuantity(cartId, currentValue + 1);
+                const cartId = input.getAttribute('data-cart-id');
+                const currentValue = parseInt(input.value);
+                const productId = input.getAttribute('data-product-id');
+                const size = input.getAttribute('data-size');
+                const color = input.getAttribute('data-color');
+                const availableStock = parseInt(input.getAttribute('data-stock'));
+
+                if (currentValue < availableStock) {
+                    adjustQuantity(cartId, currentValue + 1, currentValue, productId, size, color);
+                } else {
+                    showAlert('Cannot increase quantity beyond available stock.');
                 }
             });
         });

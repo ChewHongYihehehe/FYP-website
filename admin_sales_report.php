@@ -2,10 +2,25 @@
 include 'connect.php';
 session_start();
 
+$error_message = '';
+
+// Check if the admin is logged in
 if (!isset($_SESSION['admin_id'])) {
-    header('Location: admin_login.php');
-    exit();
+    $error_message = 'You must be logged in to view this page.';
+} else {
+    // Fetch admin details
+    $admin_id = $_SESSION['admin_id'];
+    $stmt = $conn->prepare("SELECT admin_status FROM admin WHERE id = :admin_id");
+    $stmt->bindParam(':admin_id', $admin_id);
+    $stmt->execute();
+    $admin = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    // Check if the admin's status is terminated
+    if ($admin && strtolower($admin['admin_status']) === 'terminated') {
+        $error_message = 'Your account has been terminated. Please contact support.';
+    }
 }
+
 
 // Initialize filter variable
 $filter = '';
@@ -21,11 +36,11 @@ if (isset($_POST['filter'])) {
     switch ($filter) {
         case 'today':
             $start_date = date('Y-m-d');
-            $end_date = date('Y-m-d');
+            $end_date = date('Y-m-d 23:59:59'); // Include all of today
             break;
         case 'yesterday':
             $start_date = date('Y-m-d', strtotime('-1 day'));
-            $end_date = date('Y-m-d', strtotime('-1 day'));
+            $end_date = date('Y-m-d 23:59:59', strtotime('-1 day')); // Include all of yesterday
             break;
         case 'last_7_days':
             $start_date = date('Y-m-d', strtotime('-6 days'));
@@ -47,7 +62,6 @@ if (isset($_POST['filter'])) {
             break;
     }
 }
-
 // Fetch sales data
 $sales_data = [];
 $stmt = $conn->prepare("SELECT 
@@ -121,6 +135,24 @@ function exportToCSV($sales_data)
     <title>Sales Report</title>
     <link rel="stylesheet" href="assets/css/admin_sales_report.css">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        // Check if there is an error message to display
+        var errorMessage = <?= json_encode($error_message); ?>; // Convert PHP variable to JavaScript
+
+        if (errorMessage) {
+            window.onload = function() {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Access Denied',
+                    text: errorMessage,
+                    confirmButtonText: 'OK'
+                }).then(() => {
+                    window.location.href = 'admin_login.php';
+                });
+            };
+        }
+    </script>
     <style>
         .filter-export-container {
             display: flex;
@@ -161,22 +193,20 @@ function exportToCSV($sales_data)
                 <div class="filter-section">
                     <select name="filter" onchange="this.form.submit()">
                         <option value="">Select Filter</option>
-                        <option value="today" <?= ($start_date == date('Y-m-d') && $end_date == date('Y-m-d')) ? 'selected' : ''; ?>>Today</option>
-                        <option value="yesterday" <?= ($start_date == date('Y-m-d', strtotime('-1 day')) && $end_date == date('Y-m-d', strtotime('-1 day'))) ? 'selected' : ''; ?>>Yesterday</option>
-                        <option value="last_7_days" <?= ($start_date == date('Y-m-d', strtotime('-6 days')) && $end_date == date('Y-m-d')) ? 'selected' : ''; ?>>Last 7 Days</option>
-                        <option value="last_30_days" <?= ($start_date == date('Y-m-d', strtotime('-29 days')) && $end_date == date('Y-m-d')) ? 'selected' : ''; ?>>Last 30 Days</option>
-                        <option value="this_month" <?= ($start_date == date('Y-m-01') && $end_date == date('Y-m-t')) ? 'selected' : ''; ?>>This Month</option>
+                        <option value="today" <?= ($filter == 'today') ? 'selected' : ''; ?>>Today</option>
+                        <option value="yesterday" <?= ($filter == 'yesterday') ? 'selected' : ''; ?>>Yesterday</option>
+                        <option value="last_7_days" <?= ($filter == 'last_7_days') ? 'selected' : ''; ?>>Last 7 Days</option>
+                        <option value="last_30_days" <?= ($filter == 'last_30_days') ? 'selected' : ''; ?>>Last 30 Days</option>
+                        <option value="this_month" <?= ($filter == 'this_month') ? 'selected' : ''; ?>>This Month</option>
                         <option value="custom" <?= ($filter == 'custom') ? 'selected' : ''; ?>>Custom Range</option>
                     </select>
                     <input type="date" name="start_date" value="<?= htmlspecialchars($start_date); ?>" <?= ($filter != 'custom') ? 'disabled' : ''; ?>>
                     <input type="date" name="end_date" value="<?= htmlspecialchars($end_date); ?>" <?= ($filter != 'custom') ? 'disabled' : ''; ?>>
                     <button type="submit">Filter</button>
                 </div>
-
                 <!-- Export selection and button aligned to the right -->
                 <div class="export-container">
                     <select name="export_type">
-
                         <option value="pdf">Generate PDF</option>
                         <option value="csv">Export to CSV</option>
                     </select>

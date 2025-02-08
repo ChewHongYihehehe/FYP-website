@@ -2,6 +2,26 @@
 include 'connect.php';
 session_start();
 
+$error_message = '';
+
+// Check if the admin is logged in
+if (!isset($_SESSION['admin_id'])) {
+    $error_message = 'You must be logged in to view this page.';
+} else {
+    // Fetch admin details
+    $admin_id = $_SESSION['admin_id'];
+    $stmt = $conn->prepare("SELECT admin_status FROM admin WHERE id = :admin_id");
+    $stmt->bindParam(':admin_id', $admin_id);
+    $stmt->execute();
+    $admin = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    // Check if the admin's status is terminated
+    if ($admin && strtolower($admin['admin_status']) === 'terminated') {
+        $error_message = 'Your account has been terminated. Please contact support.';
+    }
+}
+
+
 // Fetch products and their sizes
 $product_sizes = [];
 $stmt = $conn->prepare("
@@ -72,7 +92,7 @@ if (isset($_POST['add_size'])) {
 
 // Handle editing sizes
 if (isset($_POST['edit_size'])) {
-    $size_id = $_POST['size_id'];
+    $size_id = $_POST['size_id']; // This should be the unique variant_id
     $size = $_POST['size'];
     $stock = $_POST['stock'];
 
@@ -81,13 +101,12 @@ if (isset($_POST['edit_size'])) {
     ");
     $stmt->bindParam(':size', $size);
     $stmt->bindParam(':stock', $stock);
-    $stmt->bindParam(':id', $size_id);
+    $stmt->bindParam(':id', $size_id); // Ensure this is the unique variant_id
 
     if ($stmt->execute()) {
         header("Location: admin_product_size.php");
         exit();
     } else {
-        // Handle error
         echo "Error updating size.";
     }
 }
@@ -172,6 +191,24 @@ if (isset($_GET['edit_id'])) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Manage Product Sizes</title>
     <link rel="stylesheet" type="text/css" href="assets/css/admin_product.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        // Check if there is an error message to display
+        var errorMessage = <?= json_encode($error_message); ?>; // Convert PHP variable to JavaScript
+
+        if (errorMessage) {
+            window.onload = function() {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Access Denied',
+                    text: errorMessage,
+                    confirmButtonText: 'OK'
+                }).then(() => {
+                    window.location.href = 'admin_login.php';
+                });
+            };
+        }
+    </script>
     <style>
         .size-container {
             width: 100%;
@@ -288,11 +325,11 @@ if (isset($_GET['edit_id'])) {
                                                         <span class="size">Size(UK) : <?= htmlspecialchars($size['size']); ?></span>
                                                         <span class="stock">(<?= htmlspecialchars($size['stock']); ?> in stock)</span>
                                                         <button class="btn edit-size-btn"
-                                                            data-id="<?= htmlspecialchars($variant['variant_id']); ?>"
+                                                            data-id="<?= htmlspecialchars($size['variant_id']); ?>"
                                                             data-product-id="<?= htmlspecialchars($variant['product_id']); ?>"
                                                             data-color="<?= htmlspecialchars($variant['color']); ?>"
                                                             data-size="<?= htmlspecialchars($size['size']); ?>"
-                                                            data-stock="<?= htmlspecialchars($size['stock']); ?>"> <!-- Add stock data -->
+                                                            data-stock="<?= htmlspecialchars($size['stock']); ?>">
                                                             Edit
                                                         </button>
                                                         <a href="?delete_id=<?= htmlspecialchars($size['variant_id']); ?>&size=<?= htmlspecialchars($size['size']); ?>" class="btn delete-size-btn">Delete</a>

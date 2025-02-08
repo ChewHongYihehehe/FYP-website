@@ -375,6 +375,7 @@ jQuery(document).ready(function($)
 		 
 		        var selector = $(this).attr('data-filter');
 		        $('.product-grid').isotope({
+					
 		            filter: selector,
 		            animationOptions: {
 		                duration: 750,
@@ -604,6 +605,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 let sizesToShow = [];
 
+
+				
+            // Get the color from the active color circle
+            const color = activeColorCircle ? activeColorCircle.getAttribute('data-color') : 'Unknown';
+
+
                 // Determine sizes to show based on product type
                 if (hasColorVariants && activeColorCircle) {
                     // Get sizes for the active color variant
@@ -637,7 +644,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         e.stopPropagation(); // Prevent event from bubbling
                         
                         // Add to cart logic
-                        addToCart(productId, size);
+                        addToCart(productId, size, color);
                         
                         // Remove sizes container
                         closeSizesContainer();
@@ -649,21 +656,41 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Function to add product to cart
-    function addToCart(productId, size) {
-		let color = 'Unknown';
-		
+
+	function addToCart(productId, size) {
+		let color = 'No Color'; 
+	
 		const activeColorCircle = document.querySelector(`.color-circle[data-product-id="${productId}"].color-active`);
-		
+	
 		if (activeColorCircle) {
 			color = activeColorCircle.getAttribute('data-color') || 
-					activeColorCircle.style.backgroundColor || 'Unknown';
-		}else{
-			const firstVariantQuery = `SELECT color FROM product_variants
-									   WHERE product_id = ?
-									   LIMTI 1`;
+					activeColorCircle.style.backgroundColor || 'No Color';
+		} else {
+			// Fetch the first variant color if no active color is selected
+			fetch('get_first_variant_color.php', { 
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/x-www-form-urlencoded',
+				},
+				body: `product_id=${productId}`
+			})
+			.then(response => response.json())
+			.then(data => {
+				if (data.success && data.color) {
+					color = data.color; 
+				}
+	
+				addToCartWithColor(productId, size, color);
+			})
+			.catch(error => console.error('Error fetching color:', error));
+			
+			return;
 		}
 	
+		addToCartWithColor(productId, size, color);
+	}
+	
+	function addToCartWithColor(productId, size, color) {
 		fetch('add_to_cart_process.php', {
 			method: 'POST',
 			headers: {
@@ -674,34 +701,11 @@ document.addEventListener('DOMContentLoaded', function() {
 		.then(response => response.json())
 		.then(data => {
 			if (data.success) {
-				// Update cart count
-				const cartCountElement = document.querySelector('.cart-count');
-				if (cartCountElement && data.cart_count !== undefined) {
-					cartCountElement.textContent = data.cart_count;
-					
-					// Optional: Add animation
-					cartCountElement.classList.add('cart-count-updated');
-					setTimeout(() => {
-						cartCountElement.classList.remove('cart-count-updated');
-					}, 300);
-				}
-				
-				// Optional: Show notification
-				const notification = document.createElement('div');
-				notification.classList.add('cart-notification');
-				notification.textContent = 'Added to cart!';
-				document.body.appendChild(notification);
-				
-				setTimeout(() => {
-					notification.remove();
-				},  2000);
+				// Handle success (e.g., update cart count, show message, etc.)
 			}
 		})
 		.catch(error => console.error('Error:', error));
 	}
-
-
-    // Initial setup
     setupAddToCart();
 
 
@@ -714,20 +718,20 @@ document.addEventListener('DOMContentLoaded', function() {
         favoriteIcon.addEventListener('click', function(e) {
             e.preventDefault();
             
-            // Find the product item
+
             const productItem = this.closest('.product-item');
             const productId = productItem.getAttribute('data-product-id');
             
-            // Get the color from the active color circle
+
             let activeColorCircle = productItem.querySelector('.color-circle.color-active');
             const color = activeColorCircle ? activeColorCircle.style.backgroundColor : 'Unknown';
 
-            // Determine action based on current state
+
             const heartIcon = this.querySelector('i ');
             const isCurrentlyFavorited = heartIcon.classList.contains('fas');
             const action = isCurrentlyFavorited ? 'remove' : 'add';
 
-            // AJAX Request to Toggle Wishlist
+
             fetch('add_to_wishlist.php', {
                 method: 'POST',
                 headers: {
@@ -738,17 +742,17 @@ document.addEventListener('DOMContentLoaded', function() {
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    // Toggle heart icon for the active color variant
+
                     if (action === 'add') {
                         heartIcon.classList.remove('far');
                         heartIcon.classList.add('fas');
-                        heartIcon.style.color = '#fe4c50'; // Change color to indicate it's favorited
-                        localStorage.setItem(`favorite_${productId}_${color}`, true); // Store in local storage
+                        heartIcon.style.color = '#fe4c50';
+                        localStorage.setItem(`favorite_${productId}_${color}`, true); 
                     } else {
                         heartIcon.classList.remove('fas');
                         heartIcon.classList.add('far');
-                        heartIcon.style.color = '#b9b4c7'; // Reset color to indicate it's not favorited
-                        localStorage.removeItem(`favorite_${productId}_${color}`); // Remove from local storage
+                        heartIcon.style.color = '#b9b4c7'; 
+                        localStorage.removeItem(`favorite_${productId}_${color}`); 
                     }
                 } else {
                     showToast(data.message, 'error');
@@ -766,9 +770,9 @@ document.addEventListener('DOMContentLoaded', function() {
 		
 				productItems.forEach(productItem => {
 					const productId = productItem.getAttribute('data-product-id');
-					const color = productItem.getAttribute('data-color'); // Assuming you have a data-color attribute
+					const color = productItem.getAttribute('data-color'); 
 		
-					// Make an AJAX request to check the wishlist status
+
 					fetch('check_wishlist.php', {
 						method: 'POST',
 						headers: {
@@ -781,13 +785,13 @@ document.addEventListener('DOMContentLoaded', function() {
 						if (data.success) {
 							const heartIcon = productItem.querySelector('.favorite i');
 							if (data.is_favorited) {
-								heartIcon.classList.add('fas'); // Filled heart
-								heartIcon.classList.remove('far'); // Empty heart
-								heartIcon.style.color = '#fe4c50'; // Change color to indicate it's favorited
+								heartIcon.classList.add('fas'); 
+								heartIcon.classList.remove('far'); 
+								heartIcon.style.color = '#fe4c50'; 
 							} else {
-								heartIcon.classList.remove('fas'); // Filled heart
-								heartIcon.classList.add('far'); // Empty heart
-								heartIcon.style.color = '#b9b4c7'; // Reset color to indicate it's not favorited
+								heartIcon.classList.remove('fas'); 
+								heartIcon.classList.add('far'); 
+								heartIcon.style.color = '#b9b4c7'; 
 							}
 						} else {
 							console.error('Error checking wishlist status:', data.message);
@@ -799,6 +803,6 @@ document.addEventListener('DOMContentLoaded', function() {
 				});
 			}
 		
-			// Call the function to check wishlist status
+
 			checkWishlistStatus();
 });

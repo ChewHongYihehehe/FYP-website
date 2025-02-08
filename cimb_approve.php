@@ -81,7 +81,7 @@ $transaction_id = uniqid('FPX-', true);
             </div>
         </div>
         <form action="process_order.php" method="POST">
-            <input type="hidden" name="method" value="cimb">
+            <input type="hidden" name="method" value="FPX">
             <div class="actions">
                 <button class="cancel-btn">Cancel</button>
                 <button class="proceed-btn">Proceed</button>

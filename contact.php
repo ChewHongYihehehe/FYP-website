@@ -2,6 +2,10 @@
 include 'connect.php';
 include 'header.php';
 
+$stmt = $conn->prepare("SELECT * FROM contact_page_content WHERE id = 1");
+$stmt->execute();
+$contact_content = $stmt->fetch(PDO::FETCH_ASSOC);
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 	$name = $_POST['name'] ?? '';
 	$email = $_POST['email'] ?? '';
@@ -54,15 +58,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 				<div class="col-lg-6 contact_col">
 					<div class="contact_contents">
-						<h1>Contact Us</h1>
-						<p>There are many ways to contact us. You may drop us a line, give us a call or send an email, choose what suits you the most.</p>
+						<h1><?= htmlspecialchars($contact_content['title']); ?></h1>
+						<p><?= htmlspecialchars($contact_content['description']); ?></p>
 						<div>
-							<p>(+60) 123-8765</p>
-							<p>step.shoes@gmail.com</p>
+							<p><?= htmlspecialchars($contact_content['phone']); ?></p>
+							<p><?= htmlspecialchars($contact_content['email']); ?></p>
 						</div>
 						<div>
-							<p>Open hours: 8.00-18.00 Mon-Fri</p>
-							<p>Sunday: Closed</p>
+							<p>Open hours: <?= htmlspecialchars($contact_content['open_hours']); ?></p> <!-- Opening hours -->
+							<p>Closed: <?= htmlspecialchars($contact_content['closed_info']); ?></p> <!-- Closed information -->
 						</div>
 					</div>
 
@@ -71,8 +75,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 				<div class="col-lg-6 get_in_touch_col">
 					<div class="get_in_touch_contents">
-						<h1>Get In Touch With Us!</h1>
-						<p>Fill out the form below to recieve a free and confidential.</p>
+						<h1><?= htmlspecialchars($contact_content['get_in_touch_title']); ?></h1>
+						<p><?= htmlspecialchars($contact_content['form_description']); ?></p>
 
 						<?php
 						if (isset($success_message)) {

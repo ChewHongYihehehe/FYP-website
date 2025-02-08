@@ -2,6 +2,27 @@
 include 'connect.php';
 session_start();
 
+
+$error_message = '';
+
+// Check if the admin is logged in
+if (!isset($_SESSION['admin_id'])) {
+    $error_message = 'You must be logged in to view this page.';
+} else {
+    // Fetch admin details
+    $admin_id = $_SESSION['admin_id'];
+    $stmt = $conn->prepare("SELECT admin_status FROM admin WHERE id = :admin_id");
+    $stmt->bindParam(':admin_id', $admin_id);
+    $stmt->execute();
+    $admin = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    // Check if the admin's status is terminated
+    if ($admin && strtolower($admin['admin_status']) === 'terminated') {
+        $error_message = 'Your account has been terminated. Please contact support.';
+    }
+}
+
+
 // Fetch brands
 $brands = [];
 $stmt = $conn->prepare("SELECT * FROM brand"); // Assuming your table is named 'brands'
@@ -41,18 +62,28 @@ if (isset($_GET['delete_id'])) {
     $brand = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if ($brand) {
-        // Insert the brand into the deleted_brands table
-        $stmt = $conn->prepare("INSERT INTO deleted_brands (name) VALUES (:name)");
-        $stmt->bindParam(':name', $brand['name']);
+        // Check if there are any products with the same brand name
+        $stmt = $conn->prepare("SELECT COUNT(*) FROM products WHERE brand = :brand_name");
+        $stmt->bindParam(':brand_name', $brand['name']);
         $stmt->execute();
+        $product_count = $stmt->fetchColumn();
 
-        // Now delete the brand from the brand table
-        $stmt = $conn->prepare("DELETE FROM brand WHERE id = :id");
-        $stmt->bindParam(':id', $brand_id, PDO::PARAM_INT);
-        $stmt->execute();
+        if ($product_count > 0) {
+            $error_message = "Cannot delete this brand because it has associated products.";
+        } else {
+            // Insert the brand into the deleted_brands table
+            $stmt = $conn->prepare("INSERT INTO deleted_brands (name) VALUES (:name)");
+            $stmt->bindParam(':name', $brand['name']);
+            $stmt->execute();
 
-        header("Location: admin_category_brands.php");
-        exit();
+            // Now delete the brand from the brand table
+            $stmt = $conn->prepare("DELETE FROM brand WHERE id = :id");
+            $stmt->bindParam(':id', $brand_id, PDO::PARAM_INT);
+            $stmt->execute();
+
+            header("Location: admin_category_brands.php");
+            exit();
+        }
     }
 }
 ?>
@@ -66,6 +97,37 @@ if (isset($_GET['delete_id'])) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Manage Brands</title>
     <link rel="stylesheet" type="text/css" href="assets/css/admin_categories.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        // Check if there is an error message to display
+        var errorMessage = <?= json_encode($error_message); ?>; // Convert PHP variable to JavaScript
+
+        if (errorMessage) {
+            window.onload = function() {
+                let title = 'Error';
+                let text = errorMessage;
+
+                if (errorMessage.includes('not logged in') || errorMessage.includes('terminated')) {
+                    title = 'Access Denied';
+                    Swal.fire({
+                        icon: 'error',
+                        title: title,
+                        text: text,
+                        confirmButtonText: 'OK'
+                    }).then(() => {
+                        window.location.href = 'admin_login.php';
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: title,
+                        text: text,
+                        confirmButtonText: 'OK'
+                    });
+                }
+            };
+        }
+    </script>
 </head>
 
 <body>

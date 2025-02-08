@@ -1,0 +1,134 @@
+@import url('https://fonts.googleapis.com/css?family=Poppins:400,500,600,700,900');
+
+:root {
+    --green: #27ae60;
+    --black: #333;
+    --white: #fff;
+    --bg-color: #eee;
+    --box-shadow: 0 .5rem 1rem rgba(0, 0, 0, .1);
+    --border: .1rem solid var(--black);
+}
+
+* {
+    font-family: 'Poppins', sans-serif;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    font-size: 62.5%;
+    overflow-x: hidden;
+}
+
+
+.container {
+    flex: 1; 
+    padding: 2rem;
+    background: var(--bg-color);
+    margin-left:300px;
+}
+
+h1 {
+    margin-bottom: 2rem;
+    color: var(--black);
+}
+
+.dashboard-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+
+.card {
+    background: var(--white);
+    padding: 2rem;
+    border-radius: .5rem;
+    box-shadow: var(--box-shadow);
+    text-align: center;
+}
+
+.card h2 {
+    color: var(--black);
+    margin-bottom: 1rem;
+}
+
+.card p {
+    font-size: 2rem;
+    color: var(--green);
+}
+
+.charts {
+    display: flex;
+    justify-content: space-between;
+    gap: 2rem;
+}
+
+.chart {
+    flex: 1;
+    background: var(--white);
+    padding: 2rem;
+    border-radius: .5rem;
+    box-shadow: var(--box-shadow);
+}
+
+.chart h2 {
+    margin-bottom: 1rem;
+    color: var(--black);
+}
+
+.recent-orders {
+    margin-top: 2rem;
+    background: var(--white);
+    padding: 2rem;
+    border-radius: .5rem;
+    box-shadow: var(--box-shadow);
+}
+
+.recent-orders h2 {
+    margin-bottom: 1rem;
+    color: var(--black);
+}
+
+.orders-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+}
+
+.orders-table th, .orders-table td {
+    padding: 1rem;
+    text-align: left;
+    border-bottom: var(--border);
+}
+
+.orders-table th {
+    background: var(--green);
+    color: var(--white);
+}
+
+.orders-table td {
+    background: var(--white);
+}
+
+.status {
+    padding: 0.5rem 1rem;
+    border-radius: 5px;
+    color: #fff;
+}
+
+.status.completed {
+    background-color: #27ae60; /* Green */
+}
+
+.status.to_received {
+    background-color: orange; /* Change to your desired color */
+    font-weight: bold;
+    color: white; /* Ensure text is readable */
+}
+
+
+.status.cancelled {
+    background-color: #e74c3c; /* Red */
+}

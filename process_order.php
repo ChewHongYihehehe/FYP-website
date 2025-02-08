@@ -38,7 +38,7 @@ $order_number = generateOrderNumber($conn);
 $paymentMethod = $_POST['method'] ?? null; // Use null coalescing to avoid undefined index notice
 
 // Insert the order into the database
-$stmt = $conn->prepare("INSERT INTO orders (user_id, order_number, total_price, placed_on, payment_status, method, shipping_fullname, shipping_address_line, shipping_city, shipping_post_code, shipping_state) VALUES (:user_id, :order_number, :total_price, NOW(), 'Completed', :method, :shipping_fullname, :shipping_address_line, :shipping_city, :shipping_post_code, :shipping_state)");
+$stmt = $conn->prepare("INSERT INTO orders (user_id, order_number, total_price, placed_on, payment_status, method, shipping_fullname, shipping_address_line, shipping_city, shipping_post_code, shipping_state) VALUES (:user_id, :order_number, :total_price, NOW(), 'To Received', :method, :shipping_fullname, :shipping_address_line, :shipping_city, :shipping_post_code, :shipping_state)");
 
 // Bind parameters
 $stmt->bindParam(':user_id', $user_id);
@@ -74,10 +74,10 @@ foreach ($cart_items as $item) {
 
     // Bind parameters
     $stmt->bindParam(':order_id', $order_id);
-    $stmt->bindParam(':product_id', $item['pid']); // Assuming you have product_id in the cart
-    $stmt->bindParam(':name', $item['name']); // Assuming you have name in the cart
-    $stmt->bindParam(':size', $item['size']); // Assuming you have size in the cart
-    $stmt->bindParam(':color', $item['color']); // Assuming you have color in the cart
+    $stmt->bindParam(':product_id', $item['pid']);
+    $stmt->bindParam(':name', $item['name']);
+    $stmt->bindParam(':size', $item['size']);
+    $stmt->bindParam(':color', $item['color']);
     $stmt->bindParam(':quantity', $item['quantity']);
     $stmt->bindParam(':price', $item['price']);
     $stmt->bindParam(':image', $product_image);
@@ -95,7 +95,7 @@ function generateOrderNumber($conn)
     $stmt->execute();
 
     if ($stmt->fetchColumn() > 0) {
-        return generateOrderNumber($conn); // Recursively generate a new order number if it already exists
+        return generateOrderNumber($conn);
     }
 
     return $order_number;

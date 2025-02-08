@@ -122,14 +122,6 @@ input[type="submit"]:hover {
     text-decoration: underline;
 }
 
-/* Error message styles */
-.error-message {
-    color: #ff4d4d; /* Red color for error messages */
-    font-size: 0.9em;
-    margin-top: 10px;
-    text-align: center; /* Center align the error messages */
-}
-
 @media (max-width: 768px) {
     .form-box {
         width: 90%; /* Make form box take up more space on smaller screens */

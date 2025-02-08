@@ -10,6 +10,13 @@ if (isset($_SESSION['user_id'])) {
 
 include 'header.php';
 
+// Fetch home page content
+$stmt = $conn->prepare("SELECT * FROM home_page_content WHERE id = 1"); // Assuming there's only one row
+$stmt->execute();
+$home_content = $stmt->fetch(PDO::FETCH_ASSOC);
+
+
+
 
 function groupProductsByNameAndColor($products)
 {
@@ -99,21 +106,21 @@ foreach ($new_arrivals_result as $product) {
 	$new_arrivals_grouped[$key][] = $product;
 }
 
-function getAvailableSizes($conn, $productId)
+function getAvailableSizes($conn, $productId, $color)
 {
 	try {
-		$sizes_query = "SELECT DISTINCT size FROM product_variants WHERE product_id = ? AND stock > 0";
+		$sizes_query = "SELECT DISTINCT size FROM product_variants 
+                       WHERE product_id = ? 
+                       AND color = ?
+                       AND stock > 0";
 		$stmt = $conn->prepare($sizes_query);
-		$stmt->execute([$productId]);
-		$sizes = $stmt->fetchAll(PDO::FETCH_COLUMN);
-
-		return $sizes;
+		$stmt->execute([$productId, $color]);
+		return $stmt->fetchAll(PDO::FETCH_COLUMN);
 	} catch (PDOException $e) {
 		error_log("Error fetching sizes: " . $e->getMessage());
 		return [];
 	}
 }
-
 
 
 
@@ -170,14 +177,13 @@ function getAvailableSizes($conn, $productId)
 
 <!-- Slider -->
 
-<div class="main_slider" style="background-image:url(assets/image/post-item2.jpg)">
+<div class="main_slider" style="background-image:url(assets/image/<?php echo htmlspecialchars($home_content['image']); ?>)">
 	<div class="container fill_height">
 		<div class="row align-items-center fill_height">
 			<div class="col">
 				<div class="main_slider_content">
-					<h6>Spring / Summer Collection 2017</h6>
-					<h1>Get up to 30% Off New Arrivals</h1>
-
+					<h6><?php echo htmlspecialchars($home_content['title']); ?></h6>
+					<h1><?php echo htmlspecialchars($home_content['description']); ?></h1>
 				</div>
 			</div>
 		</div>
@@ -249,8 +255,15 @@ function getAvailableSizes($conn, $productId)
 
 						if (!$first_variant) continue;
 
-						$brand_class = strtolower(str_replace(' ', '-', htmlspecialchars($first_variant['brand'] ?? '')));
-						$availableSizesForProduct = json_encode(getAvailableSizes($conn, $first_variant['id'])); // Get available sizes for the main product
+						$brand_name = htmlspecialchars($first_variant['brand']);
+						$brand_class = strtolower(str_replace(' ', '-', $brand_name));
+
+						// Get available sizes for the main product WITH COLOR
+						$availableSizesForProduct = json_encode(getAvailableSizes(
+							$conn,
+							$first_variant['id'],
+							$first_variant['color']
+						));
 					?>
 						<div class="product-item <?php echo $brand_class; ?>" data-product-id="<?php echo htmlspecialchars($first_variant['id'] ?? ''); ?>" data-color="<?php echo htmlspecialchars($first_variant['color']); ?>" data-available-sizes='<?php echo $availableSizesForProduct; ?>'>
 							<div class="product product_filter">
@@ -275,18 +288,17 @@ function getAvailableSizes($conn, $productId)
 									<!-- Color Variants -->
 									<?php if (!empty($color_variants) && count($color_variants) > 1): ?>
 										<div class="color-variants">
-											<?php foreach ($color_variants as $index => $variant): ?>
+											<?php foreach ($color_variants as $index => $variant):
+												$variantSizes = getAvailableSizes($conn, $variant['product_id'], $variant['color']);
+											?>
 												<span
 													class="color-circle <?php echo $index === 0 ? 'color-active' : ''; ?>"
 													style="background-color: <?php echo htmlspecialchars($variant['color']); ?>;"
 													data-product-id="<?php echo htmlspecialchars($variant['product_id']); ?>"
 													data-product-image="<?php echo htmlspecialchars($variant['image1_display']); ?>"
 													data-product-price="<?php echo htmlspecialchars($variant['price']); ?>"
-													data-available-sizes='<?php
-																			// Fetch sizes specifically for this product variant
-																			$variantSizes = getAvailableSizes($conn, $variant['product_id']);
-																			echo json_encode($variantSizes);
-																			?>'>
+													data-color="<?php echo htmlspecialchars($variant['color']); ?>"
+													data-available-sizes='<?php echo json_encode($variantSizes); ?>'>
 												</span>
 											<?php endforeach; ?>
 										</div>
@@ -322,7 +334,13 @@ function getAvailableSizes($conn, $productId)
 							$first_variant = $product_data['main_product'];
 							$color_variants = $product_data['color_variants'];
 							$brand_class = strtolower(str_replace(' ', '-', htmlspecialchars($first_variant['brand'])));
-							$availableSizesForProduct = json_encode(getAvailableSizes($conn, $first_variant['id']));
+
+							// Add color parameter here
+							$availableSizesForProduct = json_encode(getAvailableSizes(
+								$conn,
+								$first_variant['id'],
+								$first_variant['color']
+							));
 						?>
 							<div class="owl-item product_slider_item">
 								<div class="product-item <?php echo $brand_class; ?>"
@@ -370,9 +388,6 @@ function getAvailableSizes($conn, $productId)
 											<span>new</span>
 										</div>
 									</div>
-									<div class="red_button add_to_cart_button quick-add-button">
-										<a href="#">Quick Add <i class="fa fa-plus quick-add-icon"></i></a>
-									</div>
 								</div>
 							</div>
 						<?php endforeach; ?>
@@ -391,50 +406,7 @@ function getAvailableSizes($conn, $productId)
 	</div>
 </div>
 
-<!-- Benefit -->
 
-<div class="benefit">
-	<div class="container">
-		<div class="row benefit_row">
-			<div class="col-lg-3 benefit_col">
-				<div class="benefit_item d-flex flex-row align-items-center">
-					<div class="benefit_icon"><i class="fa fa-truck" aria-hidden="true"></i></div>
-					<div class="benefit_content">
-						<h6>free shipping</h6>
-						<p>Suffered Alteration in Some Form</p>
-					</div>
-				</div>
-			</div>
-			<div class="col-lg-3 benefit_col">
-				<div class="benefit_item d-flex flex-row align-items-center">
-					<div class="benefit_icon"><i class="fa fa-money" aria-hidden="true"></i></div>
-					<div class="benefit_content">
-						<h6>cach on delivery</h6>
-						<p>The Internet Tend To Repeat</p>
-					</div>
-				</div>
-			</div>
-			<div class="col-lg-3 benefit_col">
-				<div class="benefit_item d-flex flex-row align-items-center">
-					<div class="benefit_icon"><i class="fa fa-undo" aria-hidden="true"></i></div>
-					<div class="benefit_content">
-						<h6>45 days return</h6>
-						<p>Making it Look Like Readable</p>
-					</div>
-				</div>
-			</div>
-			<div class="col-lg-3 benefit_col">
-				<div class="benefit_item d-flex flex-row align-items-center">
-					<div class="benefit_icon"><i class="fa fa-clock-o" aria-hidden="true"></i></div>
-					<div class="benefit_content">
-						<h6>opening all week</h6>
-						<p>8AM - 09PM</p>
-					</div>
-				</div>
-			</div>
-		</div>
-	</div>
-</div>
 
 
 <!-- Footer -->
@@ -487,6 +459,7 @@ function getAvailableSizes($conn, $productId)
 <script src="assets/js/owl.carousel.js"></script>
 <script src="assets/js/easing.js"></script>
 <script src="assets/js/custom.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </body>
 
 </html>

@@ -139,13 +139,19 @@ input[type="submit"]:focus {
 .error-message {
     color: #ff4d4d;
     font-size: 0.9em;
-    margin-top: 5px;
+    margin: 10px 0;
     text-align: center;
     font-weight: bold;
     background-color: rgba(255, 0, 0, 0.1);
     padding: 5px;
     text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7);
+    display:none;
 }
+
+.error-message:not(:empty) {
+    display: block; /* Show when not empty */
+}
+
 
 /* Success message styles */
 .success-message {

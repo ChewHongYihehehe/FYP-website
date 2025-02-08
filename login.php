@@ -57,7 +57,29 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="assets/css/login.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
     <title>Login</title>
+    <script>
+        // Check if there is an error message to display
+        var errorMessage = <?= json_encode($error_message); ?>; // Convert PHP variable to JavaScript
+
+        if (errorMessage) {
+            window.onload = function() {
+                var errorElement = document.querySelector('.error-message');
+                errorElement.innerHTML = errorMessage;
+                errorElement.classList.add('show'); // Add the show class to change background
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Access Denied',
+                    text: errorMessage,
+                    confirmButtonText: 'OK'
+                }).then(() => {
+                    window.location.href = 'login.php';
+                });
+            };
+        }
+    </script>
 </head>
 
 <body>
@@ -84,12 +106,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     <p><a href="forgot.password.php">Forgot Password? Click here</a></p>
                 </div>
             </form>
-            <?php if ($show_terminated_options): ?>
-                <div class="terminated-options">
-                    <p>If you believe this is a mistake, please contact support.</p>
-                    <p><a href="register.php">Register a new account</a></p>
-                </div>
-            <?php endif; ?>
         </div>
     </section>
 </body>

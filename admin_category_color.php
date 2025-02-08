@@ -1,6 +1,25 @@
 <?php
 include 'connect.php';
+
 session_start();
+$error_message = '';
+
+// Check if the admin is logged in
+if (!isset($_SESSION['admin_id'])) {
+    $error_message = 'You must be logged in to view this page.';
+} else {
+    // Fetch admin details
+    $admin_id = $_SESSION['admin_id'];
+    $stmt = $conn->prepare("SELECT admin_status FROM admin WHERE id = :admin_id");
+    $stmt->bindParam(':admin_id', $admin_id);
+    $stmt->execute();
+    $admin = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    // Check if the admin's status is terminated
+    if ($admin && strtolower($admin['admin_status']) === 'terminated') {
+        $error_message = 'Your account has been terminated. Please contact support.';
+    }
+}
 
 // Fetch colors
 $colors = [];
@@ -41,18 +60,28 @@ if (isset($_GET['delete_id'])) {
     $color = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if ($color) {
-        // Insert the color into the deleted_colors table
-        $stmt = $conn->prepare("INSERT INTO deleted_colors (color_name) VALUES (:color_name)");
+        // Check if there are any product variants with the same color name
+        $stmt = $conn->prepare("SELECT COUNT(*) FROM product_variants WHERE color = :color_name");
         $stmt->bindParam(':color_name', $color['color_name']);
         $stmt->execute();
+        $product_count = $stmt->fetchColumn();
 
-        // Now delete the color from the color table
-        $stmt = $conn->prepare("DELETE FROM color WHERE id = :id");
-        $stmt->bindParam(':id', $color_id, PDO::PARAM_INT);
-        $stmt->execute();
+        if ($product_count > 0) {
+            $error_message = "Cannot delete this color because it has associated product variants.";
+        } else {
+            // Insert the color into the deleted_colors table
+            $stmt = $conn->prepare("INSERT INTO deleted_colors (color_name) VALUES (:color_name)");
+            $stmt->bindParam(':color_name', $color['color_name']);
+            $stmt->execute();
 
-        header("Location: admin_category_color.php");
-        exit();
+            // Now delete the color from the color table
+            $stmt = $conn->prepare("DELETE FROM color WHERE id = :id");
+            $stmt->bindParam(':id', $color_id, PDO::PARAM_INT);
+            $stmt->execute();
+
+            header("Location: admin_category_color.php");
+            exit();
+        }
     }
 }
 ?>
@@ -66,6 +95,39 @@ if (isset($_GET['delete_id'])) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Manage Colors</title>
     <link rel="stylesheet" type="text/css" href="assets/css/admin_categories.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        // Check if there is an error message to display
+        var errorMessage = <?= json_encode($error_message); ?>; // Convert PHP variable to JavaScript
+
+
+        if (errorMessage) {
+            window.onload = function() {
+                let title = 'Error';
+                let text = errorMessage;
+
+                if (errorMessage.includes('not logged in') || errorMessage.includes('terminated')) {
+                    title = 'Access Denied';
+                    Swal.fire({
+                        icon: 'error',
+                        title: title,
+                        text: text,
+                        confirmButtonText: 'OK'
+                    }).then(() => {
+                        window.location.href = 'admin_login.php';
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: title,
+                        text: text,
+                        confirmButtonText: 'OK'
+                    });
+                }
+            };
+        }
+    </script>
+
 </head>
 
 <body>

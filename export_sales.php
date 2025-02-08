@@ -26,7 +26,6 @@ $stmt->bindParam(':start_date', $start_date);
 $stmt->bindParam(':end_date', $end_date);
 $stmt->execute();
 $sales_data = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
 // Set headers for Excel file download
 header("Content-Type: application/vnd.ms-excel");
 header("Content-Disposition: attachment; filename=sales_report_" . date('Ymd') . ".xls");

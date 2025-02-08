@@ -9,10 +9,28 @@ const title = document.querySelector(".titleText");
 
 const sizes = document.querySelectorAll(".sizes > li");
 const price = document.querySelector(".price");
+const quantityValue = document.getElementById('quantity-value');
 
+let quantity = 1;
 let currentProductIndex = 0;
 let currentColorIndex = 0;
 let currentSizeIndex = 0;
+
+
+
+document.getElementById('increase-quantity').addEventListener('click', function() {
+    quantity++;
+    quantityValue.textContent = quantity;
+});
+
+document.getElementById('decrease-quantity').addEventListener('click', function() {
+    if (quantity > 1) {
+        quantity--;
+        quantityValue.textContent = quantity;
+    }
+});
+
+
 
 // Group products by name
 function groupProductsByName(products) {
@@ -31,9 +49,11 @@ function groupProductsByName(products) {
 function findUniqueColors(productGroups) {
     const colors = new Set();
     productGroups.forEach(groups => {
-        groups.forEach(group => {
-            group.forEach(product => {
-                colors.add(product.color);
+        if (!Array.isArray(groups)) return; // Ensure valid structure
+        groups.forEach(productList => {
+            if (!Array.isArray(productList)) return;
+            productList.forEach(product => {
+                if (product.color) colors.add(product.color);
             });
         });
     });
@@ -58,33 +78,27 @@ function animate(element, time, anim) {
     }, time);
 }
 
-function loadProductData(productIndex) {
+function loadProductData(productIndex, colorIndex = currentColorIndex) {
     const productGroups = groupedProductsByName[productIndex];
-    
+    const selectedColor = uniqueColors[colorIndex];
+    const colorVariants = productGroups.flat().filter(p => p.color === selectedColor);
+
     // Find the specific product variant based on color and size
     let selectedProduct = null;
-    
-    // First, try to find a product with the current color and size
-    for (let group of productGroups) {
-        selectedProduct = group.find(p => 
-            p.color === uniqueColors[currentColorIndex] && 
-            p.size == sizes[currentSizeIndex].textContent
-        );
-        
-        if (selectedProduct) break;
-    }
-    
-    // If not found, default to the first product in the group
-    if (!selectedProduct) {
-        selectedProduct = productGroups[0][0];
+
+    if (colorVariants.length === 0) {
+        selectedProduct = productGroups[0][0]; 
+    } else {
+        selectedProduct = colorVariants.find(p => p.size === sizes[currentSizeIndex].textContent);
+        if (!selectedProduct) {
+            selectedProduct = colorVariants[0]; 
+        }
     }
 
     // Update product details
     title.innerText = selectedProduct.name;
     categoryText.innerText = selectedProduct.category || "Category not available";
     price.innerText = "RM" + Number(selectedProduct.price).toFixed(2);
-    
-
 
     // Set the main image
     img.src = selectedProduct.image1_display || 'default-image.png';
@@ -98,14 +112,14 @@ function loadProductData(productIndex) {
         selectedProduct.image4_thumb
     ];
 
-    for (let i = 0; i < thumb.length; i++) {
-        if (thumbs[i]) {
-            thumb[i].src = thumbs[i];
-            thumb[i].style.display = 'block';
+    thumb.forEach((thumbnailImg, index) => {
+        if (thumbs[index]) {
+            thumbnailImg.src = thumbs[index];
+            thumbnailImg.style.display = 'block';
         } else {
-            thumb[i].style.display = 'none';
+            thumbnailImg.style.display = 'none';
         }
-    }
+    });
 
     // Reset active thumbnail to the first one
     resetActive(thumb, "thumb", 0);
@@ -114,7 +128,7 @@ function loadProductData(productIndex) {
     const colorContainer = document.querySelector(".colors ul");
     colorContainer.innerHTML = "";
 
- uniqueColors.forEach((color, index) => {
+    uniqueColors.forEach((color, index) => {
         const colorButton = document.createElement("li");
         colorButton.classList.add("color");
         colorButton.style.backgroundColor = color;
@@ -126,16 +140,17 @@ function loadProductData(productIndex) {
 
         colorButton.addEventListener("click", () => {
             currentColorIndex = index;
-            loadProductData(productIndex);
+            loadProductData(productIndex, index);
             
             // Update the data-color attribute of the Add to Cart button
             const addToCartButton = document.getElementById('add-to-cart-button');
             if (addToCartButton) {
                 addToCartButton.setAttribute('data-color', color);
+                console.log(`Color set to: ${color}`); // Debugging log
             }
             
-// Check if the new color is favorited
-updateFavoriteIcon(uniqueColors[currentColorIndex]);
+            // Check if the new color is favorited
+            updateFavoriteIcon(uniqueColors[currentColorIndex]);
 
             // Animate changes
             animate(img, 550, "jump 500ms ease-in-out");
@@ -146,27 +161,29 @@ updateFavoriteIcon(uniqueColors[currentColorIndex]);
         colorContainer.appendChild(colorButton);
     });
 
+    // Set the default color for the Add to Cart button if not already set
+    const addToCartButton = document.getElementById('add-to-cart-button');
+    if (addToCartButton && !addToCartButton.getAttribute('data-color')) {
+        addToCartButton.setAttribute('data-color', uniqueColors[0]); // Set to the first color
+    }
+
     // Update sizes
     const sizesContainer = document.querySelector(".sizes");
     sizesContainer.innerHTML = "";
 
     // Collect unique sizes for this product
-    const uniqueSizes = [...new Set(productGroups.flat().map(p => p.size))];
+    const uniqueSizes = [...new Set(colorVariants.flat().map(p => p.size))];
     uniqueSizes.sort((a, b) => a - b);
 
     uniqueSizes.forEach((size, index) => {
         const sizeElement = document.createElement("li");
         sizeElement.innerText = size;
-        
-        if (index === currentSizeIndex) {
-            sizeElement.classList.add('size-active');
-        }
-
+        sizeElement.classList.toggle('size-active', index === currentSizeIndex);
         sizeElement.addEventListener('click', () => {
-            currentSizeIndex = index;
-            loadProductData(productIndex);
+            resetActive(sizes, "size", index);
+            currentSizeIndex = index; // Update the current size index
+            loadProductData(productIndex, colorIndex); // Reload product data with the new size
         });
-
         sizesContainer.appendChild(sizeElement);
     });
 
@@ -192,10 +209,6 @@ updateFavoriteIcon(uniqueColors[currentColorIndex]);
     updateFavoriteIcon(uniqueColors[currentColorIndex]);
 }
 
-
-
-
-
 // Add to Cart functionality
 const addToCartButton = document.getElementById('add-to-cart-button');
 
@@ -203,23 +216,22 @@ if (addToCartButton) {
     addToCartButton.addEventListener('click', function() {
         const productId = this.getAttribute('data-product-id');
         const size = document.querySelector('.sizes .size-active').textContent; // Get selected size
-        const color = this.getAttribute('data-color') || 'Unknown'; // Get the updated color
+        const color = this.getAttribute('data-color') || uniqueColors[0]; // Get the updated color or default to the first color
 
-        console.log(`Adding to cart: Product ID: ${productId}, Size: ${size}, Color: ${color}`); // Debugging log
+        console.log(`Adding to cart: Product ID: ${productId}, Size: ${size}, Color: ${color}, Quantity: ${quantity}`); // Debugging log
 
         // Call the function to add to cart
-        addToCart(productId, size, color);
+        addToCart(productId, size, color, quantity);
     });
 }
-
 // Function to add product to cart
-function addToCart(productId, size, color) {
+function addToCart(productId, size, color, quantity) {
     fetch('add_to_cart_process.php', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
         },
-        body: `product_id=${productId}&size=${size}& color=${encodeURIComponent(color)}`
+       body: `product_id=${productId}&size=${size}&color=${encodeURIComponent(color)}&quantity=${quantity}`
     })
     .then(response => response.json())
     .then(data => {
@@ -230,17 +242,28 @@ function addToCart(productId, size, color) {
                 cartCountElement.textContent = data.cart_count;
             }
 
-            // Optional: Show notification
-            const notification = document.createElement('div');
-            notification.classList.add('cart-notification');
-            notification.textContent = 'Added to cart!';
-            document.body.appendChild(notification);
+            
+            // Show success message
+            Swal.fire({
+                icon: 'success',
+                title: 'Success!',
+                text: 'Product added to cart successfully!',
+                confirmButtonText: 'OK'
+            }).then(() => {
+                window.location.href = `product.php?product_id=${productId}`;
+            });
 
             setTimeout(() => {
                 notification.remove();
             }, 2000);
         } else {
-            alert(data.message); // Show error message
+            // Show error message
+            Swal.fire({
+                icon: 'error',
+                title: 'Error!',
+                text: data.message,
+                confirmButtonText: 'OK'
+            });
         }
     })
     .catch(error => console.error('Error:', error));
@@ -332,9 +355,14 @@ const colorCircles = document.querySelectorAll('.colors .color');
 colorCircles.forEach(circle => {
     circle.addEventListener('click', function() {
         const selectedColor = this.style.backgroundColor;
-        updateFavoriteIcon(selectedColor);
+        const colorIndex = uniqueColors.indexOf(selectedColor);
+        if (colorIndex !== -1) {
+            currentColorIndex = colorIndex;
+            loadProductData(currentProductIndex, colorIndex);
+        }
     });
 });
+
 
 favoriteIcon.addEventListener('click', function(e) {
     e.preventDefault();

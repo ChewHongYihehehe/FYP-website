@@ -109,6 +109,23 @@ document.addEventListener('DOMContentLoaded', function() {
             } 
         })
     })
+    
+    function validatePostcode() {
+        const postcodeInputs = document.querySelectorAll('input[name="postcode"]');
+        postcodeInputs.forEach(input => {
+            input.addEventListener('input', function() {
+                // Allow only digits
+                this.value = this.value.replace(/[^0-9]/g, '');
+                // Check if the length is exactly 5
+                if (this.value.length > 5) {
+                    this.value = this.value.slice(0, 5); // Limit to 5 digits
+                }
+            });
+        });
+    }
+    
+    // Call the validatePostcode function
+    validatePostcode();
 
     function validateInput(){
         const fullnameInputs = document.querySelectorAll('input[name="fullname"]');
@@ -148,53 +165,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 this.value = this.value.replace(/[^A-Za-z\s]/g, '');
             });
         });
-        
-        const phoneInputs = document.querySelectorAll('input[name="phone"]');
-        phoneInputs.forEach(input => {
-        // Set initial value to +60 if empty
-        if (!input.value) {
-            input.value = '+60 ';
-        }
-
-        input.addEventListener('input', function(e) {
-            // Remove all non-numeric characters except +
-            let value = this.value.replace(/[^0-9+]/g, '');
-            
-            // Ensure the input starts with +60
-            if (!value.startsWith('+60')) {
-                value = '+60' + value;
-            }
-
-            // Format the number
-            let formatted = '+60 ';
-            let numericPart = value.replace(/\D/g, '').slice(2); // Remove +60 and get only numbers
-            
-            // Add first group of 3 digits
-            if (numericPart.length > 0) {
-                formatted += numericPart.slice(0, 2);
-            }
-            
-            // Add space after first 3 digits
-            if (numericPart.length > 2) {
-                formatted += '-' + numericPart.slice(2, 5);
-            }
-            
-            // Add space and last 4 digits
-            if (numericPart.length > 5) {
-                formatted += ' ' + numericPart.slice(5, 9);
-            }
-
-            // Limit to full Malaysian phone number format
-            this.value = formatted.slice(0, 17);
-
-            // Prevent typing beyond the format
-            if (this.value.length === 17) {
-                e.preventDefault();
-            }
-        });
-
-
-    });
+    
 
 }
 

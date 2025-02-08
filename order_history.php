@@ -3,10 +3,25 @@
 include 'connect.php';
 session_start();
 
-if (isset($_SESSION['user_id'])) {
-    $user_id = $_SESSION['user_id'];
+
+$error_messages = '';
+
+
+// Check if the user is logged in
+if (!isset($_SESSION['user_id'])) {
+    $error_messages = 'You must be logged in to view this page.';
 } else {
-    $user_id = '';
+    // Fetch user details
+    $user_id = $_SESSION['user_id'];
+    $stmt = $conn->prepare("SELECT status FROM users WHERE id = :user_id");
+    $stmt->bindParam(':user_id', $user_id);
+    $stmt->execute();
+    $user = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    // Check if the user's status is terminated
+    if ($user && strtolower($user['status']) === 'terminated') {
+        $error_messages = 'Your account has been terminated. Please contact support.';
+    }
 }
 
 include 'header.php';
@@ -40,6 +55,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
 
 <link rel="stylesheet" type="text/css" href="assets/css/profiles.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 
 <body>
@@ -147,6 +163,22 @@ $current_page = basename($_SERVER['PHP_SELF']);
     </div>
 
     <script src="assets/js/profiles.js"></script>
+
+    <script>
+        var errorMessages = <?= json_encode($error_messages); ?>;
+
+        window.onload = function() {
+            if (errorMessages)
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Access Denied',
+                    text: errorMessages,
+                    confirmButtonText: 'OK'
+                }).then(() => {
+                    window.location.href = 'login.php';
+                });
+        };
+    </script>
 </body>
 
 

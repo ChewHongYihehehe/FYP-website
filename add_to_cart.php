@@ -2,11 +2,26 @@
 include 'connect.php';
 session_start();
 
-// Ensure user is logged in
+$error_messages = '';
+
+
+// Check if the user is logged in
 if (!isset($_SESSION['user_id'])) {
-    header('Location: login.php');
-    exit();
+    $error_messages = 'You must be logged in to view this page.';
+} else {
+    // Fetch user details
+    $user_id = $_SESSION['user_id'];
+    $stmt = $conn->prepare("SELECT status FROM users WHERE id = :user_id");
+    $stmt->bindParam(':user_id', $user_id);
+    $stmt->execute();
+    $user = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    // Check if the user's status is terminated
+    if ($user && strtolower($user['status']) === 'terminated') {
+        $error_messages = 'Your account has been terminated. Please contact support.';
+    }
 }
+
 
 $user_id = $_SESSION['user_id'];
 
@@ -20,7 +35,8 @@ $cart_query = "SELECT
     c.size, 
     c.color,
     pv.image1_display,
-    pv.color AS variant_color
+    pv.color AS variant_color,
+    pv.stock AS stock
 FROM cart c
 JOIN products p ON c.pid = p.id
 LEFT JOIN product_variants pv ON c.pid = pv.product_id 
@@ -97,7 +113,6 @@ include 'header.php';
                                 </div>
 
                                 <div class="col-lg-4 col-md-6 mb-4 mb-lg-0">
-                                    <!-- Quantity -->
                                     <div class="d-flex mb-4" style="max-width: 300px">
                                         <button class="btn btn-primary px-3 me-2 decrease-quantity"
                                             data-cart-id="<?php echo $item['cart_id']; ?>">
@@ -108,9 +123,13 @@ include 'header.php';
                                             <input type="number"
                                                 class="form-control quantity-input"
                                                 min="1"
-                                                value="<?php echo $item['quantity']; ?>"
+                                                value="<?php echo htmlspecialchars($item['quantity']); ?>"
                                                 data-cart-id="<?php echo $item['cart_id']; ?>"
-                                                data-price="<?php echo $item['price']; ?>" />
+                                                data-price="<?php echo $item['price']; ?>"
+                                                data-product-id="<?php echo $item['pid']; ?>"
+                                                data-size="<?php echo $item['size']; ?>"
+                                                data-color="<?php echo $item['color']; ?>"
+                                                data-stock="<?php echo $item['stock']; ?>" />
                                             <label class="form-label">Quantity</label>
                                         </div>
 
@@ -119,6 +138,7 @@ include 'header.php';
                                             <i class="fas fa-plus"></i>
                                         </button>
                                     </div>
+
                                     <!-- Quantity -->
 
                                     <!-- Price -->
@@ -225,6 +245,22 @@ include 'header.php';
 <script src="assets/js/easing.js"></script>
 <script src="assets/js/custom.js"></script>
 <script src="assets/js/add_to_cart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    var errorMessages = <?= json_encode($error_messages); ?>;
+
+    window.onload = function() {
+        if (errorMessages)
+            Swal.fire({
+                icon: 'error',
+                title: 'Access Denied',
+                text: errorMessages,
+                confirmButtonText: 'OK'
+            }).then(() => {
+                window.location.href = 'login.php';
+            });
+    };
+</script>
 </body>
 
 </html>

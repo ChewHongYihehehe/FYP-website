@@ -14,14 +14,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $email = $_POST['email'];
 
     // Prepare statement to prevent SQL injection
-    $stmt = $conn->prepare("SELECT * FROM users WHERE email = :email");
+    $stmt = $conn->prepare("SELECT fullname FROM users WHERE email = :email");
     $stmt->bindParam(":email", $email, PDO::PARAM_STR);
     $stmt->execute();
 
     if ($stmt->rowCount() > 0) {
-        // Generate a unique token
+        $user = $stmt->fetch(PDO::FETCH_ASSOC);
+        $username = $user['fullname'];
+
         $token = bin2hex(random_bytes(50));
-        $expiry = date("Y-m-d H:i:s", strtotime("+5 minutes")); // Token expires in 5 minutes
+        $expiry = date("Y-m-d H:i:s", strtotime("+30 minutes")); // Token expires in 5 minutes
 
         // Update the database with the token and expiry
         $stmt = $conn->prepare("UPDATE users SET reset_token = :reset_token, reset_token_expiry = :reset_token_expiry WHERE email = :email");
@@ -52,10 +54,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             // Content
             $mail->isHTML(true);
             $mail->Subject = 'Password Reset Request';
-            $mail->Body = "Click the following link to reset your password: <a href='$reset_link'>$reset_link</a>";
+
+            // Include the new email template
+            ob_start();
+            include 'email_reset_password.php';
+            $body = ob_get_clean();
+            $mail->Body = $body;
 
             $mail->send();
-            $success_message = "Password reset link has been sent to your email.";
+            $success_message = "Password reset link has been sent to your email. The link will expired at " . date("h:i A", strtotime($expiry)) . " on " . date("d-m-Y", strtotime($expiry)) . ".";
         } catch (Exception $e) {
             $error_message = "Message could not be sent. Mailer Error: {$mail->ErrorInfo}";
         }
@@ -79,6 +86,7 @@ $conn = null;
     <link rel="stylesheet" href="assets/css/forgot.password.css">
     <script type="module" src="https://cdn.jsdelivr.net/npm/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
     <script nomodule src="https://cdn.jsdelivr.net/npm/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <title>Forgot Password</title>
 </head>
 
@@ -97,7 +105,6 @@ $conn = null;
                     </div>
                 </div>
                 <span class="error-message"><?php echo $error_message; ?></span>
-                <span class="success-message"><?php echo $success_message; ?></span>
                 <input type="submit" value="Send Reset Link">
                 <div class="login">
                     <p>Remembered your password? <a href="login.php">Login here</a>.</p>
@@ -105,6 +112,26 @@ $conn = null;
             </form>
         </div>
     </section>
+
+    <script>
+        <?php if ($success_message): ?>
+            Swal.fire({
+                icon: 'success',
+                title: 'Success!',
+                text: '<?php echo $success_message; ?>',
+                confirmButtonText: 'OK'
+            });
+        <?php endif; ?>
+
+        <?php if ($error_message): ?>
+            Swal.fire({
+                icon: 'error',
+                title: 'Error!',
+                text: '<?php echo $error_message; ?>',
+                confirmButtonText: 'OK'
+            });
+        <?php endif ?>
+    </script>
 </body>
 
 </html>

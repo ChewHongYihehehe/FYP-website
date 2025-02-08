@@ -33,12 +33,8 @@ if (isset($_GET['token'])) {
                 $update_stmt->bindParam(":email", $email, PDO::PARAM_STR);
 
                 if ($update_stmt->execute()) {
-                    // Redirect with notification
-                    echo "<script>
-                        alert('Your password has been reset successfully. You will now be redirected to the login page.');
-                        window.location.href = 'login.php';
-                    </script>";
-                    exit;
+                    // Set success message to be displayed in SweetAlert
+                    $success_message = "Your password has been reset successfully. You will now be redirected to the login page.";
                 } else {
                     $error_message = "Failed to update the password. Please try again.";
                 }
@@ -66,32 +62,116 @@ $conn = null;
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="assets/css/reset_password.css">
     <title>Reset Password</title>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 
 <body>
     <section>
         <div class="form-box">
             <h2>Reset Password</h2>
-            <form action="" method="post">
+            <form action="" method="post" onsubmit="return validateForm()">
                 <div class="form-column">
                     <div class="inputbox">
-                        <input type="password" name="new_password" placeholder=" " required>
+                        <input type="password" name="new_password" id="new_password" placeholder=" " required oninput="validatePassword()">
                         <label>New Password</label>
                         <i class="fas fa-lock"></i>
                     </div>
                 </div>
+                <span class="error-message" id="password_error"></span>
                 <div class="form-column">
                     <div class="inputbox">
-                        <input type="password" name="confirm_password" placeholder=" " required>
+                        <input type="password" name="confirm_password" id="confirm_password" placeholder=" " required oninput="checkPasswordMatch()">
                         <label>Confirm Password</label>
                         <i class="fas fa-lock"></i>
                     </div>
                 </div>
-                <span class="error-message"><?php echo $error_message; ?></span>
+                <span class="error-message" id="confirm_password_error"></span>
                 <input type="submit" value="Reset Password">
             </form>
         </div>
     </section>
+
+    <script>
+        function validatePassword() {
+            const passwordInput = document.getElementById("new_password");
+            const passwordError = document.getElementById("password_error");
+            const password = passwordInput.value;
+
+            let errorMessages = [];
+
+            if (password.length < 8 || password.length > 12) {
+                errorMessages.push("Password must be 8-12 characters long. ");
+            }
+
+            if (!/[A-Z]/.test(password)) {
+                errorMessages.push("Password must contain at least one uppercase letter.");
+            }
+
+            if (!/[a-z]/.test(password)) {
+                errorMessages.push("Password must container at least one lowercase letter.");
+            }
+
+            if (!/\d/.test(password)) {
+                errorMessages.push("Password must container at least one number.");
+            }
+
+            if (!/[\W_]/.test(password)) {
+                errorMessages.push("Password must contain at least one special characters.");
+            }
+
+            if (errorMessages.length > 0) {
+                passwordError.textContent = errorMessages.join(" ");
+            } else {
+                passwordError.textContent = "";
+            }
+        }
+
+        function checkPasswordMatch() {
+            const password = document.getElementById("new_password").value;
+            const confirmPassword = document.getElementById("confirm_password").value;
+            const confirmPasswordError = document.getElementById("confirm_password_error");
+
+            if (password !== confirmPassword) {
+                confirmPasswordError.textContent = "Passwords do not match!";
+            } else {
+                confirmPasswordError.textContent = "";
+            }
+        }
+
+        function validateForm() {
+            const passwordError = document.getElementById("password_error").textContent;
+            const confirmPasswordError = document.getElementById("confirm_password_error").textContent;
+
+            if (passwordError || confirmPasswordError) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Oops...',
+                    text: 'Please fix the errors before submitting the form.'
+                });
+                return false;
+            }
+
+            return true;
+        }
+
+        <?php if (!empty($success_message)): ?>
+            Swal.fire({
+                icon: 'success',
+                title: 'Success!',
+                text: '<?php echo $success_message; ?>'
+            }).then(() => {
+                window.location.href = 'login.php';
+            });
+        <?php endif; ?>
+
+        <?php if (!empty($error_message)): ?>
+            Swal.fire({
+                icon: 'error',
+                title: 'Error!',
+                text: '<?php echo $error_message; ?>'
+            });
+        <?php endif; ?>
+    </script>
 </body>
 
 </html>

@@ -3,13 +3,15 @@ session_start();
 include 'connect.php'; // Ensure this file sets up the $conn variable
 
 $error = '';
+$terminated = false;
+
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $admin_email = trim($_POST['admin_email']);
     $admin_password = $_POST['admin_password'];
 
 
-    $stmt = $conn->prepare("SELECT id, admin_password, role FROM admin WHERE admin_email = :admin_email");
+    $stmt = $conn->prepare("SELECT id, admin_password, role, admin_status FROM admin WHERE admin_email = :admin_email");
     $stmt->bindParam(':admin_email', $admin_email);
     $stmt->execute();
 
@@ -18,19 +20,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $hashed_password = $result['admin_password'];
         $role = $result['role'];
         $admin_id = $result['id'];
+        $status = $result['admin_status'];
 
-        if (password_verify($admin_password, $hashed_password)) {
+        // Check if the admin is terminated
+        if (strcasecmp($status, 'terminated') === 0) { // Use strcasecmp for case-insensitive comparison
+            $terminated = true;
+        } elseif (password_verify($admin_password, $hashed_password)) {
             $_SESSION['admin_id'] = $admin_id;
             $_SESSION['admin_email'] = $admin_email;
             $_SESSION['role'] = $role;
 
-            if ($role === 'super_admin') {
-                header("Location: superadmin_sidebar.php");
-                exit();
-            } else {
-                header("Location: admin_profile.php");
-                exit();
-            }
+            header("Location: admin_dashboard.php");
+            exit();
         } else {
             $error = "Invalid Admin Email or Password.";
         }
@@ -48,6 +49,8 @@ $conn = null; // Close the database connection
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Login</title>
     <link rel="stylesheet" type="text/css" href="assets/css/admin_login.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 </head>
 
 <body>
@@ -79,6 +82,15 @@ $conn = null; // Close the database connection
             const passwordField = document.getElementById('password-field');
             passwordField.type = passwordField.type === 'password' ? 'text' : 'password';
         }
+
+        <?php if ($terminated): ?>
+            Swal.fire({
+                icon: 'error',
+                title: 'Access Denied',
+                text: 'Your account has been terminated. Please contact support.',
+                confirmButtonText: 'OK'
+            });
+        <?php endif; ?>
     </script>
 </body>
 

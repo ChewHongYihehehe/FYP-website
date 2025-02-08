@@ -3,10 +3,25 @@ include 'connect.php';
 
 session_start();
 
-if (isset($_SESSION['user_id'])) {
-    $user_id = $_SESSION['user_id'];
+
+$error_messages = '';
+
+
+// Check if the user is logged in
+if (!isset($_SESSION['user_id'])) {
+    $error_messages = 'You must be logged in to view this page.';
 } else {
-    $user_id = '';
+    // Fetch user details
+    $user_id = $_SESSION['user_id'];
+    $stmt = $conn->prepare("SELECT status FROM users WHERE id = :user_id");
+    $stmt->bindParam(':user_id', $user_id);
+    $stmt->execute();
+    $user = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    // Check if the user's status is terminated
+    if ($user && strtolower($user['status']) === 'terminated') {
+        $error_messages = 'Your account has been terminated. Please contact support.';
+    }
 }
 
 // Get the product id from the url
@@ -60,7 +75,7 @@ $select_variants = $conn->prepare("
            pv.image4_thumb
     FROM products p
     JOIN product_variants pv ON p.id = pv.product_id
-    WHERE p.name = :name
+    WHERE p.name = :name AND pv.stock > 0
 ");
 $select_variants->bindParam(':name', $product['name']);
 $select_variants->execute();
@@ -187,6 +202,8 @@ $availableSizes = getAvailableSizes($conn, $product_id);
 
     <!-- custom css file link  -->
     <link rel="stylesheet" href="assets/css/product.css">
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 
 
@@ -244,8 +261,10 @@ $availableSizes = getAvailableSizes($conn, $product_id);
             <div class="options">
                 <h4>Size(UK)</h4>
                 <ul class="sizes">
-                    <?php foreach ($unique_sizes as $index => $size): ?>
-                        <li class="<?php echo $index === 0 ? 'size-active' : ''; ?>" data-size="<?php echo htmlspecialchars($size); ?>"><?php echo htmlspecialchars($size); ?></li>
+                    <?php foreach ($availableSizes as $index => $size): ?>
+                        <li class="<?php echo $index === 0 ? 'size-active' : ''; ?>" data-size="<?php echo htmlspecialchars($size); ?>">
+                            <?php echo htmlspecialchars($size); ?>
+                        </li>
                     <?php endforeach; ?>
                 </ul>
 
@@ -265,7 +284,14 @@ $availableSizes = getAvailableSizes($conn, $product_id);
                     <h4>Price: </h4>
                     <h4 class="price"> RM<?php echo number_format($product['price'], 2); ?></h4>
                 </div>
-            </div>
+                <div class="quantity-selector">
+                    <h4>Quantity:</h4>
+                    <div class="quantity-controls">
+                        <button id="decrease-quantity" class="quantity-button">-</button>
+                        <span id="quantity-value">1</span>
+                        <button id="increase-quantity" class="quantity-button">+</button>
+                    </div>
+                </div>
         </main>
         <section class="bar-bottom">
             <div class="cart">
@@ -386,6 +412,22 @@ $availableSizes = getAvailableSizes($conn, $product_id);
     <script src="assets/js/jquery-3.2.1.min.js"></script>
     <script src="assets/js/owl.carousel.js"></script>
     <script src="assets/js/custom.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        var errorMessages = <?= json_encode($error_messages); ?>;
+
+        window.onload = function() {
+            if (errorMessages)
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Access Denied',
+                    text: errorMessages,
+                    confirmButtonText: 'OK'
+                }).then(() => {
+                    window.location.href = 'login.php';
+                });
+        };
+    </script>
 </body>
 
 </html>

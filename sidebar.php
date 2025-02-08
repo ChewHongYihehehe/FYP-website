@@ -18,6 +18,12 @@
         </a>
 
         <ul class="side-menu top">
+            <li>
+                <a href="admin_dashboard.php">
+                    <i class="bx bxs-dashboard"></i>
+                    <span class="text">Dashboard</span>
+                </a>
+            </li>
             <li class="has-dropdown">
                 <a href="javascript:void(0)" onclick="toggleDropdown(this)">
                     <i class='bx bxs-data'></i>
@@ -39,6 +45,12 @@
                     <a href="admin_category_color.php">Color</a>
                     <a href="admin_category_sizes.php">Size</a>
                 </div>
+            </li>
+            <li>
+                <a href="<?php echo ($_SESSION['role'] === 'super_admin') ? 'admin_list_s.php' : 'admin_list.php'; ?>">
+                    <i class="bx bxs-user"></i>
+                    <span class="text">Admin List</span>
+                </a>
             </li>
             <li class="has-dropdown">
                 <a href="javascript:void(0)" onclick="toggleDropdown(this)">
@@ -79,6 +91,12 @@
                 </a>
             </li>
             <li>
+                <a href="admin_contact_2.php">
+                    <i class="bx bxs-message-dots"></i>
+                    <span class="text">Contact Us Content</span>
+                </a>
+            </li>
+            <li>
                 <a href="admin_user.php">
                     <i class="bx bxs-user"></i>
                     <span class="text">User </span>
@@ -90,6 +108,25 @@
                     <span class="text">My Profile</span>
                 </a>
             </li>
+            <li>
+                <a href="admin_header.php">
+                    <i class='bx bx-home'></i>
+                    <span class="text">Slider</span>
+                </a>
+            </li>
+            <li>
+                <a href="admin_navbar.php">
+                    <i class='bx bx-menu'></i>
+                    <span class="text">Navbar</span>
+                </a>
+            </li>
+            <li>
+                <a href="admin_video.php">
+                    <i class='bx bx-book'></i>
+                    <span class="text">Blog</span>
+                </a>
+            </li>
+
             <li>
                 <a href="javascript:void(0)" class="logout" onclick="confirmLogout()">
                     <i class='bx bx-log-out'></i>

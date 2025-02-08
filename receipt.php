@@ -3,10 +3,21 @@
 include 'connect.php';
 session_start();
 
-if (isset($_SESSION['user_id'])) {
-    $user_id = $_SESSION['user_id'];
+// Check if the user is logged in
+if (!isset($_SESSION['user_id'])) {
+    $error_messages = 'You must be logged in to view this page.';
 } else {
-    $user_id = '';
+    // Fetch user details
+    $user_id = $_SESSION['user_id'];
+    $stmt = $conn->prepare("SELECT status FROM users WHERE id = :user_id");
+    $stmt->bindParam(':user_id', $user_id);
+    $stmt->execute();
+    $user = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    // Check if the user's status is terminated
+    if ($user && strtolower($user['status']) === 'terminated') {
+        $error_messages = 'Your account has been terminated. Please contact support.';
+    }
 }
 
 include 'header.php';
@@ -40,6 +51,7 @@ $order_items = $stmt->fetchAll(PDO::FETCH_ASSOC);
 <head>
     <title>Receipt</title>
     <link rel="stylesheet" href="assets/css/receipt.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 
 <body>
@@ -116,6 +128,21 @@ $order_items = $stmt->fetchAll(PDO::FETCH_ASSOC);
             <?php endif; ?>
         </div>
     </div>
+    <script>
+        var errorMessages = <?= json_encode($error_messages); ?>;
+
+        window.onload = function() {
+            if (errorMessages)
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Access Denied',
+                    text: errorMessages,
+                    confirmButtonText: 'OK'
+                }).then(() => {
+                    window.location.href = 'login.php';
+                });
+        };
+    </script>
 </body>
 
 </html>

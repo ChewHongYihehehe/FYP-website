@@ -3,11 +3,26 @@ include 'connect.php';
 
 session_start();
 
-if (isset($_SESSION['user_id'])) {
-	$user_id = $_SESSION['user_id'];
+$error_messages = '';
+
+
+// Check if the user is logged in
+if (!isset($_SESSION['user_id'])) {
+	$error_messages = 'You must be logged in to view this page.';
 } else {
-	$user_id = '';
+	// Fetch user details
+	$user_id = $_SESSION['user_id'];
+	$stmt = $conn->prepare("SELECT status FROM users WHERE id = :user_id");
+	$stmt->bindParam(':user_id', $user_id);
+	$stmt->execute();
+	$user = $stmt->fetch(PDO::FETCH_ASSOC);
+
+	// Check if the user's status is terminated
+	if ($user && strtolower($user['status']) === 'terminated') {
+		$error_messages = 'Your account has been terminated. Please contact support.';
+	}
 }
+
 
 $products_per_page = 16;
 
@@ -173,22 +188,22 @@ function groupProductsByNameAndColor($products)
 	return $groupedProducts;
 }
 
-function getAvailableSizes($conn, $productId)
+function getAvailableSizes($conn, $productId, $color)
 {
 	try {
-		$sizes_query = "SELECT DISTINCT size FROM product_variants WHERE product_id = ? AND stock > 0";
+		$sizes_query = "SELECT DISTINCT size FROM product_variants 
+                       WHERE product_id = ? 
+                       AND color = ?
+                       AND stock > 0";
 		$stmt = $conn->prepare($sizes_query);
-		$stmt->execute([$productId]);
-		$sizes = $stmt->fetchAll(PDO::FETCH_COLUMN);
-
-		return $sizes;
+		$stmt->execute([$productId, $color]);
+		return $stmt->fetchAll(PDO::FETCH_COLUMN);
 	} catch (PDOException $e) {
 		error_log("Error fetching sizes: " . $e->getMessage());
 		return [];
 	}
 }
-// Fetch all available sizes
-$availableSizes = getAvailableSizes($conn, $productId);
+
 
 
 // Fetch available sizes from the sizes table
@@ -428,7 +443,12 @@ include 'header.php';
 											if (!$first_variant) continue;
 
 											$brand_class = strtolower(str_replace(' ', '-', htmlspecialchars($first_variant['brand'] ?? '')));
-											$availableSizesForProduct = json_encode(getAvailableSizes($conn, $first_variant['id'])); // Get available sizes for the main product
+											// Get available sizes for the main product WITH COLOR
+											$availableSizesForProduct = json_encode(getAvailableSizes(
+												$conn,
+												$first_variant['id'],
+												$first_variant['color']
+											));
 										?>
 											<div class="product-item <?php echo $brand_class; ?>" data-product-id="<?php echo htmlspecialchars($first_variant['id'] ?? ''); ?>" data-available-sizes='<?php echo $availableSizesForProduct; ?>'>
 												<div class="product product_filter">
@@ -453,18 +473,17 @@ include 'header.php';
 														<!-- Color Variants -->
 														<?php if (!empty($color_variants) && count($color_variants) > 1): ?>
 															<div class="color-variants">
-																<?php foreach ($color_variants as $index => $variant): ?>
+																<?php foreach ($color_variants as $index => $variant):
+																	$variantSizes = getAvailableSizes($conn, $variant['product_id'], $variant['color']);
+																?>
 																	<span
 																		class="color-circle <?php echo $index === 0 ? 'color-active' : ''; ?>"
 																		style="background-color: <?php echo htmlspecialchars($variant['color']); ?>;"
 																		data-product-id="<?php echo htmlspecialchars($variant['product_id']); ?>"
 																		data-product-image="<?php echo htmlspecialchars($variant['image1_display']); ?>"
 																		data-product-price="<?php echo htmlspecialchars($variant['price']); ?>"
-																		data-available-sizes='<?php
-																								// Fetch sizes specifically for this product variant
-																								$variantSizes = getAvailableSizes($conn, $variant['product_id']);
-																								echo json_encode($variantSizes);
-																								?>'>
+																		data-color="<?php echo htmlspecialchars($variant['color']); ?>"
+																		data-available-sizes='<?php echo json_encode($variantSizes); ?>'>
 																	</span>
 																<?php endforeach; ?>
 															</div>
@@ -603,7 +622,22 @@ include 'header.php';
 	<script src="assets/plugins/jquery-ui.js"></script>
 	<script src="assets/js/categories_custom.js"></script>
 	<script src="assets/js/custom.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+	<script>
+		var errorMessages = <?= json_encode($error_messages); ?>;
 
+		window.onload = function() {
+			if (errorMessages)
+				Swal.fire({
+					icon: 'error',
+					title: 'Access Denied',
+					text: errorMessages,
+					confirmButtonText: 'OK'
+				}).then(() => {
+					window.location.href = 'login.php';
+				});
+		};
+	</script>
 	<script>
 		document.querySelectorAll('.cancel-filter').forEach(function(element) {
 			element.addEventListener('click', function(event) {
@@ -658,8 +692,6 @@ include 'header.php';
 			});
 		});
 	</script>
-
-
 
 
 </body>

@@ -142,7 +142,7 @@ main{
     color: #111;
 }
 
-.reviews h4, .pricing h4{
+.reviews h4{
     color: #ccc;
 }
 
@@ -253,6 +253,39 @@ main{
 
 .product-favorite i.fas {
     color: #fe4c50; /* Color when the heart is filled (favorited) */
+}
+
+.quantity-selector{
+    display:flex;
+    align-items:center;
+    margin-top:1em;
+}
+
+.quantity-controls {
+    display: flex;
+    align-items: center;
+    margin-left: 1em;
+}
+
+.quantity-button {
+    background-color: #111;
+    color: #fff;
+    border: none;
+    padding: 0.5em 1em;
+    font-size: 1.2em;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.quantity-button:hover {
+    background-color: #000;
+}
+
+#quantity-value {
+    margin: 0 1em;
+    font-size: 1.2em;
+    width: 2em;
+    text-align: center;
 }
 
 

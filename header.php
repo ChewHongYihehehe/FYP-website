@@ -4,6 +4,12 @@ if (session_status() == PHP_SESSION_NONE) {
     session_start();
 }
 
+
+// Fetch existing navbar items
+$stmt = $conn->prepare("SELECT * FROM navbar_menu ORDER BY position ASC");
+$stmt->execute();
+$navbar_items = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
 // Initialize cart count to 0
 $cart_count = 0;
 
@@ -97,10 +103,9 @@ if (isset($_SESSION['user_id'])) {
                             </div>
                             <nav class="navbar">
                                 <ul class="navbar_menu">
-                                    <li><a href="home.php">home</a></li>
-                                    <li><a href="categories.php?category=WOMEN&color=&brand=&min_price=90&max_price=1100">WOMEN</a></li>
-                                    <li><a href="categories.php?category=MEN&color=&brand=&min_price=90&max_price=1100">MEN</a></li>
-                                    <li><a href="contact.php">contact</a></li>
+                                    <?php foreach ($navbar_items as $item): ?>
+                                        <li><a href="<?= htmlspecialchars($item['link']); ?>"><?= htmlspecialchars($item['title']); ?></a></li>
+                                    <?php endforeach; ?>
                                 </ul>
                                 <ul class="navbar_user">
                                     <li><a href="wishlist.php"><i class="fas fa-heart" aria-hidden="true"></i></a></li>

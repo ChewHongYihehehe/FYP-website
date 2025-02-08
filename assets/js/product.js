@@ -103,9 +103,11 @@ function loadProductData(shoeIndex) {
 
         colorContainer.appendChild(colorButton);
 
-        colorButton.addEventListener("click", () => {
+        colorButton.addEventListener("click", (event) => {
+            const selectedColor = event.currentTarget.getAttribute("data-color");
+            
             // Find the product variant with this color
-            const selectedVariant = productGroup.find(p => p.color === color);
+            const selectedVariant = productGroup.find(variant => variant.color === selectedColor);
             
             if (selectedVariant) {
                 // Update images
@@ -118,7 +120,7 @@ function loadProductData(shoeIndex) {
                     selectedVariant.image3_thumb,
                     selectedVariant.image4_thumb
                 ];
-
+        
                 for (let i = 0; i < thumb.length; i++) {
                     if (thumbs[i]) {
                         thumb[i].src = thumbs[i];
@@ -127,18 +129,18 @@ function loadProductData(shoeIndex) {
                         thumb[i].style.display = 'none';
                     }
                 }
-
+        
                 // Reset active thumbnail to the first one
                 resetActive(thumb, "thumb", 0);
-
+        
                 // Update color selection
                 resetActive(colorContainer.children, "color", index);
-
+        
                 // Animate changes
                 animate(img, 550, "jump 500ms ease-in-out");
                 animate(shadow, 550, "shadow 500ms ease-in-out");
                 animate(titleOverlay, 850, "title 800ms ease");
-
+        
                 // Update price
                 price.innerText = "$" + Number(selectedVariant.price).toFixed(2);
             }

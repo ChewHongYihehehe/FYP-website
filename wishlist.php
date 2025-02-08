@@ -3,11 +3,23 @@
 include 'connect.php';
 session_start();
 
-if (isset($_SESSION['user_id'])) {
-    $user_id = $_SESSION['user_id'];
+// Check if the user is logged in
+if (!isset($_SESSION['user_id'])) {
+    $error_messages = 'You must be logged in to view this page.';
 } else {
-    $user_id = '';
+    // Fetch user details
+    $user_id = $_SESSION['user_id'];
+    $stmt = $conn->prepare("SELECT status FROM users WHERE id = :user_id");
+    $stmt->bindParam(':user_id', $user_id);
+    $stmt->execute();
+    $user = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    // Check if the user's status is terminated
+    if ($user && strtolower($user['status']) === 'terminated') {
+        $error_messages = 'Your account has been terminated. Please contact support.';
+    }
 }
+
 
 include 'header.php';
 
@@ -198,7 +210,6 @@ function getAvailableSizes($conn, $productId)
                                                         </div>
                                                     </div>
 
-                                                    <div class="red_button add_to_cart_button quick-add-button"><a href="#">Quick Add <i class="fa fa-plus quick-add-icon"></i></a></div>
                                                 </div>
                                             <?php endforeach; ?>
                                         </div>
@@ -301,6 +312,22 @@ function getAvailableSizes($conn, $productId)
                     <script src="assets/js/easing.js"></script>
                     <script src="assets/js/custom.js"></script>
                     <script src="assets/js/wishlist.js"></script>
+                    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+                    <script>
+                        var errorMessages = <?= json_encode($error_messages); ?>;
+
+                        window.onload = function() {
+                            if (errorMessages)
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Access Denied',
+                                    text: errorMessages,
+                                    confirmButtonText: 'OK'
+                                }).then(() => {
+                                    window.location.href = 'login.php';
+                                });
+                        };
+                    </script>
                     </body>
 
                     </html>

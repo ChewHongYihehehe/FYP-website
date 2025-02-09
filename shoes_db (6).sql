@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- 主机： 127.0.0.1:3307
--- 生成日期： 2025-02-08 17:01:12
+-- 生成日期： 2025-02-09 02:17:58
 -- 服务器版本： 10.4.32-MariaDB
 -- PHP 版本： 8.0.30
 
@@ -42,7 +42,7 @@ CREATE TABLE `admin` (
 --
 
 INSERT INTO `admin` (`id`, `admin_password`, `admin_name`, `admin_email`, `admin_phone`, `admin_status`, `role`) VALUES
-(1, '$2y$10$g4tEFRcy//z4/nA/s5bL7e1RyjTGpiQwbb.kYCt/euUqVIyrjLwKm', 'Bryan Ng Jun Jie', 'bryanngjj@gmail.com', '+6013-243 2424', 'Terminated', 'admin'),
+(1, '$2y$10$g4tEFRcy//z4/nA/s5bL7e1RyjTGpiQwbb.kYCt/euUqVIyrjLwKm', 'Bryan Ng Jun Jie', 'bryanngjj@gmail.com', '+6013-243 2424', 'Active', 'admin'),
 (8, '$2y$10$hLwrD.XRMmm8YsPx5eqi5.eSVMa7HGs.XPx8ZxLvAlfFKQ4AGi8HO', 'Chew Hong Yi', 'chewhonyi@gmail.com', '+6012-131 2332', 'Active', 'super_admin'),
 (38, '$2y$10$vv6i07M7E3PeE6vgdaTfnOHVh5lLm/qgxSWRiSzOfvfiv8kngoSE2', 'Chew Hong Yi', 'cchew801@gmail.com', '+6016-772 5157', 'Active', 'admin');
 
@@ -175,6 +175,13 @@ CREATE TABLE `deleted_brands` (
   `name` varchar(255) NOT NULL,
   `deleted_at` datetime DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- 转存表中的数据 `deleted_brands`
+--
+
+INSERT INTO `deleted_brands` (`id`, `name`, `deleted_at`) VALUES
+(3, 'hehe', '2025-02-09 00:28:45');
 
 -- --------------------------------------------------------
 
@@ -350,7 +357,8 @@ INSERT INTO `navbar_menu` (`id`, `title`, `link`, `position`, `updated_at`) VALU
 (1, 'Home', 'home.php', 1, '2025-02-07 12:45:37'),
 (2, 'Women', 'categories.php?category=WOMEN', 2, '2025-02-07 12:45:40'),
 (3, 'Men', 'categories.php?category=MEN', 3, '2025-02-07 12:45:42'),
-(4, 'Contact', 'contact.php', 4, '2025-02-07 12:52:37');
+(4, 'Contact', 'contact.php', 4, '2025-02-07 12:52:37'),
+(9, 'Blog', 'blog.php', 5, '2025-02-09 09:14:45');
 
 -- --------------------------------------------------------
 
@@ -497,31 +505,31 @@ CREATE TABLE `product_variants` (
 --
 
 INSERT INTO `product_variants` (`id`, `product_id`, `size`, `color`, `stock`, `price`, `image1_thumb`, `image2_thumb`, `image3_thumb`, `image4_thumb`, `image1_display`, `image2_display`, `image3_display`, `image4_display`) VALUES
-(1, 1, 5, 'White', 4, 510, 'img/showcase/thumbs/shoe1-White/6791006cae725_imgg1.jpg', 'img/showcase/thumbs/shoe1-White/6791006cae8e5_1183A355_201_SB_BT_GLB.webp', 'img/showcase/thumbs/shoe1-White/6791006caea2a_1183A355_201_SB_BK_GLB.webp', 'img/showcase/thumbs/shoe1-White/6791006caeb3f_1183A355_201_SB_TP_GLB.webp', 'img/showcase/shoe1-White/6790ff9dcf853_imgg1.png', 'img/showcase/shoe1-White/6790ff9dcfa4d_imgg2.png', 'img/showcase/shoe1-White/6790ff9dcfb8c_imgg3.png', 'img/showcase/shoe1-White/6790ff9dcfcab_imgg4.png'),
-(2, 1, 6, 'White', 1, 510, 'img/showcase/thumbs/shoe1-White/6791006cae725_imgg1.jpg', 'img/showcase/thumbs/shoe1-White/6791006cae8e5_1183A355_201_SB_BT_GLB.webp', 'img/showcase/thumbs/shoe1-White/6791006caea2a_1183A355_201_SB_BK_GLB.webp', 'img/showcase/thumbs/shoe1-White/6791006caeb3f_1183A355_201_SB_TP_GLB.webp', 'img/showcase/shoe1-White/6790ff9dcf853_imgg1.png', 'img/showcase/shoe1-White/6790ff9dcfa4d_imgg2.png', 'img/showcase/shoe1-White/6790ff9dcfb8c_imgg3.png', 'img/showcase/shoe1-White/6790ff9dcfcab_imgg4.png'),
-(3, 1, 7, 'White', 0, 510, 'img/showcase/thumbs/shoe1-White/6791006cae725_imgg1.jpg', 'img/showcase/thumbs/shoe1-White/6791006cae8e5_1183A355_201_SB_BT_GLB.webp', 'img/showcase/thumbs/shoe1-White/6791006caea2a_1183A355_201_SB_BK_GLB.webp', 'img/showcase/thumbs/shoe1-White/6791006caeb3f_1183A355_201_SB_TP_GLB.webp', 'img/showcase/shoe1-White/6790ff9dcf853_imgg1.png', 'img/showcase/shoe1-White/6790ff9dcfa4d_imgg2.png', 'img/showcase/shoe1-White/6790ff9dcfb8c_imgg3.png', 'img/showcase/shoe1-White/6790ff9dcfcab_imgg4.png'),
-(4, 1, 8, 'White', 0, 510, 'img/showcase/thumbs/shoe1-White/6791006cae725_imgg1.jpg', 'img/showcase/thumbs/shoe1-White/6791006cae8e5_1183A355_201_SB_BT_GLB.webp', 'img/showcase/thumbs/shoe1-White/6791006caea2a_1183A355_201_SB_BK_GLB.webp', 'img/showcase/thumbs/shoe1-White/6791006caeb3f_1183A355_201_SB_TP_GLB.webp', 'img/showcase/shoe1-White/6790ff9dcf853_imgg1.png', 'img/showcase/shoe1-White/6790ff9dcfa4d_imgg2.png', 'img/showcase/shoe1-White/6790ff9dcfb8c_imgg3.png', 'img/showcase/shoe1-White/6790ff9dcfcab_imgg4.png'),
+(1, 1, 5, 'White', 4, 511, 'img/showcase/thumbs/shoe1-White/6791006cae725_imgg1.jpg', 'img/showcase/thumbs/shoe1-White/6791006cae8e5_1183A355_201_SB_BT_GLB.webp', 'img/showcase/thumbs/shoe1-White/6791006caea2a_1183A355_201_SB_BK_GLB.webp', 'img/showcase/thumbs/shoe1-White/6791006caeb3f_1183A355_201_SB_TP_GLB.webp', 'img/showcase/shoe1-White/6790ff9dcf853_imgg1.png', 'img/showcase/shoe1-White/6790ff9dcfa4d_imgg2.png', 'img/showcase/shoe1-White/6790ff9dcfb8c_imgg3.png', 'img/showcase/shoe1-White/6790ff9dcfcab_imgg4.png'),
+(2, 1, 6, 'White', 1, 511, 'img/showcase/thumbs/shoe1-White/6791006cae725_imgg1.jpg', 'img/showcase/thumbs/shoe1-White/6791006cae8e5_1183A355_201_SB_BT_GLB.webp', 'img/showcase/thumbs/shoe1-White/6791006caea2a_1183A355_201_SB_BK_GLB.webp', 'img/showcase/thumbs/shoe1-White/6791006caeb3f_1183A355_201_SB_TP_GLB.webp', 'img/showcase/shoe1-White/6790ff9dcf853_imgg1.png', 'img/showcase/shoe1-White/6790ff9dcfa4d_imgg2.png', 'img/showcase/shoe1-White/6790ff9dcfb8c_imgg3.png', 'img/showcase/shoe1-White/6790ff9dcfcab_imgg4.png'),
+(3, 1, 7, 'White', 0, 511, 'img/showcase/thumbs/shoe1-White/6791006cae725_imgg1.jpg', 'img/showcase/thumbs/shoe1-White/6791006cae8e5_1183A355_201_SB_BT_GLB.webp', 'img/showcase/thumbs/shoe1-White/6791006caea2a_1183A355_201_SB_BK_GLB.webp', 'img/showcase/thumbs/shoe1-White/6791006caeb3f_1183A355_201_SB_TP_GLB.webp', 'img/showcase/shoe1-White/6790ff9dcf853_imgg1.png', 'img/showcase/shoe1-White/6790ff9dcfa4d_imgg2.png', 'img/showcase/shoe1-White/6790ff9dcfb8c_imgg3.png', 'img/showcase/shoe1-White/6790ff9dcfcab_imgg4.png'),
+(4, 1, 8, 'White', 0, 511, 'img/showcase/thumbs/shoe1-White/6791006cae725_imgg1.jpg', 'img/showcase/thumbs/shoe1-White/6791006cae8e5_1183A355_201_SB_BT_GLB.webp', 'img/showcase/thumbs/shoe1-White/6791006caea2a_1183A355_201_SB_BK_GLB.webp', 'img/showcase/thumbs/shoe1-White/6791006caeb3f_1183A355_201_SB_TP_GLB.webp', 'img/showcase/shoe1-White/6790ff9dcf853_imgg1.png', 'img/showcase/shoe1-White/6790ff9dcfa4d_imgg2.png', 'img/showcase/shoe1-White/6790ff9dcfb8c_imgg3.png', 'img/showcase/shoe1-White/6790ff9dcfcab_imgg4.png'),
 (7, 1, 7, 'Gold', 0, 510, 'img/showcase/thumbs/shoe1-Gold/6790ffee7f1ce_imgg1.jpg', 'img/showcase/thumbs/shoe1-Gold/6790ffee7f331_imgg2.jpg', 'img/showcase/thumbs/shoe1-Gold/6790ffee7f443_imgg3.jpg', 'img/showcase/thumbs/shoe1-Gold/6790ffee7f66f_imgg4.jpg', 'img/showcase/shoe1-Gold/6790ffee7f7a9_imgg1.png', 'img/showcase/shoe1-Gold/6790ffee7f8c0_imgg2.png', 'img/showcase/shoe1-Gold/6790ffee7f9b2_imgg3.png', 'img/showcase/shoe1-Gold/6790ffee7fb4a_imgg4.png'),
 (8, 1, 8, 'Gold', 0, 510, 'img/showcase/thumbs/shoe1-Gold/6790ffee7f1ce_imgg1.jpg', 'img/showcase/thumbs/shoe1-Gold/6790ffee7f331_imgg2.jpg', 'img/showcase/thumbs/shoe1-Gold/6790ffee7f443_imgg3.jpg', 'img/showcase/thumbs/shoe1-Gold/6790ffee7f66f_imgg4.jpg', 'img/showcase/shoe1-Gold/6790ffee7f7a9_imgg1.png', 'img/showcase/shoe1-Gold/6790ffee7f8c0_imgg2.png', 'img/showcase/shoe1-Gold/6790ffee7f9b2_imgg3.png', 'img/showcase/shoe1-Gold/6790ffee7fb4a_imgg4.png'),
 (10, 1, 6, 'Green', 4, 510, 'img/showcase/thumbs/shoe1-Green/6790fbe3c7dd9_imgg1.jpg', 'img/showcase/thumbs/shoe1-Green/6790fbe3c7f3f_imgg2.jpg', 'img/showcase/thumbs/shoe1-Green/6790fbe3c811b_imgg3.jpg', 'img/showcase/thumbs/shoe1-Green/6790fbe3c8478_imgg4.jpg', 'img/showcase/shoe1-Green/6790fbe3c87f9_imgg1.png', 'img/showcase/shoe1-Green/6790fbe3c89b5_imgg2.png', 'img/showcase/shoe1-Green/6790fbe3c8c1d_imgg3.png', 'img/showcase/shoe1-Green/67a6b12d67fca_imgg4.png'),
 (11, 1, 7, 'Green', 1, 510, 'img/showcase/thumbs/shoe1-Green/6790fbe3c7dd9_imgg1.jpg', 'img/showcase/thumbs/shoe1-Green/6790fbe3c7f3f_imgg2.jpg', 'img/showcase/thumbs/shoe1-Green/6790fbe3c811b_imgg3.jpg', 'img/showcase/thumbs/shoe1-Green/6790fbe3c8478_imgg4.jpg', 'img/showcase/shoe1-Green/6790fbe3c87f9_imgg1.png', 'img/showcase/shoe1-Green/6790fbe3c89b5_imgg2.png', 'img/showcase/shoe1-Green/6790fbe3c8c1d_imgg3.png', 'img/showcase/shoe1-Green/67a6b12d67fca_imgg4.png'),
 (12, 1, 8, 'Green', 7, 510, 'img/showcase/thumbs/shoe1-Green/6790fbe3c7dd9_imgg1.jpg', 'img/showcase/thumbs/shoe1-Green/6790fbe3c7f3f_imgg2.jpg', 'img/showcase/thumbs/shoe1-Green/6790fbe3c811b_imgg3.jpg', 'img/showcase/thumbs/shoe1-Green/6790fbe3c8478_imgg4.jpg', 'img/showcase/shoe1-Green/6790fbe3c87f9_imgg1.png', 'img/showcase/shoe1-Green/6790fbe3c89b5_imgg2.png', 'img/showcase/shoe1-Green/6790fbe3c8c1d_imgg3.png', 'img/showcase/shoe1-Green/67a6b12d67fca_imgg4.png'),
-(13, 2, 9, 'Green', 1, 720, 'img/showcase/thumbs/shoe2-1/imgg1.jpg', 'img/showcase/thumbs/shoe2-1/imgg2.jpg', 'img/showcase/thumbs/shoe2-1/imgg3.jpg', 'img/showcase/thumbs/shoe2-1/imgg4.jpg', 'img/showcase/shoe2-1/imgg1.png', 'img/showcase/shoe2-1/imgg2.png', 'img/showcase/shoe2-1/imgg3.png', 'img/showcase/shoe2-1/imgg4.png'),
-(14, 2, 1, 'Green', 0, 720, 'img/showcase/thumbs/shoe2-1/imgg1.jpg', 'img/showcase/thumbs/shoe2-1/imgg2.jpg', 'img/showcase/thumbs/shoe2-1/imgg3.jpg', 'img/showcase/thumbs/shoe2 -1/imgg4.jpg', 'img/showcase/shoe2-1/imgg1.png', 'img/showcase/shoe2-1/imgg2.png', 'img/showcase/shoe2-1/imgg3.png', 'img/showcase/shoe2-1/imgg4.png'),
-(15, 2, 4, 'Green', 0, 720, 'img/showcase/thumbs/shoe2-1/imgg1.jpg', 'img/showcase/thumbs/shoe2-1/imgg2.jpg', 'img/showcase/thumbs/shoe2-1/imgg3.jpg', 'img/showcase/thumbs/shoe2-1/imgg4.jpg', 'img/showcase/shoe2-1/imgg1.png', 'img/showcase/shoe2-1/imgg2.png', 'img/showcase/shoe2-1/imgg3.png', 'img/showcase/shoe2-1/imgg4.png'),
-(16, 2, 3, 'Green', 0, 720, 'img/showcase/thumbs/shoe2-1/imgg1.jpg', 'img/showcase/thumbs/shoe2-1/imgg2.jpg', 'img/showcase/thumbs/shoe2-1/imgg3.jpg', 'img/showcase/thumbs/shoe2-1/imgg4.jpg', 'img/showcase/shoe2-1/imgg1.png', 'img/showcase/shoe2-1/imgg2.png', 'img/showcase/shoe2-1/imgg3.png', 'img/showcase/shoe2-1/imgg4.png'),
+(13, 2, 9, 'Green', 1, 720, 'img/showcase/thumbs/shoe2-1/imgg1.jpg', 'img/showcase/thumbs/shoe2-1/imgg2.jpg', 'img/showcase/thumbs/shoe2-1/imgg3.jpg', 'img/showcase/thumbs/shoe2-Green/67a787feda6c2_imgg4.png', 'img/showcase/shoe2-1/imgg1.png', 'img/showcase/shoe2-1/imgg2.png', 'img/showcase/shoe2-1/imgg3.png', 'img/showcase/shoe2-1/imgg4.png'),
+(14, 2, 1, 'Green', 0, 720, 'img/showcase/thumbs/shoe2-1/imgg1.jpg', 'img/showcase/thumbs/shoe2-1/imgg2.jpg', 'img/showcase/thumbs/shoe2-1/imgg3.jpg', 'img/showcase/thumbs/shoe2-Green/67a787feda6c2_imgg4.png', 'img/showcase/shoe2-1/imgg1.png', 'img/showcase/shoe2-1/imgg2.png', 'img/showcase/shoe2-1/imgg3.png', 'img/showcase/shoe2-1/imgg4.png'),
+(15, 2, 4, 'Green', 0, 720, 'img/showcase/thumbs/shoe2-1/imgg1.jpg', 'img/showcase/thumbs/shoe2-1/imgg2.jpg', 'img/showcase/thumbs/shoe2-1/imgg3.jpg', 'img/showcase/thumbs/shoe2-Green/67a787feda6c2_imgg4.png', 'img/showcase/shoe2-1/imgg1.png', 'img/showcase/shoe2-1/imgg2.png', 'img/showcase/shoe2-1/imgg3.png', 'img/showcase/shoe2-1/imgg4.png'),
+(16, 2, 3, 'Green', 0, 720, 'img/showcase/thumbs/shoe2-1/imgg1.jpg', 'img/showcase/thumbs/shoe2-1/imgg2.jpg', 'img/showcase/thumbs/shoe2-1/imgg3.jpg', 'img/showcase/thumbs/shoe2-Green/67a787feda6c2_imgg4.png', 'img/showcase/shoe2-1/imgg1.png', 'img/showcase/shoe2-1/imgg2.png', 'img/showcase/shoe2-1/imgg3.png', 'img/showcase/shoe2-1/imgg4.png'),
 (17, 4, 5, 'Brown', 1, 1100, 'img/showcase/thumbs/shoe3-1/imgg1.jpg', 'img/showcase/thumbs/shoe3-1/imgg2.jpg', 'img/showcase/thumbs/shoe3-1/imgg3.jpg', 'img/showcase/thumbs/shoe3-1/imgg4.jpg', 'img/showcase/shoe3-1/imgg1.png', 'img/showcase/shoe3-1/imgg2.png', 'img/showcase/shoe3-1/imgg3.png', 'img/showcase/shoe3-1/imgg4.png'),
 (18, 4, 6, 'Brown', 0, 1100, 'img/showcase/thumbs/shoe3-1/imgg1.jpg', 'img/showcase/thumbs/shoe3-1/imgg2.jpg', 'img/showcase/thumbs/shoe3-1/imgg3.jpg', 'img/showcase/thumbs/shoe3-1/imgg4.jpg', 'img/showcase/shoe3-1/imgg1.png', 'img/showcase/shoe3-1/imgg2.png', 'img/showcase/shoe3-1/imgg3.png', 'img/showcase/shoe3-1/imgg4.png'),
 (19, 4, 7, 'Brown', 0, 1100, 'img/showcase/thumbs/shoe3-1/imgg1.jpg', 'img/showcase/thumbs/shoe3-1/imgg2.jpg', 'img/showcase/thumbs/shoe3-1/imgg3.jpg', 'img/showcase/thumbs/shoe3-1/imgg4.jpg', 'img/showcase/shoe3-1/imgg1.png', 'img/showcase/shoe3-1/imgg2.png', 'img/showcase/shoe3-1/imgg3.png', 'img/showcase/shoe3-1/imgg4.png'),
 (20, 4, 8, 'Brown', 0, 1100, 'img/showcase/thumbs/shoe3-1/imgg1.jpg', 'img/showcase/thumbs/shoe3-1/imgg2.jpg', 'img/showcase/thumbs/shoe3-1/imgg3.jpg', 'img/showcase/thumbs/shoe3-1/imgg4.jpg', 'img/showcase/shoe3-1/imgg1.png', 'img/showcase/shoe3-1/imgg2.png', 'img/showcase/shoe3-1/imgg3.png', 'img/showcase/shoe3-1/imgg4.png'),
-(21, 5, 5, 'White', 0, 90, 'img/show case/thumbs/shoe4-1/imgg1.jpg', 'img/showcase/thumbs/shoe4-1/imgg2.jpg', 'img/showcase/thumbs/shoe4-1/imgg3.jpg', 'img/showcase/thumbs/shoe4-1/imgg4.jpg', 'img/showcase/shoe4-1/imgg1.png', 'img/showcase/shoe4-1/imgg2.png', 'img/showcase/shoe4-1/imgg3.png', 'img/showcase/shoe4-1/imgg4.png'),
-(22, 5, 6, 'White', 1, 90, 'img/showcase/thumbs/shoe4-1/imgg1.jpg', 'img/showcase/thumbs/shoe4-1/imgg2.jpg', 'img/showcase/thumbs/shoe4-1/imgg3.jpg', 'img/showcase/thumbs/shoe4-1/imgg4.jpg', 'img/showcase/shoe4-1/imgg1.png', 'img/showcase/shoe4-1/imgg2.png', 'img/showcase/shoe4-1/imgg3.png', 'img/showcase/shoe4-1/imgg4.png'),
-(23, 5, 7, 'White', 1, 90, 'img/showcase/thumbs/shoe4-1/imgg1.jpg', 'img/showcase/thumbs/shoe4-1/imgg2.jpg', 'img/showcase/thumbs/shoe4-1/imgg3.jpg', 'img/showcase/thumbs/shoe4-1/imgg4.jpg', 'img/showcase/shoe4-1/imgg1.png', 'img/showcase/shoe4-1/imgg2.png', 'img/showcase/shoe4-1/imgg3.png', 'img/showcase/shoe4-1/imgg4.png'),
-(24, 5, 8, 'White', 0, 90, 'img/showcase/thumbs/shoe4-1/imgg1.jpg', 'img/showcase/thumbs/shoe4-1/imgg2.jpg', 'img/showcase/thumbs/shoe4-1/imgg3.jpg', 'img/showcase/thumbs/shoe4-1/imgg4.jpg', 'img/showcase/shoe4-1/imgg1.png', 'img/showcase/shoe4-1/imgg2.png', 'img/showcase/shoe4-1/imgg3.png', 'img/showcase/shoe4-1/imgg4.png'),
-(25, 6, 5, 'Black', 0, 530, 'img/showcase/thumbs/shoe5-1/imgg1.jpg', 'img/showcase/thumbs/shoe5-1/imgg2.jpg', 'img/showcase/thumbs/shoe5-1/imgg3.jpg', 'img/showcase/thumbs/shoe5-1/imgg4.jpg', 'img/showcase/shoe5-1/imgg1.png', 'img/showcase/shoe5-1/imgg2.png', 'img/showcase/shoe5-1/imgg3.png', 'img/showcase/shoe5-1/imgg4.jpg'),
-(26, 6, 6, 'Black', 0, 530, 'img/showcase/thumbs/shoe5-1/imgg1.jpg', 'img/showcase/thumbs/shoe5-1/imgg2.jpg', 'img/showcase/thumbs/shoe5-1/imgg3.jpg', 'img/showcase/thumbs/shoe5-1/imgg4.jpg', 'img/showcase/shoe5-1/imgg1.png', 'img/showcase/shoe5-1/imgg2.png', 'img/showcase/shoe5-1/imgg3.png', 'img/showcase/shoe5-1/imgg4.jpg'),
-(27, 6, 7, 'Black', 0, 530, 'img/showcase/thumbs/shoe5-1/imgg1.jpg', 'img/showcase/thumbs/shoe5-1/imgg2.jpg', 'img/showcase/thumbs/shoe5-1/imgg3.jpg', 'img/showcase/thumbs/shoe5-1/imgg4.jpg', 'img/showcase/shoe5-1/imgg1.png', 'img/showcase/shoe5-1/imgg2.png', 'img/showcase/shoe5-1/imgg3.png', 'img/showcase/shoe5-1/imgg4.jpg'),
-(28, 6, 8, 'Black', 0, 530, 'img/showcase/thumbs/shoe5-1/imgg1.jpg', 'img/show case/thumbs/shoe5-1/imgg2.jpg', 'img/showcase/thumbs/shoe5-1/imgg3.jpg', 'img/showcase/thumbs/shoe5-1/imgg4.jpg', 'img/showcase/shoe5-1/imgg1.png', 'img/showcase/shoe5-1/imgg2.png', 'img/showcase/shoe5-1/imgg3.png', 'img/showcase/shoe5-1/imgg4.jpg'),
+(21, 5, 5, 'White', 0, 90, 'img/showcase/thumbs/shoe5-White/67a787e9a2297_imgg1.png', 'img/showcase/thumbs/shoe4-1/imgg2.jpg', 'img/showcase/thumbs/shoe4-1/imgg3.jpg', 'img/showcase/thumbs/shoe4-1/imgg4.jpg', 'img/showcase/shoe4-1/imgg1.png', 'img/showcase/shoe4-1/imgg2.png', 'img/showcase/shoe4-1/imgg3.png', 'img/showcase/shoe4-1/imgg4.png'),
+(22, 5, 6, 'White', 1, 90, 'img/showcase/thumbs/shoe5-White/67a787e9a2297_imgg1.png', 'img/showcase/thumbs/shoe4-1/imgg2.jpg', 'img/showcase/thumbs/shoe4-1/imgg3.jpg', 'img/showcase/thumbs/shoe4-1/imgg4.jpg', 'img/showcase/shoe4-1/imgg1.png', 'img/showcase/shoe4-1/imgg2.png', 'img/showcase/shoe4-1/imgg3.png', 'img/showcase/shoe4-1/imgg4.png'),
+(23, 5, 7, 'White', 1, 90, 'img/showcase/thumbs/shoe5-White/67a787e9a2297_imgg1.png', 'img/showcase/thumbs/shoe4-1/imgg2.jpg', 'img/showcase/thumbs/shoe4-1/imgg3.jpg', 'img/showcase/thumbs/shoe4-1/imgg4.jpg', 'img/showcase/shoe4-1/imgg1.png', 'img/showcase/shoe4-1/imgg2.png', 'img/showcase/shoe4-1/imgg3.png', 'img/showcase/shoe4-1/imgg4.png'),
+(24, 5, 8, 'White', 0, 90, 'img/showcase/thumbs/shoe5-White/67a787e9a2297_imgg1.png', 'img/showcase/thumbs/shoe4-1/imgg2.jpg', 'img/showcase/thumbs/shoe4-1/imgg3.jpg', 'img/showcase/thumbs/shoe4-1/imgg4.jpg', 'img/showcase/shoe4-1/imgg1.png', 'img/showcase/shoe4-1/imgg2.png', 'img/showcase/shoe4-1/imgg3.png', 'img/showcase/shoe4-1/imgg4.png'),
+(25, 6, 5, 'Black', 0, 530, 'img/showcase/thumbs/shoe5-1/imgg1.jpg', 'img/showcase/thumbs/shoe5-1/imgg2.jpg', 'img/showcase/thumbs/shoe5-1/imgg3.jpg', 'img/showcase/thumbs/shoe5-1/imgg4.jpg', 'img/showcase/shoe5-1/imgg1.png', 'img/showcase/shoe5-1/imgg2.png', 'img/showcase/shoe5-1/imgg3.png', 'img/showcase/shoe6-Black/67a787cf6e8ce_imgg4.png'),
+(26, 6, 6, 'Black', 0, 530, 'img/showcase/thumbs/shoe5-1/imgg1.jpg', 'img/showcase/thumbs/shoe5-1/imgg2.jpg', 'img/showcase/thumbs/shoe5-1/imgg3.jpg', 'img/showcase/thumbs/shoe5-1/imgg4.jpg', 'img/showcase/shoe5-1/imgg1.png', 'img/showcase/shoe5-1/imgg2.png', 'img/showcase/shoe5-1/imgg3.png', 'img/showcase/shoe6-Black/67a787cf6e8ce_imgg4.png'),
+(27, 6, 7, 'Black', 0, 530, 'img/showcase/thumbs/shoe5-1/imgg1.jpg', 'img/showcase/thumbs/shoe5-1/imgg2.jpg', 'img/showcase/thumbs/shoe5-1/imgg3.jpg', 'img/showcase/thumbs/shoe5-1/imgg4.jpg', 'img/showcase/shoe5-1/imgg1.png', 'img/showcase/shoe5-1/imgg2.png', 'img/showcase/shoe5-1/imgg3.png', 'img/showcase/shoe6-Black/67a787cf6e8ce_imgg4.png'),
+(28, 6, 8, 'Black', 0, 530, 'img/showcase/thumbs/shoe5-1/imgg1.jpg', 'img/showcase/thumbs/shoe5-1/imgg2.jpg', 'img/showcase/thumbs/shoe5-1/imgg3.jpg', 'img/showcase/thumbs/shoe5-1/imgg4.jpg', 'img/showcase/shoe5-1/imgg1.png', 'img/showcase/shoe5-1/imgg2.png', 'img/showcase/shoe5-1/imgg3.png', 'img/showcase/shoe6-Black/67a787cf6e8ce_imgg4.png'),
 (29, 7, 5, 'White', 0, 250, 'img/showcase/thumbs/shoe6-1/imgg1.jpg', 'img/showcase/thumbs/shoe6-1/imgg2.jpg', 'img/showcase/thumbs/shoe6-1/imgg3.jpg', 'img/showcase/thumbs/shoe6-1/imgg4.jpg', 'img/showcase/shoe6-1/imgg1.png', 'img/showcase/shoe6-1/imgg2.png', 'img/showcase/shoe6-1/imgg3.png', 'img/showcase/shoe6-1/imgg4.png'),
 (30, 7, 6, 'White', 0, 250, 'img/showcase/thumbs/shoe6-1/imgg1.jpg', 'img/showcase/thumbs/shoe6-1/imgg2.jpg', 'img/showcase/thumbs/shoe6-1/imgg3.jpg', 'img/showcase/thumbs/shoe6-1/imgg4.jpg', 'img/showcase/shoe6-1/imgg1.png', 'img/showcase/shoe6-1/imgg2.png', 'img/showcase/shoe6-1/imgg3.png', 'img/showcase/shoe6-1/imgg4.png'),
 (31, 7, 7, 'White', 0, 250, 'img/showcase/thumbs/shoe6-1/imgg1.jpg', 'img/showcase/thumbs/shoe6-1/imgg2.jpg', 'img/showcase/thumbs/shoe6-1/imgg3.jpg', 'img/showcase/thumbs/shoe6-1/imgg4.jpg', 'img/showcase/shoe6-1/imgg1.png', 'img/showcase/shoe6-1/imgg2.png', 'img/showcase/shoe6-1/imgg3.png', 'img/showcase/shoe6-1/imgg4.png'),
@@ -530,14 +538,14 @@ INSERT INTO `product_variants` (`id`, `product_id`, `size`, `color`, `stock`, `p
 (34, 15, 6, 'Brown', 0, 450, 'img/showcase/thumbs/shoe7-1/imgg1.jpg', 'img/showcase/thumbs/shoe7-1/imgg2.jpg', 'img/showcase/thumbs/shoe7-1/imgg3.jpg', 'img/showcase/thumbs/shoe7-1/imgg4.jpg', 'img/showcase/shoe7-1/imgg1.png', 'img/showcase/shoe7-1/imgg2.png', 'img/showcase/shoe7- 1/imgg3.png', 'img/showcase/shoe7-1/imgg4.jpg'),
 (35, 15, 7, 'Brown', 0, 450, 'img/showcase/thumbs/shoe7-1/imgg1.jpg', 'img/showcase/thumbs/shoe7-1/imgg2.jpg', 'img/showcase/thumbs/shoe7-1/imgg3.jpg', 'img/showcase/thumbs/shoe7-1/imgg4.jpg', 'img/showcase/shoe7-1/imgg1.png', 'img/showcase/shoe7-1/imgg2.png', 'img/showcase/shoe7-1/imgg3.png', 'img/showcase/shoe7-1/imgg4.jpg'),
 (36, 15, 8, 'Brown', 0, 450, 'img/showcase/thumbs/shoe7-1/imgg1.jpg', 'img/showcase/thumbs/shoe7-1/imgg2.jpg', 'img/showcase/thumbs/shoe7-1/imgg3.jpg', 'img/showcase/thumbs/shoe7-1/imgg4.jpg', 'img/showcase/shoe7-1/imgg1.png', 'img/showcase/shoe7-1/imgg2.png', 'img/showcase/shoe7-1/imgg3.png', 'img/showcase/shoe7-1/imgg4.jpg'),
-(37, 17, 5, 'Black', 0, 300, 'img/showcase/thumbs/shoe8-1/imgg1.jpg', 'img/showcase/thumbs/shoe8-1/imgg2.jpg', 'img/showcase/thumbs/shoe8-1/imgg3.jpg', 'img/showcase/thumbs/shoe8-1/imgg4.jpg', 'img/showcase/shoe8-1/imgg1.png', 'img/showcase/shoe8-1/imgg2.png', 'img/showcase/shoe8-1/imgg3.png', 'img/showcase/shoe8-1/imgg4.jpg'),
-(38, 17, 6, 'Black', 1, 300, 'img/showcase/thumbs/shoe8-1/imgg1.jpg', 'img/showcase/thumbs/shoe8-1/imgg2.jpg', 'img/showcase/thumbs/shoe8-1/imgg3.jpg', 'img/showcase/thumbs/shoe8-1/imgg4.jpg', 'img/showcase/shoe8-1/imgg1.png', 'img/showcase/shoe8-1/imgg2.png', 'img/showcase/shoe8-1/imgg3.png', 'img/showcase/shoe8-1/imgg4.jpg'),
-(39, 17, 7, 'Black', 1, 300, 'img/showcase/thumbs/shoe8-1/imgg1.jpg', 'img/showcase/thumbs/shoe8-1/imgg2.jpg', 'img/showcase/thumbs/shoe8-1/imgg3.jpg', 'img/showcase/thumbs/shoe8-1/imgg4.jpg', 'img/showcase/shoe8-1/imgg1.png', 'img/showcase/shoe8-1/imgg2.png', 'img/showcase/shoe8-1/imgg3.png', 'img/showcase/shoe8-1/imgg4.jpg'),
-(40, 17, 8, 'Black', 1, 300, 'img/showcase/thumbs/shoe8-1/imgg1.jpg', 'img/showcase/thumbs/shoe8-1/imgg2.jpg', 'img/showcase/thumbs/shoe8-1/imgg3.jpg', 'img/showcase/thumbs/shoe8-1/imgg4.jpg', 'img/showcase/shoe8-1/imgg1.png', 'img/showcase/shoe8-1/imgg2.png', 'img/showcase/shoe8-1/imgg3.png', 'img/showcase/shoe8-1/imgg4.jpg'),
-(41, 18, 5, 'Red', 0, 470, 'img/showcase/thumbs/shoe9-1/imgg1.jpg', 'img/showcase/thumbs/shoe9-1/imgg2.jpg', 'img/showcase/thumbs/shoe9-1/imgg3.jpg', 'img/showcase/thumbs/sh oe9-1/imgg4.jpg', 'img/showcase/shoe9-1/imgg1.png', 'img/showcase/shoe9-1/imgg2.png', 'img/showcase/shoe9-1/imgg3.png', 'img/showcase/shoe9-1/imgg4.png'),
-(42, 18, 6, 'Red', 0, 470, 'img/showcase/thumbs/shoe9-1/imgg1.jpg', 'img/showcase/thumbs/shoe9-1/imgg2.jpg', 'img/showcase/thumbs/shoe9-1/imgg3.jpg', 'img/showcase/thumbs/shoe9-1/imgg4.jpg', 'img/showcase/shoe9-1/imgg1.png', 'img/showcase/shoe9-1/imgg2.png', 'img/showcase/shoe9-1/imgg3.png', 'img/showcase/shoe9-1/imgg4.png'),
-(43, 18, 7, 'Red', 0, 470, 'img/showcase/thumbs/shoe9-1/imgg1.jpg', 'img/showcase/thumbs/shoe9-1/imgg2.jpg', 'img/showcase/thumbs/shoe9-1/imgg3.jpg', 'img/showcase/thumbs/shoe9-1/imgg4.jpg', 'img/showcase/shoe9-1/imgg1.png', 'img/showcase/shoe9-1/imgg2.png', 'img/showcase/shoe9-1/imgg3.png', 'img/showcase/shoe9-1/imgg4.png'),
-(44, 18, 8, 'Red', 0, 470, 'img/showcase/thumbs/shoe9-1/imgg1.jpg', 'img/showcase/thumbs/shoe9-1/imgg2.jpg', 'img/showcase/thumbs/shoe9-1/imgg3.jpg', 'img/showcase/thumbs/shoe9-1/imgg4.jpg', 'img/showcase/shoe9-1/imgg1.png', 'img/showcase/shoe9-1/imgg2.png', 'img/showcase/shoe9-1/imgg3.png', 'img/showcase/shoe9-1/imgg4.png'),
+(37, 17, 5, 'Black', 0, 300, 'img/showcase/thumbs/shoe8-1/imgg1.jpg', 'img/showcase/thumbs/shoe8-1/imgg2.jpg', 'img/showcase/thumbs/shoe8-1/imgg3.jpg', 'img/showcase/thumbs/shoe8-1/imgg4.jpg', 'img/showcase/shoe8-1/imgg1.png', 'img/showcase/shoe8-1/imgg2.png', 'img/showcase/shoe8-1/imgg3.png', 'img/showcase/shoe17-Black/67a787b3bdebf_imgg4.png'),
+(38, 17, 6, 'Black', 1, 300, 'img/showcase/thumbs/shoe8-1/imgg1.jpg', 'img/showcase/thumbs/shoe8-1/imgg2.jpg', 'img/showcase/thumbs/shoe8-1/imgg3.jpg', 'img/showcase/thumbs/shoe8-1/imgg4.jpg', 'img/showcase/shoe8-1/imgg1.png', 'img/showcase/shoe8-1/imgg2.png', 'img/showcase/shoe8-1/imgg3.png', 'img/showcase/shoe17-Black/67a787b3bdebf_imgg4.png'),
+(39, 17, 7, 'Black', 1, 300, 'img/showcase/thumbs/shoe8-1/imgg1.jpg', 'img/showcase/thumbs/shoe8-1/imgg2.jpg', 'img/showcase/thumbs/shoe8-1/imgg3.jpg', 'img/showcase/thumbs/shoe8-1/imgg4.jpg', 'img/showcase/shoe8-1/imgg1.png', 'img/showcase/shoe8-1/imgg2.png', 'img/showcase/shoe8-1/imgg3.png', 'img/showcase/shoe17-Black/67a787b3bdebf_imgg4.png'),
+(40, 17, 8, 'Black', 1, 300, 'img/showcase/thumbs/shoe8-1/imgg1.jpg', 'img/showcase/thumbs/shoe8-1/imgg2.jpg', 'img/showcase/thumbs/shoe8-1/imgg3.jpg', 'img/showcase/thumbs/shoe8-1/imgg4.jpg', 'img/showcase/shoe8-1/imgg1.png', 'img/showcase/shoe8-1/imgg2.png', 'img/showcase/shoe8-1/imgg3.png', 'img/showcase/shoe17-Black/67a787b3bdebf_imgg4.png'),
+(41, 18, 5, 'Red', 0, 470, 'img/showcase/thumbs/shoe9-1/imgg1.jpg', 'img/showcase/thumbs/shoe9-1/imgg2.jpg', 'img/showcase/thumbs/shoe9-1/imgg3.jpg', 'img/showcase/thumbs/shoe18-Red/67a787a00c955_imgg4.png', 'img/showcase/shoe9-1/imgg1.png', 'img/showcase/shoe9-1/imgg2.png', 'img/showcase/shoe9-1/imgg3.png', 'img/showcase/shoe9-1/imgg4.png'),
+(42, 18, 6, 'Red', 0, 470, 'img/showcase/thumbs/shoe9-1/imgg1.jpg', 'img/showcase/thumbs/shoe9-1/imgg2.jpg', 'img/showcase/thumbs/shoe9-1/imgg3.jpg', 'img/showcase/thumbs/shoe18-Red/67a787a00c955_imgg4.png', 'img/showcase/shoe9-1/imgg1.png', 'img/showcase/shoe9-1/imgg2.png', 'img/showcase/shoe9-1/imgg3.png', 'img/showcase/shoe9-1/imgg4.png'),
+(43, 18, 7, 'Red', 0, 470, 'img/showcase/thumbs/shoe9-1/imgg1.jpg', 'img/showcase/thumbs/shoe9-1/imgg2.jpg', 'img/showcase/thumbs/shoe9-1/imgg3.jpg', 'img/showcase/thumbs/shoe18-Red/67a787a00c955_imgg4.png', 'img/showcase/shoe9-1/imgg1.png', 'img/showcase/shoe9-1/imgg2.png', 'img/showcase/shoe9-1/imgg3.png', 'img/showcase/shoe9-1/imgg4.png'),
+(44, 18, 8, 'Red', 0, 470, 'img/showcase/thumbs/shoe9-1/imgg1.jpg', 'img/showcase/thumbs/shoe9-1/imgg2.jpg', 'img/showcase/thumbs/shoe9-1/imgg3.jpg', 'img/showcase/thumbs/shoe18-Red/67a787a00c955_imgg4.png', 'img/showcase/shoe9-1/imgg1.png', 'img/showcase/shoe9-1/imgg2.png', 'img/showcase/shoe9-1/imgg3.png', 'img/showcase/shoe9-1/imgg4.png'),
 (45, 19, 5, 'Gold', 0, 220, 'img/showcase/thumbs/shoe10-1/imgg1.jpg', 'img/showcase/thumbs/shoe10-1/imgg2.jpg', 'img/showcase/thumbs/shoe10-1/imgg3.jpg', 'img/showcase/thumbs/shoe10-1/imgg4.jpg', 'img/showcase/shoe10-1/imgg1.png', 'img/showcase/shoe10-1/imgg2.png', 'img/showcase/shoe10-1/imgg3.png', 'img/showcase/shoe10-1/imgg4.png'),
 (46, 19, 6, 'Gold', 0, 220, 'img/showcase/thumbs/shoe10-1/imgg1.jpg', 'img/showcase/thumbs/shoe10-1/imgg2.jpg', 'img/showcase/thumbs/shoe10-1/imgg3.jpg', 'img/showcase/thumbs/shoe10-1/imgg4.jpg', 'img/showcase/shoe10-1/imgg1.png', 'img/showcase/shoe10-1/imgg2.png', 'img/showcase/shoe10-1/imgg3.png', 'img/showcase/shoe10-1/imgg4.png'),
 (47, 19, 7, 'Gold', 0, 220, 'img/showcase/thumbs/shoe10-1/imgg1.jpg', 'img/showcase/thumbs/shoe10-1/imgg2.jpg', 'img/showcase/thumbs/shoe10-1/imgg3.jpg', 'img/showcase/thumbs/shoe10-1/imgg4.jpg', 'img/showcase/shoe10-1/imgg1.png', 'img/showcase/shoe10-1/imgg2.png', 'img/showcase/shoe10-1/imgg3.png', 'img/showcase/shoe10-1/imgg4.png'),
@@ -550,12 +558,13 @@ INSERT INTO `product_variants` (`id`, `product_id`, `size`, `color`, `stock`, `p
 (55, 21, 7, 'Blue', 1, 650, 'img/showcase/thumbs/shoe12-1/imgg1.jpg', 'img /showcase/thumbs/shoe12-1/imgg2.jpg', 'img/showcase/thumbs/shoe12-1/imgg3.jpg', 'img/showcase/thumbs/shoe12-1/imgg4.jpg', 'img/showcase/shoe12-1/imgg1.png', 'img/showcase/shoe12-1/imgg2.png', 'img/showcase/shoe12-1/imgg3.png', 'img/showcase/shoe12-1/imgg4.png'),
 (56, 21, 8, 'Blue', 1, 650, 'img/showcase/thumbs/shoe12-1/imgg1.jpg', 'img/showcase/thumbs/shoe12-1/imgg2.jpg', 'img/showcase/thumbs/shoe12-1/imgg3.jpg', 'img/showcase/thumbs/shoe12-1/imgg4.jpg', 'img/showcase/shoe12-1/imgg1.png', 'img/showcase/shoe12-1/imgg2.png', 'img/showcase/shoe12-1/imgg3.png', 'img/showcase/shoe12-1/imgg4.png'),
 (58, 22, 6, 'Black', 0, 430, 'img/showcase/thumbs/shoe13-1/imgg1.jpg', 'img/showcase/thumbs/shoe13-1/imgg2.jpg', 'img/showcase/thumbs/shoe13-1/imgg3.jpg', 'img/showcase/thumbs/shoe13-1/imgg4.jpg', 'img/showcase/shoe13-1/imgg1.png', 'img/showcase/shoe13-1/imgg2.png', 'img/showcase/shoe13-1/imgg3.png', 'img/showcase/shoe13-1/imgg4.png'),
-(59, 22, 7, 'Black', 0, 430, 'img/showcase/thumbs/shoe13-1/imgg1.jpg', 'img/showcase/thumbs/shoe13-1/imgg2.jpg', 'img/showcase/thumbs/shoe13-1/imgg3.jpg', 'img/showcase/thumbs/shoe13-1/imgg4.jpg', 'img/showcase/shoe13-1/imgg1.png', 'img/showcase/shoe13-1/imgg2.png', 'img/showcase/shoe13-1/imgg3.png', 'img/showcase/shoe13-1/imgg4.png'),
-(60, 22, 8, 'Black', 0, 430, 'img/showcase/thumbs/shoe13-1/imgg1.jpg', 'img/showcase/thumbs/shoe13-1/imgg2.jpg', 'img/showcase/thumbs/shoe13-1/imgg3.jpg', 'img/showcase/thumbs/shoe13-1/imgg4.jpg', 'img/showcase/shoe13-1/imgg1.png', 'img/showcase/shoe13-1/imgg2.png', 'img/showcase/shoe13-1/imgg3.png', 'img/showcase/shoe13-1/imgg4.png'),
+(59, 22, 7, 'Black', 1, 430, 'img/showcase/thumbs/shoe13-1/imgg1.jpg', 'img/showcase/thumbs/shoe13-1/imgg2.jpg', 'img/showcase/thumbs/shoe13-1/imgg3.jpg', 'img/showcase/thumbs/shoe13-1/imgg4.jpg', 'img/showcase/shoe13-1/imgg1.png', 'img/showcase/shoe13-1/imgg2.png', 'img/showcase/shoe13-1/imgg3.png', 'img/showcase/shoe13-1/imgg4.png'),
+(60, 22, 8, 'Black', 1, 430, 'img/showcase/thumbs/shoe13-1/imgg1.jpg', 'img/showcase/thumbs/shoe13-1/imgg2.jpg', 'img/showcase/thumbs/shoe13-1/imgg3.jpg', 'img/showcase/thumbs/shoe13-1/imgg4.jpg', 'img/showcase/shoe13-1/imgg1.png', 'img/showcase/shoe13-1/imgg2.png', 'img/showcase/shoe13-1/imgg3.png', 'img/showcase/shoe13-1/imgg4.png'),
 (138, 1, 6, 'Gold', 0, 510, 'img/showcase/thumbs/shoe1-Gold/6790ffee7f1ce_imgg1.jpg', 'img/showcase/thumbs/shoe1-Gold/6790ffee7f331_imgg2.jpg', 'img/showcase/thumbs/shoe1-Gold/6790ffee7f443_imgg3.jpg', 'img/showcase/thumbs/shoe1-Gold/6790ffee7f66f_imgg4.jpg', 'img/showcase/shoe1-Gold/6790ffee7f7a9_imgg1.png', 'img/showcase/shoe1-Gold/6790ffee7f8c0_imgg2.png', 'img/showcase/shoe1-Gold/6790ffee7f9b2_imgg3.png', 'img/showcase/shoe1-Gold/6790ffee7fb4a_imgg4.png'),
 (142, 45, 8, 'Pink', 1, 751, 'img/showcase/thumbs/shoe14-1/imgg1.jpg', 'img/showcase/thumbs/shoe14-1/imgg2.jpg', 'img/showcase/thumbs/shoe14-1/imgg3.jpg', 'img/showcase/thumbs/shoe14-1/imgg4.jpg', 'img/showcase/shoe14-1/imgg1.png', 'img/showcase/shoe14-1/imgg2.png', 'img/showcase/shoe14-1/imgg3.png', 'img/showcase/shoe14-1/imgg4.png'),
 (156, 1, 9, 'Gold', 4, 510, 'img/showcase/thumbs/shoe1-Gold/6790ffee7f1ce_imgg1.jpg', 'img/showcase/thumbs/shoe1-Gold/6790ffee7f331_imgg2.jpg', 'img/showcase/thumbs/shoe1-Gold/6790ffee7f443_imgg3.jpg', 'img/showcase/thumbs/shoe1-Gold/6790ffee7f66f_imgg4.jpg', 'img/showcase/shoe1-Gold/6790ffee7f7a9_imgg1.png', 'img/showcase/shoe1-Gold/6790ffee7f8c0_imgg2.png', 'img/showcase/shoe1-Gold/6790ffee7f9b2_imgg3.png', 'img/showcase/shoe1-Gold/6790ffee7fb4a_imgg4.png'),
-(234, 102, 9, 'Black', 0, 123, 'img/showcase/thumbs/shoe98-1/6790f0d252624_imgg1.png', 'img/showcase/thumbs/shoe98-1/6790f0d252733_imgg2.webp', 'img/showcase/thumbs/shoe98-1/6790f0d2545d2_imgg3.webp', 'img/showcase/thumbs/shoe98-1/6790f0d255e41_imgg4.webp', 'img/showcase/shoe98-1/6790f0d255f62_imgg1.png', 'img/showcase/shoe98-1/6790f0d256030_imgg2.webp', 'img/showcase/shoe98-1/6790f0d2560e3_imgg3.webp', 'img/showcase/shoe98-1/6790f0d25623d_imgg4.webp');
+(234, 102, 9, 'Black', 0, 123, 'img/showcase/thumbs/shoe98-1/6790f0d252624_imgg1.png', 'img/showcase/thumbs/shoe98-1/6790f0d252733_imgg2.webp', 'img/showcase/thumbs/shoe98-1/6790f0d2545d2_imgg3.webp', 'img/showcase/thumbs/shoe98-1/6790f0d255e41_imgg4.webp', 'img/showcase/shoe98-1/6790f0d255f62_imgg1.png', 'img/showcase/shoe98-1/6790f0d256030_imgg2.webp', 'img/showcase/shoe98-1/6790f0d2560e3_imgg3.webp', 'img/showcase/shoe98-1/6790f0d25623d_imgg4.webp'),
+(236, 102, 10, 'Black', 1, 123, 'img/showcase/thumbs/shoe98-1/6790f0d252624_imgg1.png', 'img/showcase/thumbs/shoe98-1/6790f0d252733_imgg2.webp', 'img/showcase/thumbs/shoe98-1/6790f0d2545d2_imgg3.webp', 'img/showcase/thumbs/shoe98-1/6790f0d255e41_imgg4.webp', 'img/showcase/shoe98-1/6790f0d255f62_imgg1.png', 'img/showcase/shoe98-1/6790f0d256030_imgg2.webp', 'img/showcase/shoe98-1/6790f0d2560e3_imgg3.webp', 'img/showcase/shoe98-1/6790f0d25623d_imgg4.webp');
 
 -- --------------------------------------------------------
 
@@ -860,7 +869,7 @@ ALTER TABLE `admin`
 -- 使用表AUTO_INCREMENT `brand`
 --
 ALTER TABLE `brand`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- 使用表AUTO_INCREMENT `cart`
@@ -890,7 +899,7 @@ ALTER TABLE `contact_page_content`
 -- 使用表AUTO_INCREMENT `deleted_brands`
 --
 ALTER TABLE `deleted_brands`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- 使用表AUTO_INCREMENT `deleted_categories`
@@ -938,7 +947,7 @@ ALTER TABLE `messages`
 -- 使用表AUTO_INCREMENT `navbar_menu`
 --
 ALTER TABLE `navbar_menu`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- 使用表AUTO_INCREMENT `orders`
@@ -962,7 +971,7 @@ ALTER TABLE `products`
 -- 使用表AUTO_INCREMENT `product_variants`
 --
 ALTER TABLE `product_variants`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=236;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=237;
 
 --
 -- 使用表AUTO_INCREMENT `sizes`
